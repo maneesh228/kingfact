@@ -1,0 +1,47 @@
+.newsletter-area {
+	background-size: cover;
+	background-position: center center;
+}
+.newsletter-form  form {
+    position: relative;
+  }
+  .newsletter-form form input {
+        height: 90px;
+        padding: 0 32px;
+        background: $white;
+        color: $body-text-color;
+        font-size: 15px;
+        border-radius: 5px;
+        border: none;
+        width: 100%;
+        font-weight: 500;
+}
+  .newsletter-form form input::placeholder {
+    color: $body-text-color;
+      font-size: 15px;
+  }
+  .newsletter-form form::-moz-placeholder {
+      color: $body-text-color;
+      font-size: 15px;
+  }
+  .newsletter-btn button.b-btn {
+	position: absolute;
+	border: none;
+	right: 10px;
+	top: 16px;
+	cursor: pointer;
+}
+.newsletter-text {
+    & span{
+        font-size: 15px;
+        font-weight: 700;
+        color: $black;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    & h1{
+        margin-bottom: 0;
+        font-size: 40px;
+        margin-top: 20px;
+    }
+}

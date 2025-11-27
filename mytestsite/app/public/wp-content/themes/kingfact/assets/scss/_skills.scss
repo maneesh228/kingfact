@@ -1,0 +1,43 @@
+.our-skills-area {
+	overflow: hidden;
+}
+.skills-bg-img {
+	background-size: cover;
+	height: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 39%;
+    background-position: center center;
+}
+.skills-bg-img-right {
+	background-size: cover;
+	height: 100%;
+	right: 0;
+	top: 0;
+	width: 61%;
+    background-position: center center;
+    float: right;
+}
+.skill-wrapper {
+	margin-left: 135px;
+	margin-right: 150px;
+}
+.progress-circular {
+    position: relative;
+  }
+  h4.progress-h4 {
+	margin-top: -16px;
+	color: $body-text-color;
+	font-size: 22px;
+	font-weight: 500;
+}
+ .progress-circular input {
+    color: #222 !important;
+    font-size: 40px;
+    font-weight: 900;
+}
+.skill-wrapper .section-title p {
+	margin-right: 75px;
+	margin-bottom: 0;
+}

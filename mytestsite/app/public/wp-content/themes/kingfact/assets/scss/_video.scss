@@ -1,0 +1,24 @@
+.video-bg-area {
+	background-size: cover;
+	background-position: center center;
+}
+.b-play a {
+	color: $white;
+	border: 2px solid $white;
+	height: 100px;
+	width: 100px;
+	display: inline-block;
+	border-radius: 50%;
+	line-height: 98px;
+	font-size: 20px;
+}
+.b-play a:hover{
+  background: $theme-color;
+  color: $black;
+  border-color: $theme-color;
+}
+.b-video h2 {
+	color: $white;
+	font-size: 56px;
+	margin-bottom: 40px;
+}

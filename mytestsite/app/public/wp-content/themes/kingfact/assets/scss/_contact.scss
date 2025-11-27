@@ -1,0 +1,319 @@
+.subscribe-wrapper {
+	background-size: cover;
+	background-position: center center;
+	padding: 68px 50px 73px;
+}
+.sub-title {
+	color: $white;
+	line-height: 1.1;
+	margin-bottom: 32px;
+}
+#sub-form form{position: relative;}
+#sub-form input {
+	border: none;
+	height: 60px;
+	margin-bottom: 15px;
+	padding: 0 25px;
+	width: 100%;
+	font-size: 14px;
+	color: $body-text-color;
+	font-weight: 500;
+	border-radius: 0;
+}
+  #sub-form input::-moz-placeholder {
+    font-size: 14px;
+    color: $body-text-color;
+    font-weight: 500; }
+  
+  #sub-form input::placeholder {
+    font-size: 14px;
+    color:$body-text-color;
+    font-weight: 500; }
+    .sub-button button.btn {
+        background: #11202d;
+        color: #ffffff;
+        line-height: 1;
+        padding: 21px 79px;
+        text-transform: uppercase;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 0;
+        transition: .3s;
+        &:hover{color:$red;}
+    }
+    .sub-2-button button.btn:hover{color:$theme-color;}
+    .sup-map {
+        min-height: 460px;
+    }
+    .sup-2-map {
+        min-height: 465px;
+    }
+    .sub-address-wrapper {
+        padding: 68px 50px;
+        background-size: cover;
+        background-position: center center;
+    }
+    .sub-address-link{
+        & li{
+            margin-bottom: 22px;
+            &:last-child{margin-bottom:0;}
+        }
+    }
+    .sub-address-icon {
+        float: left;
+        margin-right: 10px;
+        & i{
+            font-size: 15px;
+            color: $red;
+            top:-2px;
+            position: relative;
+        }
+    }
+    .sub-address-text{
+        overflow: hidden;
+        & h4{
+            font-size: 18px;
+            color:$white;
+        }
+        & p{
+            font-size: 14px;
+            line-height: 23px;
+            margin-bottom: 0;
+            color:#c8c8c8;
+        }
+    }
+
+
+
+    #appointment-form form{position: relative;}
+    #appointment-form input {
+        background: none;
+        height: 60px;
+        width: 100%;
+        padding: 0 30px;
+        padding-right: 30px;
+        border: 0;
+        color: $body-text-color;
+        font-weight: 500;
+        border: 1px solid #ececec;
+        font-size: 14px;
+        text-transform: capitalize;
+        border-radius: 0;
+    }
+    #appointment-form textarea {
+        color: $body-text-color;
+        font-weight: 500;
+        height: 125px;
+        width: 100%;
+        padding: 30px 30px;
+        border: 1px solid #ececec;
+        text-transform: capitalize;
+        background: none;
+        border-radius: 5px;
+    }
+    #appointment-form input::-moz-placeholder, .appointment-form input::placeholder {
+      color: $body-text-color;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    #appointment-form textarea::-moz-placeholder, .appointment-form textarea::placeholder {
+        color: $body-text-color;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .appointment-button button.b-btn{border:none;}
+    .form-box{position: relative;}
+    .form-box::after {
+        position: absolute;
+        content: "\f007";
+        font-family: "Font Awesome 5 Pro";
+        display: inline-block;
+        font-size: 14px;
+        text-align: center;
+        right: 24px;
+        color: $body-text-color;
+        top: 20px;
+    }
+    .email-icon:after{
+        content: "\f0e0";
+    }
+    
+    .phone-icon::after {
+        content: "\f095";
+    }
+    .person-icon:after{content: "\f6c0";}
+    .time-icon:after{content: "\f017";}
+    .message-icon:after{content: "\f040";}
+
+
+   // map
+   .contact-map {
+	min-height: 700px;
+}
+// contact-box
+.contact-box {
+	border: 2px dashed #eaeaea;
+	padding: 40px 10px;
+	transition: .3s;
+	-webkit-transition: .3s;
+	-moz-transition: .3s;
+	-ms-transition: .3s;
+	-o-transition: .3s;
+}
+.contact-box:hover,.contact-box:hover i{
+	border-color:$theme-color ;
+}
+.contact-box i {
+	font-size: 29px;
+	height: 100px;
+	width: 100px;
+	color: $theme-color;
+	border-radius: 50%;
+	line-height: 99px;
+	border: 2px dashed #eaedff;
+	margin-bottom: 30px;
+	transition: .3s;
+}
+.contact-box h3 {
+	font-size: 26px;
+	margin-bottom: 15px;
+}
+
+.contact-box p {
+  margin: 0;
+  padding: 0 50px;
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1200px) {
+  .contact-box p {
+    padding: 0 10px;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+  .contact-box p {
+    padding: 0 0px;
+  }
+}
+.contact-social a {
+	width: 35px;
+	height: 35px;
+	display: inline-block;
+	line-height: 36px;
+	text-align: center;
+	color: #fff;
+	border-radius: 50%;
+	margin-right: 6px;
+	font-size: 13px;
+}
+
+
+.contacts-us-form {
+    & input{
+        border: 1px solid #ececec;
+        height: 70px;
+        margin-bottom: 30px;
+        padding: 0 28px;
+        width: 100%;
+        font-size: 15px;
+		color: $body-text-color;
+		font-weight: 500;
+		border-radius: 5px;
+    }
+    & textarea{
+        border: 1px solid #ececec;
+        height: 150px;
+        margin-bottom: 30px;
+        padding: 28px;
+        width: 100%;
+        font-size: 15px;
+		color: $body-text-color;
+		font-weight: 500;
+		border-radius: 5px;
+    }
+}
+.contacts-us-form input:focus{border-color:$theme-color}
+.contacts-us-form textarea:focus{border-color:$theme-color}
+#contacts-us-form input::-moz-placeholder {
+	font-size: 15px;
+	color: $body-text-color;
+	font-weight: 500;
+}
+#contacts-us-form input::placeholder {
+	font-size: 15px;
+	color: $body-text-color;
+	font-weight: 500;
+}
+#contacts-us-form textarea::-moz-placeholder {
+	font-size: 15px;
+	color: $body-text-color;
+	font-weight: 500;
+}
+#contacts-us-form textarea::placeholder {
+	font-size: 15px;
+	color: $body-text-color;
+	font-weight: 500;
+}
+.contacts-icon{
+    position:relative;
+}
+.contacts-icon::after {
+	position: absolute;
+	content: "";
+	font-family: "Font Awesome 5 Pro";
+	font-weight: 700;
+	display: inline-block;
+	font-size: 16px;
+	text-align: center;
+	right: 25px;
+	color: $theme-color;
+	top: 22px;
+}
+.contactss-message::after {
+    content: "\f303";
+}
+.contactss-name::after {
+    content: "\f007";
+}
+.contactss-email::after {
+    content: "\f0e0";
+}
+.contactss-website::after {
+    content: "\f0ac";
+}
+.contacts-us-form-button .btn{
+		padding: 23px 74px 25px;
+}
+.contact-1-address-text {
+	overflow: hidden;
+}
+.contact-1-address-text h3 {
+	font-size: 24px;
+	text-transform: capitalize;
+	margin-bottom: 12px;
+}
+.contact-1-address-text p {
+	line-height: 28px;
+	margin-bottom: 0;
+	font-size: 18px;
+}
+.contact-1-list-address li {
+	padding-bottom: 46px;
+}
+.contact-1-list-address li:last-child{padding-bottom: 0;}
+.contact-1-address-icon {
+	float: left;
+	margin-right: 20px;
+	& i {
+		font-size: 25px;
+		color:$theme-color;
+	}
+}
+.contact-us-01-wrapper .contacts-us-form textarea {
+	height: 195px;
+}
+
+button{
+    cursor: pointer;
+    transition: .3s;
+}

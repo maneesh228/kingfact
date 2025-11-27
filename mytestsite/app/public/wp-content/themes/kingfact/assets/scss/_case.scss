@@ -1,0 +1,51 @@
+.case-details-link {
+	border: 3px dashed #eee;
+	padding: 30px;
+	& li{
+		padding-bottom: 8px;
+		&:last-child{padding-bottom: 0;}
+	}
+}
+.case-d-info-1 span {
+	color: #888888;
+	font-weight: 500;
+	font-size: 14px;
+	margin-right: 10px;
+	width: 125px;
+	display: inline-block;
+}
+.case-d-info-2 {
+	overflow: hidden;
+}
+.case-d-info-2 span {
+	color: $black;
+	font-weight: 600;
+	font-size: 14px;
+}
+.case-details-11 .marketing-text h2 {
+	font-size: 30px;
+	margin-bottom: 11px;
+}
+.case-details-11 .marketing-text p {
+	margin-bottom: 0;
+	font-size: 14px;
+	line-height: 28px;
+}
+.case-details-11 .relationship-link{
+	margin-top: 18px;
+}
+.case-details-11 .relationship-link li {
+	font-weight: 500;
+	padding-bottom: 13px;
+}
+
+.case-list i {
+	color: $theme-color;
+	margin-right: 10px;
+}
+.case-list p {
+	padding-left: 39px;
+}
+.case-list li {
+	margin-bottom: 30px;
+}

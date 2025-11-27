@@ -1,0 +1,112 @@
+.choose-content{
+    & li{
+        padding-bottom: 45px;
+        &:last-child{padding-bottom: 0;}
+    }
+}
+.choose-icon{
+    position: relative;
+    margin-right: 35px;
+    margin-top: 9px;
+    & i{
+        font-size: 30px;
+        color:$black;
+        height: 80px;
+        width: 80px;
+        line-height: 80px;
+        background: $theme-color;
+        text-align: center;
+        border-radius: 50%;;
+    }
+    &::after {
+        position: absolute;
+        content: "\f00c";
+        font-family: "Font Awesome 5 Pro";
+        display: inline-block;
+        color:  $black;
+        font-size: 14px;
+        top: -13px;
+        font-weight: 400;
+        height: 36px;
+        width: 36px;
+        line-height: 32px;
+        text-align: center;
+        background:  $theme-color;
+        right: -5px;
+        border-radius: 50%;
+        border: 3px solid $white;
+        transition: .3s;
+    }
+}
+.choose-content li:hover .choose-icon::after{transform: translateX(-5PX);}
+.choose-text{
+    overflow: hidden;
+    & h4{
+        font-size: 20px;
+        margin-bottom: 11px;
+        color:#12124d;
+    }
+    & p{
+        margin-bottom: 0;
+        margin-right: 70px;
+    }
+    
+}
+.choose-img{
+    & img{width:100%;}
+}
+.choose-video-icon {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+	text-align: center;
+	transform: translateY(-50%);
+	& a{
+	height: 80px;
+	width: 80px;
+	background: $theme-color;
+	display: inline-block;
+	border-radius: 50%;
+	line-height: 80px;
+	text-align: center;
+	font-size: 16px;
+	transition: .3s;
+	color: $black;
+	position: relative;
+	}
+}
+@-webkit-keyframes btnIconRipple { 0% { border-width: 4px; -webkit-transform: scale(1); transform: scale(1); }
+80% { border-width: 1px; -webkit-transform: scale(1.35); transform: scale(1.35); }
+100% { opacity: 0; } }
+
+.choose-video-icon a::before {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  bottom: -2px;
+  right: -2px;
+  border-radius: inherit;
+  border: 1px solid $theme-color;
+  -webkit-animation: btnIconRipple 2s cubic-bezier(0.23, 1, 0.32, 1) both infinite;
+  animation: btnIconRipple 2s cubic-bezier(0.23, 1, 0.32, 1) both infinite;
+}
+// choose-2
+.choose-bg-img {
+	background-size: cover;
+	height: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 50%;
+	background-position: center center;
+}
+.choose-box {
+	margin-left: 122px;
+	margin-right: 221px;
+}
+.choose-box .choose-text h4 {
+	color: #d3d3d3;
+}

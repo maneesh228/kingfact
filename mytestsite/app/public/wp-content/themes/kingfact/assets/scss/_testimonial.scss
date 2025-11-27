@@ -1,0 +1,217 @@
+.testimonial-shap-area{
+	background-position: top;
+	padding-top: 400px;
+}
+.client-area {
+	background-size: cover;
+	background-position: center center;
+}
+.testimonial-item > p {
+	font-size: 24px;
+	line-height: 1.5;
+	margin-bottom: 35px;
+	color: #222222;
+}
+.designation > h3 {
+	font-size: 22px;
+	font-weight: 700;
+	margin-bottom: 7px;
+	letter-spacing: .6px;
+}
+.designation span {
+	font-size: 14px;
+	color: #7b8491;
+	text-transform: uppercase;
+	font-weight: 500;
+}
+.testimonial-nav {
+	margin: auto auto;
+	text-align: center;
+	width: 310px;
+	margin-bottom: 30px;
+}
+.testimonial-nav button {
+  background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+  border: medium none;
+  color: #333333;
+  font-size: 20px;
+  left: -50px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.testimonial-nav button.slick-next {
+  left: auto;
+  right: -50px;
+}
+.testimonial-thumb > img {
+  transform: scale(0.7);
+}
+.testimonial-thumb.slick-center > img {
+  transform: scale(01);
+}
+.testimonia-item-active .slick-dots li button {
+	background: #cfd7e1;
+	padding: 0;
+	text-indent: -9999px;
+	height: 12px;
+	width: 12px;
+	border: 0;
+	border-radius: 30px;
+	transition: .3s;
+	-webkit-transition: .3s;
+	-moz-transition: .3s;
+	-ms-transition: .3s;
+	-o-transition: .3s;
+}
+.testimonia-item-active .slick-dots li.slick-active button{
+	background: #fcc30a;
+}
+.testimonia-item-active .slick-dots li {
+	display: inline-block;
+	margin: 0 5px;
+}
+.testimonia-item-active .slick-dots {
+	text-align: center;
+}
+.testimonia-item-2 p{
+	margin-bottom: 0;
+}
+.testimonia-item-2 .testimonial-item{
+	margin-bottom: 40px;
+}
+.testimonia-item-2 .designation > h3 {
+	font-weight: 300;
+}
+// client
+.client-wrapper{background: $white;padding: 48px 30px 31px;}
+.client-img {
+	margin-bottom: 22px;
+	& img{margin:auto;}
+}
+.client-img::after {
+	position: absolute;
+	content: "\f10e";
+	font-family: "Font Awesome 5 Pro";
+	display: inline-block;
+	color: $black;
+	font-size: 16px;
+	top: -9px;
+	font-weight: 400;
+	height: 40px;
+	width: 40px;
+	line-height: 40px;
+	text-align: center;
+	background: $theme-color;
+	right: 98px;
+	border-radius: 50%;
+}
+.client-content p {
+	font-size: 18px;
+	line-height: 32px;
+	color:$black;
+	margin-bottom: 26px;
+}
+.client-text{
+	& h4{
+		font-size: 22px;
+		margin-bottom: 3px;
+	}
+	& span{
+		font-size: 14px;
+		font-weight: 500;
+		text-transform: uppercase;
+		color: $body-text-color;
+	}
+}
+// client-02
+.clients-02-margin{
+	margin-top: -50px;
+}
+.clients-02-wrapper {
+	background-size: cover;
+	background-position: center center;
+	padding: 61px 93px 44px;
+}
+.clients-03-img img{max-width:inherit;}
+.clients-02-wrapper .client-img::after {
+	color: $red;
+	top: -11px;
+	background: $white;
+	right: 136px;
+}
+.clients-02-wrapper .client-content p {
+	color: $white;
+}
+.clients-02-wrapper .client-text h4 {
+	color:$white
+}
+.clients-02-wrapper .client-text span {
+	color:$white
+}
+.client-02-active .slick-arrow {
+	position: absolute;
+	bottom: -40px;
+	left: 53%;
+	padding: 0;
+	border: 2px solid #eee;
+	height: 50px;
+	width: 50px;
+	text-align: center;
+	line-height: 50px;
+	font-size: 16px;
+	color: $black;
+	background: none;
+	border-radius: 50%;
+	cursor: pointer;
+	z-index: 9;
+	transition: .3s;
+}
+.client-02-active .slick-prev {
+	left: 42%;
+}
+  .client-02-active .slick-arrow:hover {
+	color: $white;
+	background: $red;
+	border-color: $red; }
+
+// client-03-wrapper
+.client-03-icon{
+	margin-bottom: 35px;
+	& i{
+		color:$coral;
+		font-size: 60px;
+	}
+}
+.client-03-wrapper .client-content p {
+	font-size: 24px;
+	line-height: 40px;
+	color: #c6c6c6;
+	margin-bottom: 32px;
+}
+.client-03-wrapper .client-text h4 {
+	color:$coral;
+}
+.client-03-wrapper .client-text span {
+	color: #bcbcbc;
+}
+.client-03-active .slick-dots li button {
+	background: #cfd7e1;
+	padding: 0;
+	text-indent: -9999px;
+	height: 12px;
+	width: 12px;
+	border: 0;
+	border-radius: 30px;
+	transition: .3s;
+}
+.client-03-active .slick-dots li.slick-active button{
+	background: #fcc30a;
+}
+.client-03-active .slick-dots li {
+	display: inline-block;
+	margin: 0 5px;
+}
+.client-03-active .slick-dots {
+	text-align: center;
+}

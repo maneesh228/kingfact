@@ -1,0 +1,150 @@
+<?php
+// Prepare footer values: prefer ACF options when non-empty, otherwise use fallback theme options
+$opts = get_option( 'kingfact_theme_options', array() );
+if ( function_exists( 'get_field' ) ) {
+    $acf_footer_logo    = get_field( 'footer_logo', 'option' );
+    $acf_footer_text    = get_field( 'footer_text', 'option' );
+    $acf_quick_links    = get_field( 'footer_quick_links', 'option' );
+    $acf_contact_addr   = get_field( 'footer_contact_address', 'option' );
+    $acf_contact_email  = get_field( 'footer_contact_email', 'option' );
+    $acf_contact_phone  = get_field( 'footer_contact_phone', 'option' );
+    $acf_footer_socials = get_field( 'footer_social_links', 'option' );
+    $acf_copyright      = get_field( 'footer_copyright', 'option' );
+
+    $footer_logo    = $acf_footer_logo ? $acf_footer_logo : ( ! empty( $opts['footer_logo'] ) ? $opts['footer_logo'] : false );
+    $footer_text    = $acf_footer_text ? $acf_footer_text : ( ! empty( $opts['footer_text'] ) ? $opts['footer_text'] : '<p>But I must explain to you how all this misn idea of denouncing pleasure and prais pain</p><a href="#">Continue Reading</a>' );
+    $quick_links    = $acf_quick_links ? $acf_quick_links : ( ! empty( $opts['footer_quick_links'] ) ? $opts['footer_quick_links'] : array() );
+    $footer_contact_address = $acf_contact_addr ? $acf_contact_addr : ( ! empty( $opts['footer_contact_address'] ) ? $opts['footer_contact_address'] : '1058 Meadowb, Mall Road' );
+    $footer_contact_email   = $acf_contact_email ? $acf_contact_email : ( ! empty( $opts['footer_contact_email'] ) ? $opts['footer_contact_email'] : 'support@gmail.com' );
+    $footer_contact_phone   = $acf_contact_phone ? $acf_contact_phone : ( ! empty( $opts['footer_contact_phone'] ) ? $opts['footer_contact_phone'] : '+000 (123) 44 558' );
+    $footer_socials = $acf_footer_socials ? $acf_footer_socials : ( ! empty( $opts['footer_social_links'] ) ? $opts['footer_social_links'] : array() );
+    $footer_copyright = $acf_copyright ? $acf_copyright : ( ! empty( $opts['footer_copyright'] ) ? $opts['footer_copyright'] : 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.' );
+} else {
+    $footer_logo    = ! empty( $opts['footer_logo'] ) ? $opts['footer_logo'] : false;
+    $footer_text    = ! empty( $opts['footer_text'] ) ? $opts['footer_text'] : '<p>But I must explain to you how all this misn idea of denouncing pleasure and prais pain</p><a href="#">Continue Reading</a>';
+    $quick_links    = ! empty( $opts['footer_quick_links'] ) ? $opts['footer_quick_links'] : array();
+    $footer_contact_address = ! empty( $opts['footer_contact_address'] ) ? $opts['footer_contact_address'] : '1058 Meadowb, Mall Road';
+    $footer_contact_email   = ! empty( $opts['footer_contact_email'] ) ? $opts['footer_contact_email'] : 'support@gmail.com';
+    $footer_contact_phone   = ! empty( $opts['footer_contact_phone'] ) ? $opts['footer_contact_phone'] : '+000 (123) 44 558';
+    $footer_socials = ! empty( $opts['footer_social_links'] ) ? $opts['footer_social_links'] : array();
+    $footer_copyright = ! empty( $opts['footer_copyright'] ) ? $opts['footer_copyright'] : 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.';
+}
+?>
+
+<!-- footer-area-start -->
+        <footer class="pos-rel">
+            <span class="line line-1"></span>
+            <span class="line line-2"></span>
+            <span class="line line-3"></span>
+            <div class="footer-widget-area black-bg pt-80">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-6">
+                            <div class="footer-wrapper mb-30">
+                                <div class="footer-2-logo">
+                                    <a href="<?php echo esc_url( home_url() ); ?>"><img src="<?php echo esc_url( $footer_logo ? ( is_array( $footer_logo ) && ! empty( $footer_logo['url'] ) ? $footer_logo['url'] : $footer_logo ) : get_template_directory_uri() . '/assets/img/logo/logo-2.png' ); ?>" alt=""></a>
+                                </div>
+                                <div class="footer-text footer-2-text">
+                                    <?php echo wp_kses_post( $footer_text ); ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-lg-2 col-md-6">
+                            <div class="footer-wrapper pl-25 mb-30">
+                                <h3 class="footer-title">Quick Links</h3>
+                                <div class="footer-link">
+                                    <ul>
+                                        <?php $quick = get_field('footer_quick_links','option');
+                                        if ( $quick ) :
+                                            foreach ( $quick as $q ) : ?>
+                                                <li><a href="<?php echo esc_url( $q['url'] ); ?>"><?php echo esc_html( $q['text'] ); ?></a></li>
+                                            <?php endforeach;
+                                        else : ?>
+                                            <li><a href="#">About Company</a></li>
+                                            <li><a href="#">Latest Projects</a></li>
+                                            <li><a href="#">Lastest From Blog</a></li>
+                                            <li><a href="#">Our Mission</a></li>
+                                            <li><a href="#">Our Testimonials</a></li>
+                                            <li><a href="#">Contact Us</a></li>
+                                        <?php endif; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="footer-wrapper pl-30 mb-30">
+                                <h3 class="footer-title">Latest News</h3>
+                                <ul class="footer-news">
+                                    <li>
+                                        <div class="footer-news-img f-left">
+                                            <a href="#"><img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/footer/01.jpg' ); ?>" alt=""></a>
+                                        </div>
+                                        <div class="footer-news-text">
+                                            <h5><a href="#">Making Distributed Product Teams Work More Effic</a></h5>
+                                            <span><i class="fal fa-calendar-alt"></i> 25 Sep 2019</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="footer-news-img f-left">
+                                            <a href="#"><img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/footer/02.jpg' ); ?>" alt=""></a>
+                                        </div>
+                                        <div class="footer-news-text">
+                                            <h5><a href="#">Complete Anatomy Of The Gutenberg WordPress Editor</a></h5>
+                                            <span><i class="fal fa-calendar-alt"></i> 25 Sep 2019</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-6">
+                            <div class="footer-wrapper mb-30 pl-40">
+                                <h3 class="footer-title">Contact Us</h3>
+                                <ul class="footer-info">
+                                    <li><span><i class="far fa-map-marker-alt"></i> <?php echo esc_html( $footer_contact_address ); ?></span></li>
+                                    <li><span><i class="far fa-envelope-open"></i> <?php echo esc_html( $footer_contact_email ); ?></span></li>
+                                    <li><span><i class="far fa-phone"></i> <?php echo esc_html( $footer_contact_phone ); ?></span></li>
+                                    <li><span><i class="far fa-paper-plane"></i> <?php echo esc_html( home_url() ); ?></span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="footer-bottom-area footer-2-bottom mt-40 pt-25 pb-25">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-6">
+                                <div class="copyright  copyright-1 text-center col-md-left">
+                                    <p><?php echo esc_html( $footer_copyright ); ?></p>
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-lg-6">
+                                <div class="footer-bottom-wrapper">
+                                        <div class="footer-2-icon f-right">
+                                            <?php $fs = $footer_socials; if ( $fs ) : foreach ( $fs as $f ) : ?>
+                                                <a href="<?php echo esc_url( $f['url'] ); ?>"><i class="<?php echo esc_attr( $f['icon'] ); ?>"></i></a>
+                                            <?php endforeach; else : ?>
+                                                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                                                <a href="#"><i class="fab fa-twitter"></i></a>
+                                                <a href="#"><i class="fab fa-instagram"></i></a>
+                                                <a href="#"><i class="fab fa-google"></i></a>
+                                            <?php endif; ?>
+                                        </div>
+                                        <ul class="footer-bottom-link f-right">
+                                            <li><a href="#">Setting & Privacy </a></li>
+                                            <li><a href="#">Terms of Use</a></li>
+                                            <li><a href="#">Site Map</a></li>
+                                        </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- footer-area-end -->
+
+    <!-- allow WP to print enqueued JS and footer hooks -->
+    <?php wp_footer(); ?>
+</body>
+</html>
