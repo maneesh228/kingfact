@@ -176,6 +176,159 @@ if ( $slides ) : ?>
  the_content();
 ?>
 
+            <!-- services-area start  -->
+            <div class="services-area pt-120 pb-90">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 offset-lg-3 offset-xl-3">
+                            <div class="section-title text-center mb-75">
+                                <span>what we do</span>
+                                <h1>Latest Services</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row service-active arrow-style">
+                        <?php
+                        // Query 6 services dynamically
+                        $services_query = new WP_Query(array(
+                            'post_type' => 'service',
+                            'posts_per_page' => 6,
+                            'post_status' => 'publish',
+                            'orderby' => 'menu_order',
+                            'order' => 'ASC'
+                        ));
+                        
+                        if ($services_query->have_posts()) :
+                            while ($services_query->have_posts()) : $services_query->the_post();
+                                $service_url = get_permalink();
+                                $service_link_text = get_post_meta(get_the_ID(), '_service_link_text', true);
+                                if (empty($service_link_text)) {
+                                    $service_link_text = 'raed more';
+                                }
+                                
+                                // Get description
+                                $description = get_the_excerpt();
+                                if (empty($description)) {
+                                    $description = wp_trim_words(get_the_content(), 20, '...');
+                                }
+                        ?>
+                        <div class="col-xl-4">
+                            <div class="b-services mb-30">
+                                <?php if (has_post_thumbnail()) : ?>
+                                <div class="b-services-img">
+                                    <?php the_post_thumbnail('medium', array('alt' => get_the_title(), 'style' => 'width: 100%; height: auto;')); ?>
+                                </div>
+                                <?php endif; ?>
+                                <div class="b-services-content">
+                                    <h3><a href="<?php echo esc_url($service_url); ?>"><?php the_title(); ?></a></h3>
+                                    <p><?php echo esc_html($description); ?></p>
+                                    <div class="sv-link">
+                                        <a href="<?php echo esc_url($service_url); ?>"><?php echo esc_html($service_link_text); ?></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php 
+                            endwhile;
+                            wp_reset_postdata();
+                        else : 
+                        ?>
+                        <div class="col-xl-12">
+                            <p class="text-center">No services found. Please add services from WordPress Admin → Services.</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <!-- services-area end  -->
+
+             <!-- video-bg-area start  -->
+              
+            <div class="video-bg-area pt-120 pb-120" style="background-image:url(<?php echo get_template_directory_uri(); ?>/assets/img/bg/video.jpg)">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-8 offset-xl-2 text-center">
+                            <div class="b-video">
+                                <div class="b-play mb-40">
+                                    <a href="#"><i class="fal fa-play"></i></a>
+                                </div>
+                                <h2>Need Our Premium Services
+                                Full Free & More</h2>
+                                <div class="b-main-btn">
+                                    <a class="b-btn" href="/services">
+                                        <span>read more</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- video-bg-area end  -->
+
+            <!-- work start  -->
+            <div class="work-area-start pt-120 pb-90">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 offset-lg-3 offset-xl-3">
+                            <div class="section-title text-center mb-75">
+                                <span>our works</span>
+                                <h1>Project We Have Done</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <?php
+                        // Query 6 products dynamically
+                        $products_query = new WP_Query(array(
+                            'post_type' => 'product',
+                            'posts_per_page' => 6,
+                            'post_status' => 'publish',
+                            'orderby' => 'menu_order',
+                            'order' => 'ASC'
+                        ));
+                        
+                        if ($products_query->have_posts()) :
+                            while ($products_query->have_posts()) : $products_query->the_post();
+                                $product_url = get_permalink();
+                                
+                                // Get description
+                                $description = get_the_excerpt();
+                                if (empty($description)) {
+                                    $description = wp_trim_words(get_the_content(), 15, '...');
+                                }
+                        ?>
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="b-work position-relative mb-30">
+                                <?php if (has_post_thumbnail()) : ?>
+                                <div class="b-work-img">
+                                    <?php the_post_thumbnail('medium', array('alt' => get_the_title(), 'style' => 'width: 100%; height: auto;')); ?>
+                                </div>
+                                <?php endif; ?>
+                                <div class="b-work-content-2">
+                                    <div class="inner-work-2">
+                                        <h2><a href="<?php echo esc_url($product_url); ?>"><?php the_title(); ?></a></h2>
+                                        <p><?php echo esc_html($description); ?></p>
+                                        <div class="b-work-link">
+                                            <a href="<?php echo esc_url($product_url); ?>"><i class="far fa-long-arrow-right"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php 
+                            endwhile;
+                            wp_reset_postdata();
+                        else : 
+                        ?>
+                        <div class="col-xl-12">
+                            <p class="text-center">No products found. Please add products from WordPress Admin → Products.</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <!-- work end  -->
 
     </main>
 

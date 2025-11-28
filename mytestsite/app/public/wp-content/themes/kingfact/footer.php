@@ -75,24 +75,50 @@ if ( function_exists( 'get_field' ) ) {
                             <div class="footer-wrapper pl-30 mb-30">
                                 <h3 class="footer-title">Latest News</h3>
                                 <ul class="footer-news">
-                                    <li>
-                                        <div class="footer-news-img f-left">
-                                            <a href="#"><img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/footer/01.jpg' ); ?>" alt=""></a>
-                                        </div>
-                                        <div class="footer-news-text">
-                                            <h5><a href="#">Making Distributed Product Teams Work More Effic</a></h5>
-                                            <span><i class="fal fa-calendar-alt"></i> 25 Sep 2019</span>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="footer-news-img f-left">
-                                            <a href="#"><img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/footer/02.jpg' ); ?>" alt=""></a>
-                                        </div>
-                                        <div class="footer-news-text">
-                                            <h5><a href="#">Complete Anatomy Of The Gutenberg WordPress Editor</a></h5>
-                                            <span><i class="fal fa-calendar-alt"></i> 25 Sep 2019</span>
-                                        </div>
-                                    </li>
+                                    <?php
+                                    // Get latest 2 blog posts
+                                    $footer_posts = new WP_Query(array(
+                                        'post_type' => 'post',
+                                        'posts_per_page' => 2,
+                                        'post_status' => 'publish',
+                                        'orderby' => 'date',
+                                        'order' => 'DESC'
+                                    ));
+
+                                    if ( $footer_posts->have_posts() ) :
+                                        while ( $footer_posts->have_posts() ) : $footer_posts->the_post();
+                                    ?>
+                                        <li>
+                                            <div class="footer-news-img f-left">
+                                                <a href="<?php the_permalink(); ?>">
+                                                    <?php if ( has_post_thumbnail() ) : ?>
+                                                        <?php the_post_thumbnail( 'thumbnail', array( 'alt' => get_the_title() ) ); ?>
+                                                    <?php else : ?>
+                                                        <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/blog/blog-01.jpg' ); ?>" alt="<?php the_title_attribute(); ?>">
+                                                    <?php endif; ?>
+                                                </a>
+                                            </div>
+                                            <div class="footer-news-text">
+                                                <h5><a href="<?php the_permalink(); ?>"><?php echo wp_trim_words( get_the_title(), 8, '...' ); ?></a></h5>
+                                                <span><i class="fal fa-calendar-alt"></i> <?php echo get_the_date( 'd M Y' ); ?></span>
+                                            </div>
+                                        </li>
+                                    <?php
+                                        endwhile;
+                                        wp_reset_postdata();
+                                    else :
+                                        // Fallback if no posts exist
+                                    ?>
+                                        <li>
+                                            <div class="footer-news-img f-left">
+                                                <a href="#"><img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/footer/01.jpg' ); ?>" alt=""></a>
+                                            </div>
+                                            <div class="footer-news-text">
+                                                <h5><a href="#">No posts available yet</a></h5>
+                                                <span><i class="fal fa-calendar-alt"></i> <?php echo date( 'd M Y' ); ?></span>
+                                            </div>
+                                        </li>
+                                    <?php endif; ?>
                                 </ul>
                             </div>
                         </div>

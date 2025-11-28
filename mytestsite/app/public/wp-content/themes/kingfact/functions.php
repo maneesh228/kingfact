@@ -83,6 +83,12 @@ function theme_enqueue_home_assets() {
         foreach ( $rev_ext as $ext ) {
             wp_enqueue_script( 'rev-ext-' . md5($ext), $base . 'rs/js/' . $ext, array('rev'), null, true );
         }
+
+        // Google Maps API (for contact page)
+        if ( is_page_template( 'page-contact.php' ) ) {
+            $google_maps_api_key = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with your actual API key
+            wp_enqueue_script( 'google-maps', 'https://maps.googleapis.com/maps/api/js?key=' . $google_maps_api_key, array(), null, true );
+        }
     }
 }
 add_action( 'wp_enqueue_scripts', 'theme_enqueue_home_assets' );
@@ -886,6 +892,7 @@ function kingfact_features_shortcode( $atts, $content = null ) {
         'paragraph3' => "Avoids pleasure itself, because it is pleasure because those who do not know how",
         'allow_html' => '0',
     );
+    
 
     $a = shortcode_atts( $defaults, $atts, 'features_section' );
 
@@ -927,7 +934,7 @@ function kingfact_features_shortcode( $atts, $content = null ) {
 
     ob_start();
     ?>
-    <div class="features-area pt-120 pb-90" style="background-image:url(<?php echo esc_url( $base . ltrim( $a['bg'], '/' ) ); ?>)">
+    <div class="features-area pt-120 pb-90" style="background-image:url(<?php echo esc_url( ltrim( $a['bg'], '/' ) ); ?>)">
       <div class="container">
         <div class="row">
           <div class="col-xl-4 col-lg-4 col-md-6">
