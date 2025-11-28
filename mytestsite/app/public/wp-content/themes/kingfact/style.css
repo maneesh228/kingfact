@@ -5,3 +5,517 @@
  Description: Custom theme for HTML integration
  Version: 1.0
 */
+
+/* Blog Styles */
+.blog-wrapper {
+    margin-bottom: 30px;
+}
+
+.blog-img {
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.blog-img img {
+    width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.blog-img:hover img {
+    transform: scale(1.05);
+}
+
+.blog-text h4 {
+    font-size: 22px;
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+.blog-text h4 a {
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.blog-text h4 a:hover {
+    color: #f7b61a;
+}
+
+.blog-text > a {
+    color: #1a1a1a;
+    font-weight: 600;
+    text-transform: capitalize;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.blog-text > a:hover {
+    color: #f7b61a;
+}
+
+.search-excerpt {
+    margin-bottom: 15px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.blog-meta {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 15px;
+}
+
+.blog-meta span {
+    margin-right: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.blog-meta span i {
+    margin-right: 5px;
+}
+
+.blog-meta span a {
+    color: #666;
+    text-decoration: none;
+}
+
+.blog-meta span a:hover {
+    color: #f7b61a;
+}
+
+/* Blog Details */
+.blog-details-wrapper {
+    background: #fff;
+}
+
+.blog-details-img {
+    margin-bottom: 45px;
+}
+
+.blog-details-img img {
+    width: 100%;
+    height: auto;
+}
+
+.blog-details-content {
+    padding: 0 30px;
+}
+
+.blog-details-text {
+    margin-bottom: 30px;
+}
+
+.blog-details-text p {
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+.blog-details-tags,
+.blog-details-share {
+    padding: 20px 0;
+    border-top: 1px solid #e5e5e5;
+}
+
+.blog-details-tags h5,
+.blog-details-share h5 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.tag-list a,
+.widget-tags a {
+    display: inline-block;
+    padding: 8px 20px;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    margin: 5px 5px 5px 0;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.tag-list a:hover,
+.widget-tags a:hover {
+    background: #f7b61a;
+    color: #fff;
+}
+
+.share-links a {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    margin-right: 10px;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.share-links a:hover {
+    background: #f7b61a;
+    color: #fff;
+}
+
+/* Author Box */
+.author-box {
+    display: flex;
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+.author-img {
+    flex: 0 0 100px;
+    margin-right: 20px;
+}
+
+.author-img img {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+}
+
+.author-text h5 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.author-text p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Post Navigation */
+.post-navigation {
+    padding: 30px 0;
+    border-top: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.prev-post,
+.next-post {
+    padding: 15px 0;
+}
+
+.nav-label {
+    display: block;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.prev-post h6,
+.next-post h6 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.prev-post h6 a,
+.next-post h6 a {
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.prev-post h6 a:hover,
+.next-post h6 a:hover {
+    color: #f7b61a;
+}
+
+/* Sidebar Widgets */
+.blog-sidebar .widget {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 5px;
+}
+
+.widget-title {
+    font-size: 22px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f7b61a;
+}
+
+.widget-search input[type="search"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+}
+
+.widget-categories,
+.widget-recent-posts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.widget-categories li {
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.widget-categories li:last-child {
+    border-bottom: none;
+}
+
+.widget-categories li a {
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.widget-categories li a:hover {
+    color: #f7b61a;
+}
+
+.recent-post-item {
+    display: flex;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.recent-post-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.recent-post-img {
+    flex: 0 0 80px;
+    margin-right: 15px;
+}
+
+.recent-post-img img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.recent-post-text h6 {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.recent-post-text h6 a {
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.recent-post-text h6 a:hover {
+    color: #f7b61a;
+}
+
+.recent-post-text span {
+    color: #666;
+    font-size: 13px;
+}
+
+/* Pagination */
+.basic-pagination {
+    margin-top: 50px;
+}
+
+.basic-pagination .page-numbers {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 0 5px;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    text-decoration: none;
+    border-radius: 3px;
+}
+
+.basic-pagination .page-numbers.current,
+.basic-pagination .page-numbers:hover {
+    background: #f7b61a;
+    color: #fff;
+}
+
+/* Comments Section */
+.comments-area {
+    margin-top: 50px;
+    padding-top: 50px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.comments-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px 0;
+}
+
+.comment-list .comment {
+    margin-bottom: 30px;
+}
+
+.comment-body {
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    position: relative;
+}
+
+.comment-author {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.comment-author img {
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.comment-author .fn {
+    font-style: normal;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-right: 10px;
+}
+
+.comment-date {
+    color: #666;
+    font-size: 13px;
+}
+
+.comment-text {
+    margin-bottom: 15px;
+    line-height: 1.8;
+}
+
+.comment-reply a {
+    color: #f7b61a;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.comment-reply a:hover {
+    color: #1a1a1a;
+}
+
+.comment-awaiting-moderation {
+    color: #f7b61a;
+    font-style: italic;
+}
+
+.comment-list .children {
+    list-style: none;
+    margin-left: 50px;
+    margin-top: 30px;
+}
+
+/* Comment Form */
+.comment-respond {
+    margin-top: 40px;
+}
+
+.comment-reply-title {
+    font-size: 24px;
+    margin-bottom: 25px;
+}
+
+.comment-form p {
+    margin-bottom: 20px;
+}
+
+.comment-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.comment-form input[type="text"],
+.comment-form input[type="email"],
+.comment-form input[type="url"],
+.comment-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.comment-form input:focus,
+.comment-form textarea:focus {
+    outline: none;
+    border-color: #f7b61a;
+}
+
+.comment-form .required {
+    color: #f00;
+}
+
+.comment-form .form-submit {
+    margin-top: 20px;
+}
+
+.no-comments {
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 3px;
+    text-align: center;
+}
+
+/* Search Form */
+.search-form-wrapper {
+    position: relative;
+}
+
+.search-form .search-field {
+    width: 100%;
+    padding: 12px 50px 12px 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+}
+
+.search-form .search-submit {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 50px;
+    background: #f7b61a;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 0 3px 3px 0;
+}
+
+.search-form .search-submit:hover {
+    background: #1a1a1a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+    .comment-list .children {
+        margin-left: 20px;
+    }
+    
+    .author-box {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .author-img {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+    
+    .recent-post-img {
+        flex: 0 0 60px;
+    }
+    
+    .recent-post-img img {
+        width: 60px;
+        height: 60px;
+    }
+}

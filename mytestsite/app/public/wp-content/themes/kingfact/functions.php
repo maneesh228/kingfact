@@ -2,7 +2,8 @@
 // Enqueue assets only when the page template 'page-home.php' is used
 function theme_enqueue_home_assets() {
     if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'page-products.php' )  || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' )
-        || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_singular( 'product' ) || is_404()
+        || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_singular( 'product' ) || is_404() 
+        || is_home() || is_archive() || is_single() || is_search() || is_category() || is_tag() || is_author()
         ){
 
         $base = get_template_directory_uri() . '/assets/';
@@ -88,7 +89,7 @@ add_action( 'wp_enqueue_scripts', 'theme_enqueue_home_assets' );
 
 // Debug: print comment in <head> indicating whether homepage enqueue condition is met
 add_action( 'wp_head', function() {
-    if ( is_front_page() || is_page_template( 'page-home.php' ) || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' ) || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_404() ) {
+    if ( is_front_page() || is_page_template( 'page-home.php' ) || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' ) || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_404() || is_home() || is_archive() || is_single() || is_search() ) {
         echo "\n<!-- kingfact: enqueue condition = TRUE -->\n";
     } else {
         echo "\n<!-- kingfact: enqueue condition = FALSE -->\n";
@@ -2334,6 +2335,121 @@ function kingfact_enqueue_product_media_scripts($hook) {
     }
 }
 add_action('admin_enqueue_scripts', 'kingfact_enqueue_product_media_scripts');
+
+/**
+ * Blog functionality
+ */
+
+// Add blog page to settings for easier management
+function kingfact_add_blog_settings() {
+    if ( function_exists( 'acf_add_options_page' ) ) {
+        // Blog settings are part of theme options
+        // We can add blog-specific fields in ACF
+    }
+}
+add_action( 'acf/init', 'kingfact_add_blog_settings' );
+
+// Register ACF fields for blog settings (if ACF is active)
+if ( function_exists( 'acf_add_local_field_group' ) ) {
+    acf_add_local_field_group( array(
+        'key' => 'group_blog_settings',
+        'title' => 'Blog Settings',
+        'fields' => array(
+            array(
+                'key' => 'field_blog_breadcrumb_bg',
+                'label' => 'Blog Breadcrumb Background',
+                'name' => 'blog_breadcrumb_bg',
+                'type' => 'image',
+                'instructions' => 'Upload the background image for blog breadcrumb area',
+                'return_format' => 'url',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'options_page',
+                    'operator' => '==',
+                    'value' => 'acf-options-theme-options',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+    ));
+}
+
+// Modify excerpt length for blog posts
+function kingfact_excerpt_length( $length ) {
+    return 20;
+}
+add_filter( 'excerpt_length', 'kingfact_excerpt_length', 999 );
+
+// Modify excerpt more string
+function kingfact_excerpt_more( $more ) {
+    return '...';
+}
+add_filter( 'excerpt_more', 'kingfact_excerpt_more' );
+
+// Add custom image sizes for blog
+add_action( 'after_setup_theme', 'kingfact_blog_image_sizes' );
+function kingfact_blog_image_sizes() {
+    add_image_size( 'blog-thumbnail', 400, 300, true );
+    add_image_size( 'blog-large', 800, 600, true );
+}
+
+// Enable support for Post Formats (optional - for different post types like video, gallery, etc.)
+add_theme_support( 'post-formats', array( 'aside', 'gallery', 'link', 'image', 'quote', 'status', 'video', 'audio', 'chat' ) );
+
+// Add custom search form
+function kingfact_custom_search_form( $form ) {
+    $form = '
+    <form role="search" method="get" class="search-form" action="' . esc_url( home_url( '/' ) ) . '">
+        <div class="search-form-wrapper">
+            <input type="search" class="search-field" placeholder="' . esc_attr__( 'Search...', 'kingfact' ) . '" value="' . get_search_query() . '" name="s" />
+            <button type="submit" class="search-submit"><i class="fas fa-search"></i></button>
+        </div>
+    </form>';
+    return $form;
+}
+add_filter( 'get_search_form', 'kingfact_custom_search_form' );
+
+// Add comments template styling support
+function kingfact_comment( $comment, $args, $depth ) {
+    ?>
+    <li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
+        <div id="comment-<?php comment_ID(); ?>" class="comment-body">
+            <div class="comment-author vcard">
+                <?php echo get_avatar( $comment, 60 ); ?>
+                <cite class="fn"><?php echo get_comment_author_link(); ?></cite>
+                <span class="comment-date"><?php echo get_comment_date(); ?></span>
+            </div>
+            
+            <?php if ( $comment->comment_approved == '0' ) : ?>
+                <em class="comment-awaiting-moderation"><?php _e( 'Your comment is awaiting moderation.', 'kingfact' ); ?></em>
+                <br />
+            <?php endif; ?>
+
+            <div class="comment-text">
+                <?php comment_text(); ?>
+            </div>
+
+            <div class="comment-reply">
+                <?php 
+                comment_reply_link( array_merge( $args, array( 
+                    'depth' => $depth, 
+                    'max_depth' => $args['max_depth'],
+                    'reply_text' => '<i class="fas fa-reply"></i> Reply'
+                ) ) ); 
+                ?>
+            </div>
+        </div>
+    <?php
+}
+
+
+
+
 
 
 
