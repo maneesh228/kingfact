@@ -5,21 +5,22 @@ Template Name: Products Page
 
 get_header(); ?>
 
-<!-- breadcrumb-area -->
-<section class="breadcrumb-area d-flex  p-relative align-items-center">
+<!-- breadcrumb-area-start -->
+<div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo get_template_directory_uri(); ?>/assets/img/bg/bg-9.jpg)">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-xl-12 col-lg-12">
-                <div class="breadcrumb-wrap text-left">
-                    <div class="breadcrumb-title">
-                        <h2><?php the_title(); ?></h2>   
-                        <?php echo do_shortcode('[kingfact_breadcrumb]'); ?>
-                    </div>
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb-text text-center">
+                    <h1><?php the_title(); ?></h1>
+                    <ul class="breadcrumb-menu">
+                        <li><a href="<?php echo home_url(); ?>">home</a></li>
+                        <li><span><?php the_title(); ?></span></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 <!-- breadcrumb-area-end -->
 
 <?php if (have_posts()) : while (have_posts()) : the_post(); ?>

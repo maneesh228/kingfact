@@ -1,7 +1,7 @@
 <?php
 // Enqueue assets only when the page template 'page-home.php' is used
 function theme_enqueue_home_assets() {
-    if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' )
+    if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'page-products.php' )  || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' )
         || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_404()
         ){
 
@@ -1349,6 +1349,294 @@ function kingfact_update_service_order() {
 
     wp_send_json_success();
 }
+
+// 4) Services Display Shortcode
+function kingfact_services_display_shortcode( $atts, $content = null ) {
+    $base = get_template_directory_uri() . '/assets/';
+
+    $defaults = array(
+        // Layout settings
+        'columns'           => '3', // 2, 3, 4, 6
+        'posts_per_page'    => -1,  // -1 for all, or specific number
+        'orderby'           => 'menu_order',
+        'order'             => 'ASC',
+        'padding_top'       => 'pt-130',
+        'padding_bottom'    => 'pb-130',
+        'class'             => '',
+        
+        // Section title
+        'show_title'        => '0',
+        'section_title'     => 'Our Services',
+        'section_subtitle'  => 'what we offer',
+        
+        // Bottom button
+        'show_button'       => '1',
+        'button_text'       => 'view all services',
+        'button_url'        => '#',
+        
+        // Filter options
+        'include_ids'       => '', // Comma-separated post IDs
+        'exclude_ids'       => '', // Comma-separated post IDs
+        'category'          => '', // If you add categories later
+    );
+
+    $a = shortcode_atts( $defaults, $atts, 'services_display' );
+
+    // Calculate column classes
+    $col_class = 'col-xl-4 col-lg-4 col-md-6'; // default 3 columns
+    switch ( $a['columns'] ) {
+        case '2':
+            $col_class = 'col-xl-6 col-lg-6 col-md-6';
+            break;
+        case '4':
+            $col_class = 'col-xl-3 col-lg-3 col-md-6';
+            break;
+        case '6':
+            $col_class = 'col-xl-2 col-lg-2 col-md-4';
+            break;
+    }
+
+    // Query arguments
+    $query_args = array(
+        'post_type'      => 'service',
+        'posts_per_page' => intval( $a['posts_per_page'] ),
+        'orderby'        => $a['orderby'],
+        'order'          => $a['order'],
+        'post_status'    => 'publish',
+    );
+
+    // Handle include/exclude IDs
+    if ( ! empty( $a['include_ids'] ) ) {
+        $include_ids = array_map( 'intval', explode( ',', $a['include_ids'] ) );
+        $query_args['post__in'] = $include_ids;
+    }
+
+    if ( ! empty( $a['exclude_ids'] ) ) {
+        $exclude_ids = array_map( 'intval', explode( ',', $a['exclude_ids'] ) );
+        $query_args['post__not_in'] = $exclude_ids;
+    }
+
+    // Get services
+    $services_query = new WP_Query( $query_args );
+
+    if ( ! $services_query->have_posts() ) {
+        wp_reset_postdata();
+        
+        $debug_info = '<div class="services-area pt-130 pb-130">';
+        $debug_info .= '<div class="container">';
+        $debug_info .= '<div class="row"><div class="col-xl-12">';
+        $debug_info .= '<div class="no-services" style="padding: 40px; background: #f9f9f9; margin: 20px 0; text-align: center; border-radius: 10px;">';
+        $debug_info .= '<h3 style="color: #333; margin-bottom: 20px;">No Services Found</h3>';
+        $debug_info .= '<p style="margin-bottom: 20px;"><strong>To display services, please:</strong></p>';
+        $debug_info .= '<ol style="text-align: left; max-width: 400px; margin: 0 auto;"><li>Go to WordPress Admin → Services → Add New</li>';
+        $debug_info .= '<li>Create some services and publish them (not as drafts)</li>';
+        $debug_info .= '<li>Add featured images and content to each service</li></ol>';
+        $debug_info .= '<p style="margin-top: 20px;"><a href="' . admin_url('post-new.php?post_type=service') . '" class="b-btn btn-black"><span>Add Your First Service</span></a></p>';
+        $debug_info .= '</div>';
+        $debug_info .= '</div></div></div></div>';
+        
+        return $debug_info;
+    }
+
+    ob_start();
+    ?>
+    <div class="services-area <?php echo esc_attr( $a['padding_top'] . ' ' . $a['padding_bottom'] . ' ' . $a['class'] ); ?>">
+        <div class="container">
+            
+            <?php if ( '1' === $a['show_title'] ) : ?>
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="section-title text-center mb-70">
+                        <span><?php echo esc_html( $a['section_subtitle'] ); ?></span>
+                        <h2><?php echo esc_html( $a['section_title'] ); ?></h2>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <div class="row" id="services-container">
+                <?php 
+                $service_count = 0;
+                $total_services = $services_query->found_posts;
+                while ( $services_query->have_posts() ) : $services_query->the_post(); ?>
+                <?php
+                    $service_count++;
+                    $service_id = get_the_ID();
+                    $service_url = get_post_meta( $service_id, '_service_url', true );
+                    $service_link_text = get_post_meta( $service_id, '_service_link_text', true );
+                    $service_icon = get_post_meta( $service_id, '_service_icon', true );
+                    
+                    // Always use service detail page permalink for read more
+                    $service_detail_url = get_permalink( $service_id );
+                    
+                    // Fallback link text
+                    if ( empty( $service_link_text ) ) {
+                        $service_link_text = 'read more';
+                    }
+                    
+                    // Get description (excerpt or content)
+                    $description = get_the_excerpt();
+                    if ( empty( $description ) ) {
+                        $description = wp_trim_words( get_the_content(), 20, '...' );
+                    }
+                    
+                    // Add class to hide services after the 6th one
+                    $hide_class = $service_count > 6 ? 'service-hidden' : '';
+                ?>
+                
+                <div class="<?php echo esc_attr( $col_class ); ?> service-item <?php echo esc_attr( $hide_class ); ?>">
+                    <div class="b-services b-services-02 mb-80">
+                        <?php if ( has_post_thumbnail() ) : ?>
+                        <div class="b-services-img">
+                            <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title() ) ); ?>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="b-services-content">
+                            <h3>
+                                <?php if ( ! empty( $service_icon ) ) : ?>
+                                <i class="<?php echo esc_attr( $service_icon ); ?>"></i> 
+                                <?php endif; ?>
+                                <a href="<?php echo esc_url( $service_detail_url ); ?>">
+                                    <?php the_title(); ?>
+                                </a>
+                            </h3>
+                            
+                            <?php if ( ! empty( $description ) ) : ?>
+                            <p><?php echo esc_html( $description ); ?></p>
+                            <?php endif; ?>
+                            
+                            <div class="sv-link">
+                                <a href="<?php echo esc_url( $service_detail_url ); ?>"><?php echo esc_html( $service_link_text ); ?></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <?php endwhile; ?>
+                <?php wp_reset_postdata(); ?>
+            </div>
+            
+            <?php if ( $total_services > 6 ) : ?>
+            <!-- Show More / Show Less Button -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="fea-btn text-center">
+                        <button class="b-btn btn-black" id="toggle-services-btn" onclick="toggleServices()">
+                            <span id="service-btn-text">View All Services (<?php echo ($total_services - 6); ?> more)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <?php elseif ( '1' === $a['show_button'] && ! empty( $a['button_text'] ) && $a['button_url'] !== '#' ) : ?>
+            <!-- Regular button if less than 6 services or custom URL provided -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="fea-btn text-center">
+                        <a class="b-btn btn-black" href="<?php echo esc_url( $a['button_url'] ); ?>">
+                            <span><?php echo esc_html( $a['button_text'] ); ?></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php if ( $total_services > 6 ) : ?>
+    <style>
+    .service-hidden {
+        display: none;
+    }
+    .service-show-animation {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    .service-hide-animation {
+        animation: fadeOutDown 0.4s ease-out;
+    }
+    #toggle-services-btn {
+        transition: all 0.3s ease;
+    }
+    #toggle-services-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeOutDown {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+    </style>
+
+    <script>
+    function toggleServices() {
+        const hiddenServices = document.querySelectorAll('.service-hidden');
+        const button = document.getElementById('toggle-services-btn');
+        const buttonText = document.getElementById('service-btn-text');
+        const isExpanded = button.classList.contains('expanded');
+        
+        if (!isExpanded) {
+            // Show all services
+            hiddenServices.forEach((service, index) => {
+                setTimeout(() => {
+                    service.classList.remove('service-hidden');
+                    service.classList.add('service-show-animation');
+                }, index * 100);
+            });
+            
+            button.classList.add('expanded');
+            buttonText.textContent = 'Show Less Services';
+            
+        } else {
+            // Hide extra services
+            const allServices = document.querySelectorAll('.service-item');
+            const servicesToHide = Array.from(allServices).slice(6);
+            
+            servicesToHide.forEach((service, index) => {
+                setTimeout(() => {
+                    service.classList.add('service-hide-animation');
+                    setTimeout(() => {
+                        service.classList.remove('service-show-animation', 'service-hide-animation');
+                        service.classList.add('service-hidden');
+                    }, 400);
+                }, index * 50);
+            });
+            
+            button.classList.remove('expanded');
+            buttonText.textContent = 'View All Services (<?php echo ($total_services - 6); ?> more)';
+            
+            // Smooth scroll to services container
+            setTimeout(() => {
+                document.getElementById('services-container').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 300);
+        }
+    }
+    </script>
+    <?php endif; ?>
+    
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'services_display', 'kingfact_services_display_shortcode' );
 
 // ========================================
 // PRODUCTS CUSTOM POST TYPE (Similar to Services)
