@@ -1488,7 +1488,7 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
                     <div class="b-services b-services-02 mb-80">
                         <?php if ( has_post_thumbnail() ) : ?>
                         <div class="b-services-img">
-                            <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title() ) ); ?>
+                            <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title(), 'style' => 'width: 100%; height: auto;' ) ); ?>
                         </div>
                         <?php endif; ?>
                         
@@ -1543,8 +1543,22 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
         </div>
     </div>
 
-    <?php if ( $total_services > 6 ) : ?>
     <style>
+    /* Service image full width styling */
+    .b-services .b-services-img {
+        overflow: hidden;
+        width: 100%;
+    }
+    .b-services .b-services-img img {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 100% !important;
+        display: block;
+        object-fit: cover;
+    }
+    
+    <?php if ( $total_services > 6 ) : ?>
+    /* Show more functionality styles */
     .service-hidden {
         display: none;
     }
@@ -1582,6 +1596,7 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
             transform: translateY(-20px);
         }
     }
+    <?php endif; ?>
     </style>
 
     <script>
@@ -1631,7 +1646,6 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
         }
     }
     </script>
-    <?php endif; ?>
     
     <?php
     return ob_get_clean();

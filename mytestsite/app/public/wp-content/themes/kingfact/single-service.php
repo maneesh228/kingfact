@@ -88,13 +88,6 @@ echo do_shortcode('[kingfact_breadcrumb title="' . esc_attr( $service_title ) . 
                         <div class="service-content">
                             <?php the_content(); ?>
                         </div>
-                        
-                        <?php if ( get_the_excerpt() ) : ?>
-                        <div class="service-excerpt mt-30">
-                            <h4>Summary</h4>
-                            <p><?php echo get_the_excerpt(); ?></p>
-                        </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>
