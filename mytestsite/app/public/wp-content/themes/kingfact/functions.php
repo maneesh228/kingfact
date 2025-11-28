@@ -2,7 +2,7 @@
 // Enqueue assets only when the page template 'page-home.php' is used
 function theme_enqueue_home_assets() {
     if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'page-products.php' )  || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' )
-        || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_404()
+        || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_singular( 'product' ) || is_404()
         ){
 
         $base = get_template_directory_uri() . '/assets/';
@@ -1618,6 +1618,7 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
             button.classList.add('expanded');
             buttonText.textContent = 'Show Less Services';
             
+       
         } else {
             // Hide extra services
             const allServices = document.querySelectorAll('.service-item');
@@ -1724,6 +1725,8 @@ function kingfact_product_meta_box_cb( $post ) {
     $product_link_text = get_post_meta( $post->ID, '_product_link_text', true );
     $product_icon = get_post_meta( $post->ID, '_product_icon', true );
     $product_price = get_post_meta( $post->ID, '_product_price', true );
+    $product_images = get_post_meta( $post->ID, '_product_images', true );
+    $product_videos = get_post_meta( $post->ID, '_product_videos', true );
 
     ?>
     <table class="form-table">
@@ -1755,6 +1758,42 @@ function kingfact_product_meta_box_cb( $post ) {
                 <p class="description">FontAwesome icon class (e.g., "fas fa-box", "fas fa-laptop")</p>
             </td>
         </tr>
+        <tr>
+            <th><label for="product_images"><strong>Product Images</strong></label></th>
+            <td>
+                <input type="text" id="product_images" name="product_images" value="<?php echo esc_attr( $product_images ); ?>" class="large-text" />
+                <button type="button" id="select_product_images" class="button">Select Images</button>
+                <p class="description">Select multiple images for the product gallery. Image IDs will be saved automatically.</p>
+                <div id="product_images_preview" style="margin-top: 10px;">
+                    <?php if ( ! empty( $product_images ) ) : 
+                        $image_ids = explode( ',', $product_images );
+                        foreach ( $image_ids as $image_id ) :
+                            $image_id = trim( $image_id );
+                            if ( ! empty( $image_id ) ) :
+                                $image_url = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+                                if ( $image_url ) :
+                    ?>
+                    <img src="<?php echo esc_url( $image_url ); ?>" style="width: 80px; height: 80px; object-fit: cover; margin: 5px; border: 1px solid #ddd;" />
+                    <?php 
+                                endif;
+                            endif;
+                        endforeach;
+                    endif; ?>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="product_videos"><strong>Product Videos</strong></label></th>
+            <td>
+                <textarea id="product_videos" name="product_videos" class="large-text" rows="5"><?php echo esc_textarea( $product_videos ); ?></textarea>
+                <p class="description">
+                    Enter video URLs, one per line. Supports:
+                    <br>• YouTube URLs (e.g., https://www.youtube.com/watch?v=VIDEO_ID)
+                    <br>• Direct video file URLs (e.g., https://example.com/video.mp4)
+                    <br>• Vimeo URLs and other video platforms
+                </p>
+            </td>
+        </tr>
     </table>
 
     <div style="margin-top: 20px;">
@@ -1765,8 +1804,55 @@ function kingfact_product_meta_box_cb( $post ) {
             <li><strong>Featured Image:</strong> Set the product image using the Featured Image box</li>
             <li><strong>Excerpt:</strong> Use excerpt for short description (will fallback to description if empty)</li>
             <li><strong>Order:</strong> Use the Order field in Page Attributes to control display order</li>
+            <li><strong>Images:</strong> Use the "Select Images" button to add product gallery images</li>
+            <li><strong>Videos:</strong> Add YouTube URLs or direct video file URLs in the videos field</li>
         </ul>
     </div>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        var productImagesUploader;
+        
+        $('#select_product_images').on('click', function(e) {
+            e.preventDefault();
+            
+            if (productImagesUploader) {
+                productImagesUploader.open();
+                return;
+            }
+            
+            productImagesUploader = wp.media.frames.productImagesUploader = wp.media({
+                title: 'Select Product Images',
+                button: {
+                    text: 'Select Images'
+                },
+                multiple: true,
+                library: {
+                    type: 'image'
+                }
+            });
+            
+            productImagesUploader.on('select', function() {
+                var attachments = productImagesUploader.state().get('selection').toJSON();
+                var imageIds = [];
+                var previewHtml = '';
+                
+                attachments.forEach(function(attachment) {
+                    imageIds.push(attachment.id);
+                    if (attachment.sizes && attachment.sizes.thumbnail) {
+                        previewHtml += '<img src="' + attachment.sizes.thumbnail.url + '" style="width: 80px; height: 80px; object-fit: cover; margin: 5px; border: 1px solid #ddd;" />';
+                    }
+                });
+                
+                $('#product_images').val(imageIds.join(','));
+                $('#product_images_preview').html(previewHtml);
+            });
+            
+            productImagesUploader.open();
+        });
+    });
+    </script>
+    
     <?php
 }
 
@@ -1783,6 +1869,8 @@ function kingfact_product_save( $post_id ) {
         'product_link_text' => '_product_link_text',
         'product_icon' => '_product_icon',
         'product_price' => '_product_price',
+        'product_images' => '_product_images',
+        'product_videos' => '_product_videos',
     );
 
     foreach ( $fields as $input => $meta_key ) {
@@ -1898,7 +1986,6 @@ function kingfact_enqueue_product_admin_scripts( $hook ) {
         if (!tbody.length) return;
 
         tbody.sortable({
-           
             items: 'tr[id^=post-]',
             axis: 'y',
             cursor: 'move',
@@ -2237,6 +2324,16 @@ function kingfact_products_display_shortcode( $atts, $content = null ) {
     return ob_get_clean();
 }
 add_shortcode( 'products_display', 'kingfact_products_display_shortcode' );
+
+// Enqueue media scripts for product admin
+function kingfact_enqueue_product_media_scripts($hook) {
+    global $post_type;
+    
+    if (($hook === 'post-new.php' || $hook === 'post.php') && $post_type === 'product') {
+        wp_enqueue_media();
+    }
+}
+add_action('admin_enqueue_scripts', 'kingfact_enqueue_product_media_scripts');
 
 
 

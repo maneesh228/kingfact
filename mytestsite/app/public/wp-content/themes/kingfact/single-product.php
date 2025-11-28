@@ -1,21 +1,6 @@
 <?php get_header(); ?>
 
-<!-- breadcrumb-area -->
-<section class="breadcrumb-area d-flex  p-relative align-items-center">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-xl-12 col-lg-12">
-                <div class="breadcrumb-wrap text-left">
-                    <div class="breadcrumb-title">
-                        <h2><?php the_title(); ?></h2>   
-                        <?php echo do_shortcode('[kingfact_breadcrumb]'); ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- breadcrumb-area-end -->
+<?php echo do_shortcode('[kingfact_breadcrumb title="' . get_the_title() . '" current="Products" home_label="Home" home_url="' . home_url('/') . '"]'); ?>
 
 <!-- Product detail area -->
 <section class="product-detail-area pt-120 pb-90">
@@ -48,6 +33,126 @@
                         </div>
                         
                         <?php
+                        // Product Images Gallery
+                        $product_images = get_post_meta(get_the_ID(), '_product_images', true);
+                        if (!empty($product_images)) :
+                        ?>
+                        <div class="product-images-section mt-40 mb-40">
+                            <h3>Product Images</h3>
+                            <div class="product-gallery">
+                                <div class="row">
+                                    <?php 
+                                    $images = explode(',', $product_images);
+                                    foreach ($images as $image_id) : 
+                                        $image_id = trim($image_id);
+                                        if (!empty($image_id)) :
+                                            $image_url = wp_get_attachment_image_url($image_id, 'medium');
+                                            $image_full = wp_get_attachment_image_url($image_id, 'large');
+                                            if ($image_url) :
+                                    ?>
+                                    <div class="col-lg-4 col-md-6 col-sm-6 mb-20">
+                                        <div class="gallery-item">
+                                            <a href="<?php echo esc_url($image_full); ?>" class="gallery-link" data-lightbox="product-gallery">
+                                                <img src="<?php echo esc_url($image_url); ?>" alt="Product Image" class="img-fluid">
+                                                <div class="gallery-overlay">
+                                                    <i class="fas fa-expand-arrows-alt"></i>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <?php 
+                                            endif;
+                                        endif;
+                                    endforeach; 
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php
+                        // Product Videos
+                        $product_videos = get_post_meta(get_the_ID(), '_product_videos', true);
+                        if (!empty($product_videos)) :
+                        ?>
+                        <div class="product-videos-section mt-40 mb-40">
+                            <h3>Product Videos</h3>
+                            <div class="product-videos">
+                                <div class="row">
+                                    <?php 
+                                    // Handle different line break formats (Windows \r\n, Unix \n, Mac \r)
+                                    $product_videos = str_replace(array("\r\n", "\r"), "\n", $product_videos);
+                                    
+                                    // Split by newlines first
+                                    $video_lines = explode("\n", $product_videos);
+                                    $videos = array();
+                                    
+                                    // For each line, also check if there are multiple URLs separated by spaces
+                                    foreach ($video_lines as $line) {
+                                        $line = trim($line);
+                                        if (!empty($line)) {
+                                            // Check if line contains multiple URLs (space-separated)
+                                            if (preg_match_all('/https?:\/\/[^\s]+/', $line, $matches)) {
+                                                foreach ($matches[0] as $url) {
+                                                    $videos[] = $url;
+                                                }
+                                            } else {
+                                                $videos[] = $line;
+                                            }
+                                        }
+                                    }
+                                    
+                                    $video_count = 0;
+                                    foreach ($videos as $video_url) : 
+                                        $video_url = trim($video_url);
+                                        if (!empty($video_url)) :
+                                            $video_count++;
+                                            
+                                            // Check if it's a YouTube URL
+                                            if (strpos($video_url, 'youtube.com') !== false || strpos($video_url, 'youtu.be') !== false) :
+                                                // Extract video ID
+                                                preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/', $video_url, $matches);
+                                                $video_id = isset($matches[1]) ? $matches[1] : '';
+                                                if ($video_id) :
+                                    ?>
+                                    <div class="col-lg-6 col-md-12 mb-20">
+                                        <div class="video-item">
+                                            <div class="video-wrapper">
+                                                <iframe 
+                                                    src="https://www.youtube.com/embed/<?php echo esc_attr($video_id); ?>" 
+                                                    frameborder="0" 
+                                                    allowfullscreen
+                                                    class="video-iframe">
+                                                </iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php 
+                                                endif;
+                                            else :
+                                                // For other video URLs (Vimeo, direct video files, etc.)
+                                    ?>
+                                    <div class="col-lg-6 col-md-12 mb-20">
+                                        <div class="video-item">
+                                            <div class="video-wrapper">
+                                                <video controls class="video-player">
+                                                    <source src="<?php echo esc_url($video_url); ?>" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php 
+                                            endif;
+                                        endif;
+                                    endforeach; 
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php
                         $product_url = get_post_meta(get_the_ID(), '_product_url', true);
                         $product_link_text = get_post_meta(get_the_ID(), '_product_link_text', true);
                         
@@ -75,7 +180,7 @@
                     <!-- Related Products -->
                     <div class="widget mb-40">
                         <div class="widget-title-box mb-30">
-                            <span class="animate-border"></span>
+                            <!-- <span class="animate-border"></span> -->
                             <h3 class="widget-title">Related Products</h3>
                         </div>
                         <div class="recent-products">
@@ -134,7 +239,7 @@
                     <!-- Contact Widget -->
                     <div class="widget mb-40">
                         <div class="widget-title-box mb-30">
-                            <span class="animate-border"></span>
+                            <!-- <span class="animate-border"></span> -->
                             <h3 class="widget-title">Need Help?</h3>
                         </div>
                         <div class="contact-widget">
@@ -205,6 +310,93 @@
     font-size: 16px;
     line-height: 1.6;
     color: #666;
+}
+
+/* Product Images Gallery Styles */
+.product-images-section h3,
+.product-videos-section h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 10px;
+}
+
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+.gallery-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 124, 186, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-item:hover .gallery-overlay {
+    opacity: 1;
+}
+
+.gallery-overlay i {
+    color: white;
+    font-size: 24px;
+}
+
+/* Product Videos Styles */
+.video-item {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.video-iframe,
+.video-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.video-player {
+    position: relative;
+    padding-bottom: 0;
 }
 
 .product-cta .btn {
@@ -311,6 +503,86 @@
     height: 3px;
     background: #007cba;
 }
+
+/* Simple Lightbox Styles */
+.lightbox-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.lightbox-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.lightbox-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+.lightbox-close:hover {
+    color: #ccc;
+}
 </style>
+
+<!-- Simple Lightbox HTML -->
+<div id="lightbox" class="lightbox-overlay">
+    <span class="lightbox-close">&times;</span>
+    <div class="lightbox-content">
+        <img src="" alt="Product Image">
+    </div>
+</div>
+
+<script>
+jQuery(document).ready(function($) {
+    // Simple lightbox functionality
+    $('.gallery-link').on('click', function(e) {
+        e.preventDefault();
+        var imageSrc = $(this).attr('href');
+        $('#lightbox img').attr('src', imageSrc);
+        $('#lightbox').fadeIn(300);
+    });
+    
+    // Close lightbox
+    $('#lightbox, .lightbox-close').on('click', function() {
+        $('#lightbox').fadeOut(300);
+    });
+    
+    // Prevent closing when clicking on image
+    $('.lightbox-content img').on('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // Close with ESC key
+    $(document).on('keyup', function(e) {
+        if (e.keyCode === 27) {
+            $('#lightbox').fadeOut(300);
+        }
+    });
+});
+</script>
 
 <?php get_footer(); ?>
