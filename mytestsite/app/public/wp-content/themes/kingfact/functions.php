@@ -1528,12 +1528,12 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
                     </div>
                 </div>
             </div>
-            <?php elseif ( '1' === $a['show_button'] && ! empty( $a['button_text'] ) && $a['button_url'] !== '#' ) : ?>
-            <!-- Regular button if less than 6 services or custom URL provided -->
+            <?php elseif ( '1' === $a['show_button'] ) : ?>
+            <!-- Regular "view all services" button -->
             <div class="row">
                 <div class="col-xl-12">
                     <div class="fea-btn text-center">
-                        <a class="b-btn btn-black" href="<?php echo esc_url( $a['button_url'] ); ?>">
+                        <a class="b-btn btn-black" href="<?php echo esc_url( $a['button_url'] !== '#' ? $a['button_url'] : '/services/' ); ?>">
                             <span><?php echo esc_html( $a['button_text'] ); ?></span>
                         </a>
                     </div>
@@ -2150,12 +2150,12 @@ function kingfact_products_display_shortcode( $atts, $content = null ) {
                     </div>
                 </div>
             </div>
-            <?php elseif ( '1' === $a['show_button'] && ! empty( $a['button_text'] ) && $a['button_url'] !== '#' ) : ?>
-            <!-- Regular button if less than 6 products or custom URL provided -->
+            <?php elseif ( '1' === $a['show_button'] ) : ?>
+            <!-- Regular "view all products" button -->
             <div class="row">
                 <div class="col-xl-12">
                     <div class="fea-btn text-center">
-                        <a class="b-btn btn-black" href="<?php echo esc_url( $a['button_url'] ); ?>">
+                        <a class="b-btn btn-black" href="<?php echo esc_url( $a['button_url'] !== '#' ? $a['button_url'] : '/products/' ); ?>">
                             <span><?php echo esc_html( $a['button_text'] ); ?></span>
                         </a>
                     </div>
