@@ -1,7 +1,9 @@
 <?php
 // Enqueue assets only when the page template 'page-home.php' is used
 function theme_enqueue_home_assets() {
-    if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'front-home.php' ) ) {
+    if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' )
+        || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_404()
+        ){
 
         $base = get_template_directory_uri() . '/assets/';
 
@@ -86,7 +88,7 @@ add_action( 'wp_enqueue_scripts', 'theme_enqueue_home_assets' );
 
 // Debug: print comment in <head> indicating whether homepage enqueue condition is met
 add_action( 'wp_head', function() {
-    if ( is_front_page() || is_page_template( 'page-home.php' ) || is_page_template( 'front-home.php' ) ) {
+    if ( is_front_page() || is_page_template( 'page-home.php' ) || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' ) || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_404() ) {
         echo "\n<!-- kingfact: enqueue condition = TRUE -->\n";
     } else {
         echo "\n<!-- kingfact: enqueue condition = FALSE -->\n";
@@ -862,3 +864,1078 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
         <?php
     }
 }
+
+// Register features_section shortcode so [features_section] works in posts/pages
+function kingfact_features_shortcode( $atts, $content = null ) {
+    $base = get_template_directory_uri() . '/assets/';
+
+    $defaults = array(
+        'title'    => 'Explore Features',
+        'subtitle' => 'what we do',
+        'first_paragraph' => 'But I must explain to you how all this mistaken is denouncing pleasure and praising pain was borners will give you a complete account of the system and expound the actual teachings',
+        'bg'       => 'img/features/fea-bg.jpg',
+        'btn_text' => 'read more',
+        'btn_url'  => '#',
+        'img1'     => 'img/features/who-01.jpg',
+        'img2'     => 'img/features/who-02.jpg',
+        // optional third feature
+        'title2'    => 'Technology Buildup',
+        'paragraph2' => "Avoids pleasure itself, because it is pleasure because those who do not know how",
+        'title3'    => 'Awards & Accolades',
+        'paragraph3' => "Avoids pleasure itself, because it is pleasure because those who do not know how",
+        'allow_html' => '0',
+    );
+
+    $a = shortcode_atts( $defaults, $atts, 'features_section' );
+
+    // Helper function to determine if URL is full or relative
+    $get_image_url = function( $image_path ) use ( $base ) {
+        // Debug: Log what we're processing (visible in HTML source when debugging)
+        if ( WP_DEBUG ) {
+            error_log( "Processing image path: " . $image_path );
+        }
+        
+        // If it starts with http:// or https:// or //, it's a full URL
+        if ( preg_match( '/^(https?:)?\/\//', $image_path ) ) {
+            if ( WP_DEBUG ) {
+                error_log( "Detected full URL: " . $image_path );
+            }
+            return $image_path;
+        }
+        
+        // If it starts with /, it's an absolute path from site root
+        if ( strpos( $image_path, '/' ) === 0 ) {
+            $url = home_url( $image_path );
+            if ( WP_DEBUG ) {
+                error_log( "Converted absolute path to: " . $url );
+            }
+            return $url;
+        }
+        
+        // Otherwise treat as relative to theme assets
+        $url = $base . ltrim( $image_path, '/' );
+        if ( WP_DEBUG ) {
+            error_log( "Using theme asset path: " . $url );
+        }
+        return $url;
+    };
+
+    $maybe_html = function( $text ) use ( $a ) {
+        return ( '1' === (string) $a['allow_html'] ) ? wp_kses_post( $text ) : esc_html( $text );
+    };
+
+    ob_start();
+    ?>
+    <div class="features-area pt-120 pb-90" style="background-image:url(<?php echo esc_url( $base . ltrim( $a['bg'], '/' ) ); ?>)">
+      <div class="container">
+        <div class="row">
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="section-title mb-30">
+              <span><?php echo esc_html( $a['subtitle'] ); ?></span>
+              <h1><?php echo esc_html( $a['title'] ); ?></h1>
+              <div class="mb-20"></div>
+              <p><?php echo $content ? $maybe_html( $content ) : $maybe_html( $a['first_paragraph'] ); ?></p>
+              <div class="fea-btn mt-30">
+                <a class="b-btn btn-black" href="<?php echo esc_url( $a['btn_url'] ); ?>">
+                  <span><?php echo esc_html( $a['btn_text'] ); ?></span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="b-features text-center mb-30">
+              <div class="b-fea-img">
+                <img src="<?php echo esc_url( $get_image_url( $a['img1'] ) ); ?>" alt="<?php echo esc_attr( $a['title2'] ); ?>">
+              </div>
+              <div class="b-fea-content">
+                <h3><?php echo esc_html( $a['title2'] ); ?></h3>
+                <p><?php echo $maybe_html( $a['paragraph2'] ); ?></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="b-features text-center mb-30">
+              <div class="b-fea-img">
+                <img src="<?php echo esc_url( $get_image_url( $a['img2'] ) ); ?>" alt="<?php echo esc_attr( $a['title3'] ); ?>">
+              </div>
+              <div class="b-fea-content">
+                <h3><?php echo esc_html( $a['title3'] ); ?></h3>
+                <p><?php echo $maybe_html( $a['paragraph3'] ); ?></p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'features_section', 'kingfact_features_shortcode' );
+
+// Shortcode: breadcrumb area with configurable background and labels
+function kingfact_breadcrumb_shortcode( $atts ) {
+    $base = get_template_directory_uri() . '/assets/';
+
+    $a = shortcode_atts( array(
+        'title'      => 'Our Services',
+        'home_label' => 'home',
+        'home_url'   => home_url('/'),
+        'current'    => 'Services',
+        'bg'         => 'img/bg/bg-9.jpg',
+        'class'      => '',
+    ), $atts, 'kingfact_breadcrumb' );
+
+    ob_start();
+    ?>
+    <div class="breadcrumb-area pt-245 pb-255 <?php echo esc_attr( $a['class'] ); ?>" style="background-image:url(<?php echo esc_url( $base . ltrim( $a['bg'], '/' ) ); ?>)">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="breadcrumb-text text-center">
+                        <h1><?php echo esc_html( $a['title'] ); ?></h1>
+                        <ul class="breadcrumb-menu">
+                            <li><a href="<?php echo esc_url( $a['home_url'] ); ?>"><?php echo esc_html( $a['home_label'] ); ?></a></li>
+                            <li><span><?php echo esc_html( $a['current'] ); ?></span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'kingfact_breadcrumb', 'kingfact_breadcrumb_shortcode' );
+
+// 1) Register 'service' CPT for Services/Products
+function kingfact_register_service_cpt() {
+    $labels = array(
+        'name'               => __( 'Services', 'kingfact' ),
+        'singular_name'      => __( 'Service', 'kingfact' ),
+        'add_new'            => __( 'Add New', 'kingfact' ),
+        'add_new_item'       => __( 'Add New Service', 'kingfact' ),
+        'edit_item'          => __( 'Edit Service', 'kingfact' ),
+        'new_item'           => __( 'New Service', 'kingfact' ),
+        'view_item'          => __( 'View Service', 'kingfact' ),
+        'search_items'       => __( 'Search Services', 'kingfact' ),
+        'not_found'          => __( 'No services found', 'kingfact' ),
+        'not_found_in_trash' => __( 'No services found in Trash', 'kingfact' ),
+        'all_items'          => __( 'All Services', 'kingfact' ),
+        'menu_name'          => __( 'Services', 'kingfact' ),
+    );
+
+    $args = array(
+        'labels'              => $labels,
+        'public'              => true,
+        'publicly_queryable'  => true,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'query_var'           => true,
+        'rewrite'             => array( 
+            'slug' => 'service',
+            'with_front' => false 
+        ),
+        'capability_type'     => 'post',
+        'has_archive'         => true,
+        'hierarchical'        => false,
+        'menu_position'       => 20,
+        'menu_icon'           => 'dashicons-hammer',
+        'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'page-attributes' ),
+        'show_in_rest'        => true, // Enable Gutenberg editor
+    );
+
+    register_post_type( 'service', $args );
+}
+add_action( 'init', 'kingfact_register_service_cpt' );
+
+// Flush rewrite rules on theme activation to ensure service URLs work
+function kingfact_flush_rewrite_rules() {
+    kingfact_register_service_cpt();
+    flush_rewrite_rules();
+}
+add_action( 'after_switch_theme', 'kingfact_flush_rewrite_rules' );
+
+// Manual function to flush rewrite rules if needed
+function kingfact_manual_flush_rewrite_rules() {
+    if ( current_user_can( 'manage_options' ) && isset( $_GET['flush_service_rules'] ) ) {
+        kingfact_register_service_cpt();
+        flush_rewrite_rules();
+        
+        echo '<div style="padding: 20px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; margin: 20px; border-radius: 5px;">';
+        echo '<h2>✅ Rewrite Rules Flushed Successfully!</h2>';
+        echo '<p>Service URLs should now work properly.</p>';
+        echo '<p><strong>Test your services:</strong></p>';
+        echo '<ul>';
+        
+        $services = get_posts( array( 'post_type' => 'service', 'numberposts' => -1, 'post_status' => 'publish' ) );
+        foreach ( $services as $service ) {
+            $url = get_permalink( $service->ID );
+            echo '<li><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $service->post_title ) . '</a> - ' . esc_html( $url ) . '</li>';
+        }
+        echo '</ul>';
+        echo '<p><a href="' . admin_url( 'edit.php?post_type=service' ) . '">← Back to Services</a></p>';
+        echo '</div>';
+        exit;
+    }
+}
+add_action( 'init', 'kingfact_manual_flush_rewrite_rules' );
+
+// Add admin notice for flushing rules
+add_action( 'admin_notices', function() {
+    if ( isset( $_GET['rules_flushed'] ) ) {
+        echo '<div class="notice notice-success is-dismissible"><p>Service URL rules have been flushed successfully!</p></div>';
+    }
+} );
+
+// 2) Add meta box for service extra fields
+function kingfact_service_meta_boxes() {
+    add_meta_box( 
+        'kingfact_service_fields', 
+        'Service Settings', 
+        'kingfact_service_meta_box_cb', 
+        'service', 
+        'normal', 
+        'high' 
+    );
+}
+add_action( 'add_meta_boxes', 'kingfact_service_meta_boxes' );
+
+function kingfact_service_meta_box_cb( $post ) {
+    wp_nonce_field( 'kingfact_service_save', 'kingfact_service_nonce' );
+
+    $service_url = get_post_meta( $post->ID, '_service_url', true );
+    $service_link_text = get_post_meta( $post->ID, '_service_link_text', true );
+    $service_icon = get_post_meta( $post->ID, '_service_icon', true );
+
+    ?>
+    <table class="form-table">
+        <tr>
+            <th><label for="service_url"><strong>Service Link URL</strong></label></th>
+            <td>
+                <input type="url" id="service_url" name="service_url" value="<?php echo esc_attr( $service_url ); ?>" class="regular-text" />
+                <p class="description">Link to service details page or external URL</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="service_link_text"><strong>Link Text</strong></label></th>
+            <td>
+                <input type="text" id="service_link_text" name="service_link_text" value="<?php echo esc_attr( $service_link_text ); ?>" class="regular-text" />
+                <p class="description">Text for the "read more" link (default: "read more")</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="service_icon"><strong>Service Icon</strong></label></th>
+            <td>
+                <input type="text" id="service_icon" name="service_icon" value="<?php echo esc_attr( $service_icon ); ?>" class="regular-text" />
+                <p class="description">FontAwesome icon class (e.g., "fas fa-hammer", "fas fa-building")</p>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <h4>Instructions:</h4>
+        <ul>
+            <li><strong>Title:</strong> Use the main title field above for the service name</li>
+            <li><strong>Description:</strong> Use the main editor for the service description</li>
+            <li><strong>Featured Image:</strong> Set the service image using the Featured Image box</li>
+            <li><strong>Excerpt:</strong> Use excerpt for short description (will fallback to description if empty)</li>
+            <li><strong>Order:</strong> Use the Order field in Page Attributes to control display order</li>
+        </ul>
+    </div>
+    <?php
+}
+
+function kingfact_service_save( $post_id ) {
+    // Security checks
+    if ( ! isset( $_POST['kingfact_service_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['kingfact_service_nonce'], 'kingfact_service_save' ) ) return;
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+    if ( ! current_user_can( 'edit_post', $post_id ) ) return;
+
+    // Save custom fields
+    $fields = array(
+        'service_url' => '_service_url',
+        'service_link_text' => '_service_link_text',
+        'service_icon' => '_service_icon',
+    );
+
+    foreach ( $fields as $input => $meta_key ) {
+        if ( isset( $_POST[ $input ] ) ) {
+            $value = wp_unslash( $_POST[ $input ] );
+            if ( $input === 'service_url' ) {
+                update_post_meta( $post_id, $meta_key, esc_url_raw( $value ) );
+            } else {
+                update_post_meta( $post_id, $meta_key, sanitize_text_field( $value ) );
+            }
+        } else {
+            delete_post_meta( $post_id, $meta_key );
+        }
+    }
+}
+add_action( 'save_post', 'kingfact_service_save' );
+
+// 3) Admin columns for Service CPT
+add_filter( 'manage_edit-service_columns', 'kingfact_service_manage_columns' );
+function kingfact_service_manage_columns( $columns ) {
+    $new = array();
+    $new['cb'] = $columns['cb'];
+    $new['thumbnail'] = __( 'Image', 'kingfact' );
+    $new['title'] = __( 'Service Name', 'kingfact' );
+    $new['description'] = __( 'Description', 'kingfact' );
+    $new['service_url'] = __( 'Service URL', 'kingfact' );
+    $new['menu_order'] = __( 'Order', 'kingfact' );
+    $new['date'] = $columns['date'];
+    return $new;
+}
+
+add_action( 'manage_service_posts_custom_column', 'kingfact_service_custom_column', 10, 2 );
+function kingfact_service_custom_column( $column, $post_id ) {
+    switch ( $column ) {
+        case 'thumbnail':
+            $thumb_id = get_post_thumbnail_id( $post_id );
+            if ( $thumb_id ) {
+                echo wp_get_attachment_image( $thumb_id, array( 80, 80 ) );
+            } else {
+                echo '<span style="color:#999;">' . __( 'No image', 'kingfact' ) . '</span>';
+            }
+            break;
+
+        case 'description':
+            $excerpt = get_the_excerpt( $post_id );
+            if ( $excerpt ) {
+                echo wp_trim_words( $excerpt, 10, '...' );
+            } else {
+                $content = get_post_field( 'post_content', $post_id );
+                echo wp_trim_words( strip_tags( $content ), 10, '...' );
+            }
+            break;
+
+        case 'service_url':
+            $url = get_post_meta( $post_id, '_service_url', true );
+            if ( $url ) {
+                echo '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $url ) . '</a>';
+            } else {
+                echo '<span style="color:#999;">' . __( '—', 'kingfact' ) . '</span>';
+            }
+            break;
+
+        case 'menu_order':
+            $order = get_post_field( 'menu_order', $post_id );
+            echo intval( $order );
+            break;
+    }
+}
+
+// Make menu_order column sortable
+add_filter( 'manage_edit-service_sortable_columns', 'kingfact_service_sortable_columns' );
+function kingfact_service_sortable_columns( $columns ) {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+}
+
+// Adjust query when sorting by menu_order for services
+add_action( 'pre_get_posts', 'kingfact_service_orderby_menu_order' );
+function kingfact_service_orderby_menu_order( $query ) {
+    if ( ! is_admin() ) return;
+    $orderby = $query->get( 'orderby' );
+    $post_type = $query->get( 'post_type' );
+
+    if ( 'service' === $post_type ) {
+        if ( 'menu_order' === $orderby ) {
+            $query->set( 'orderby', 'menu_order' );
+            $query->set( 'order', 'ASC' );
+        }
+    }
+}
+
+// Admin: enqueue sortable script for Services list and localize nonce/ajax
+add_action( 'admin_enqueue_scripts', 'kingfact_enqueue_service_admin_scripts' );
+function kingfact_enqueue_service_admin_scripts( $hook ) {
+    global $post_type;
+
+    // Only enqueue on edit.php for service post type
+    if ( 'edit.php' !== $hook || 'service' !== ( isset( $_GET['post_type'] ) ? $_GET['post_type'] : $post_type ) ) {
+        return;
+    }
+
+    // jQuery UI sortable is included with WP
+    wp_enqueue_script( 'jquery-ui-sortable' );
+
+    // Small admin script for services
+    $handle = 'kingfact-service-admin';
+    wp_register_script( $handle, false, array( 'jquery', 'jquery-ui-sortable' ), '1.0', true );
+
+    // Use a nowdoc so PHP doesn't try to interpolate JS $ variables
+    $inline = <<<'JS'
+(function($){
+    $(function(){
+        var tbody = $('.wp-list-table.posts tbody');
+        if (!tbody.length) return;
+
+        tbody.sortable({
+            items: 'tr[id^=post-]',
+            axis: 'y',
+            cursor: 'move',
+            helper: function(e, tr){
+                var originals = tr.children();
+                var helper = tr.clone();
+                helper.children().each(function(index){
+                    // Set helper cell widths to match
+                    $(this).width(originals.eq(index).width());
+                });
+                return helper;
+            },
+            update: function(event, ui){
+                var order = [];
+                tbody.find('tr[id^=post-]').each(function(i){
+                    var id = $(this).attr('id').replace('post-','');
+                    order.push(parseInt(id,10));
+                });
+
+                $.post(ajaxurl, {
+                    action: 'kingfact_update_service_order',
+                    nonce: '%s',
+                    order: order
+                }, function(resp){
+                    if (resp && resp.success) {
+                        // optional: flash a notice
+                        $('#message.updated').remove();
+                        $('<div id="message" class="updated notice is-dismissible"><p>Service order saved.</p></div>').insertBefore('.wrap');
+                    } else {
+                        alert('Could not save service order.');
+                    }
+                }, 'json');
+            }
+        });
+    });
+})(jQuery);
+JS;
+
+    $nonce = wp_create_nonce( 'kingfact_service_order' );
+    $inline = sprintf( $inline, esc_js( $nonce ) );
+
+    wp_add_inline_script( $handle, $inline );
+    wp_enqueue_script( $handle );
+}
+
+// AJAX handler to save the menu_order for services
+add_action( 'wp_ajax_kingfact_update_service_order', 'kingfact_update_service_order' );
+function kingfact_update_service_order() {
+    if ( ! current_user_can( 'edit_posts' ) ) {
+        wp_send_json_error( 'no_permission' );
+    }
+
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'kingfact_service_order' ) ) {
+        wp_send_json_error( 'bad_nonce' );
+    }
+
+    if ( ! isset( $_POST['order'] ) || ! is_array( $_POST['order'] ) ) {
+        wp_send_json_error( 'bad_input' );
+    }
+
+    $order = array_map( 'absint', $_POST['order'] );
+
+    foreach ( $order as $position => $post_id ) {
+        // double-check post type
+        $post = get_post( $post_id );
+        if ( ! $post || 'service' !== $post->post_type ) continue;
+
+        // Update menu_order (0-based position)
+        wp_update_post( array( 'ID' => $post_id, 'menu_order' => $position ) );
+    }
+
+    wp_send_json_success();
+}
+
+// ========================================
+// PRODUCTS CUSTOM POST TYPE (Similar to Services)
+// ========================================
+
+// 1) Register 'product' CPT for Products
+function kingfact_register_product_cpt() {
+    $labels = array(
+        'name'               => __( 'Products', 'kingfact' ),
+        'singular_name'      => __( 'Product', 'kingfact' ),
+        'add_new'            => __( 'Add New', 'kingfact' ),
+        'add_new_item'       => __( 'Add New Product', 'kingfact' ),
+        'edit_item'          => __( 'Edit Product', 'kingfact' ),
+        'new_item'           => __( 'New Product', 'kingfact' ),
+        'view_item'          => __( 'View Product', 'kingfact' ),
+        'search_items'       => __( 'Search Products', 'kingfact' ),
+        'not_found'          => __( 'No products found', 'kingfact' ),
+        'not_found_in_trash' => __( 'No products found in Trash', 'kingfact' ),
+        'all_items'          => __( 'All Products', 'kingfact' ),
+        'menu_name'          => __( 'Products', 'kingfact' ),
+    );
+
+    $args = array(
+        'labels'              => $labels,
+        'public'              => true,
+        'publicly_queryable'  => true,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'query_var'           => true,
+        'rewrite'             => array( 
+            'slug' => 'product',
+            'with_front' => false 
+        ),
+        'capability_type'     => 'post',
+        'has_archive'         => true,
+        'hierarchical'        => false,
+        'menu_position'       => 21,
+        'menu_icon'           => 'dashicons-products',
+        'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'page-attributes' ),
+        'show_in_rest'        => true, // Enable Gutenberg editor
+    );
+
+    register_post_type( 'product', $args );
+}
+add_action( 'init', 'kingfact_register_product_cpt' );
+
+// Flush rewrite rules for products
+function kingfact_flush_product_rewrite_rules() {
+    kingfact_register_product_cpt();
+    flush_rewrite_rules();
+}
+add_action( 'after_switch_theme', 'kingfact_flush_product_rewrite_rules' );
+
+// 2) Add meta box for product extra fields
+function kingfact_product_meta_boxes() {
+    add_meta_box( 
+        'kingfact_product_fields', 
+        'Product Settings', 
+        'kingfact_product_meta_box_cb', 
+        'product', 
+        'normal', 
+        'high' 
+    );
+}
+add_action( 'add_meta_boxes', 'kingfact_product_meta_boxes' );
+
+function kingfact_product_meta_box_cb( $post ) {
+    wp_nonce_field( 'kingfact_product_save', 'kingfact_product_nonce' );
+
+    $product_url = get_post_meta( $post->ID, '_product_url', true );
+    $product_link_text = get_post_meta( $post->ID, '_product_link_text', true );
+    $product_icon = get_post_meta( $post->ID, '_product_icon', true );
+    $product_price = get_post_meta( $post->ID, '_product_price', true );
+
+    ?>
+    <table class="form-table">
+        <tr>
+            <th><label for="product_price"><strong>Product Price</strong></label></th>
+            <td>
+                <input type="text" id="product_price" name="product_price" value="<?php echo esc_attr( $product_price ); ?>" class="regular-text" />
+                <p class="description">Product price (e.g., "$99", "Contact for Price")</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="product_url"><strong>Product Link URL</strong></label></th>
+            <td>
+                <input type="url" id="product_url" name="product_url" value="<?php echo esc_attr( $product_url ); ?>" class="regular-text" />
+                <p class="description">Link to product details page or external URL</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="product_link_text"><strong>Link Text</strong></label></th>
+            <td>
+                <input type="text" id="product_link_text" name="product_link_text" value="<?php echo esc_attr( $product_link_text ); ?>" class="regular-text" />
+                <p class="description">Text for the "read more" link (default: "view details")</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="product_icon"><strong>Product Icon</strong></label></th>
+            <td>
+                <input type="text" id="product_icon" name="product_icon" value="<?php echo esc_attr( $product_icon ); ?>" class="regular-text" />
+                <p class="description">FontAwesome icon class (e.g., "fas fa-box", "fas fa-laptop")</p>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <h4>Instructions:</h4>
+        <ul>
+            <li><strong>Title:</strong> Use the main title field above for the product name</li>
+            <li><strong>Description:</strong> Use the main editor for the product description</li>
+            <li><strong>Featured Image:</strong> Set the product image using the Featured Image box</li>
+            <li><strong>Excerpt:</strong> Use excerpt for short description (will fallback to description if empty)</li>
+            <li><strong>Order:</strong> Use the Order field in Page Attributes to control display order</li>
+        </ul>
+    </div>
+    <?php
+}
+
+function kingfact_product_save( $post_id ) {
+    // Security checks
+    if ( ! isset( $_POST['kingfact_product_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['kingfact_product_nonce'], 'kingfact_product_save' ) ) return;
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+    if ( ! current_user_can( 'edit_post', $post_id ) ) return;
+
+    // Save custom fields
+    $fields = array(
+        'product_url' => '_product_url',
+        'product_link_text' => '_product_link_text',
+        'product_icon' => '_product_icon',
+        'product_price' => '_product_price',
+    );
+
+    foreach ( $fields as $input => $meta_key ) {
+        if ( isset( $_POST[ $input ] ) ) {
+            $value = wp_unslash( $_POST[ $input ] );
+            if ( $input === 'product_url' ) {
+                update_post_meta( $post_id, $meta_key, esc_url_raw( $value ) );
+            } else {
+                update_post_meta( $post_id, $meta_key, sanitize_text_field( $value ) );
+            }
+        } else {
+            delete_post_meta( $post_id, $meta_key );
+        }
+    }
+}
+add_action( 'save_post', 'kingfact_product_save' );
+
+// 3) Admin columns for Product CPT
+add_filter( 'manage_edit-product_columns', 'kingfact_product_manage_columns' );
+function kingfact_product_manage_columns( $columns ) {
+    $new = array();
+    $new['cb'] = $columns['cb'];
+    $new['thumbnail'] = __( 'Image', 'kingfact' );
+    $new['title'] = __( 'Product Name', 'kingfact' );
+    $new['description'] = __( 'Description', 'kingfact' );
+    $new['product_price'] = __( 'Price', 'kingfact' );
+    $new['menu_order'] = __( 'Order', 'kingfact' );
+    $new['date'] = $columns['date'];
+    return $new;
+}
+
+add_action( 'manage_product_posts_custom_column', 'kingfact_product_custom_column', 10, 2 );
+function kingfact_product_custom_column( $column, $post_id ) {
+    switch ( $column ) {
+        case 'thumbnail':
+            $thumb_id = get_post_thumbnail_id( $post_id );
+            if ( $thumb_id ) {
+                echo wp_get_attachment_image( $thumb_id, array( 80, 80 ) );
+            } else {
+                echo '<span style="color:#999;">' . __( 'No image', 'kingfact' ) . '</span>';
+            }
+            break;
+
+        case 'description':
+            $excerpt = get_the_excerpt( $post_id );
+            if ( $excerpt ) {
+                echo wp_trim_words( $excerpt, 10, '...' );
+            } else {
+                $content = get_post_field( 'post_content', $post_id );
+                echo wp_trim_words( strip_tags( $content ), 10, '...' );
+            }
+            break;
+
+        case 'product_price':
+            $price = get_post_meta( $post_id, '_product_price', true );
+            if ( $price ) {
+                echo '<strong>' . esc_html( $price ) . '</strong>';
+            } else {
+                echo '<span style="color:#999;">' . __( '—', 'kingfact' ) . '</span>';
+            }
+            break;
+
+        case 'menu_order':
+            $order = get_post_field( 'menu_order', $post_id );
+            echo intval( $order );
+            break;
+    }
+}
+
+// Make menu_order column sortable for products
+add_filter( 'manage_edit-product_sortable_columns', 'kingfact_product_sortable_columns' );
+function kingfact_product_sortable_columns( $columns ) {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+}
+
+// Adjust query when sorting by menu_order for products
+add_action( 'pre_get_posts', 'kingfact_product_orderby_menu_order' );
+function kingfact_product_orderby_menu_order( $query ) {
+    if ( ! is_admin() ) return;
+    $orderby = $query->get( 'orderby' );
+    $post_type = $query->get( 'post_type' );
+
+    if ( 'product' === $post_type ) {
+        if ( 'menu_order' === $orderby ) {
+            $query->set( 'orderby', 'menu_order' );
+            $query->set( 'order', 'ASC' );
+        }
+    }
+}
+
+// Admin: enqueue sortable script for Products list
+add_action( 'admin_enqueue_scripts', 'kingfact_enqueue_product_admin_scripts' );
+function kingfact_enqueue_product_admin_scripts( $hook ) {
+    global $post_type;
+
+    // Only enqueue on edit.php for product post type
+    if ( 'edit.php' !== $hook || 'product' !== ( isset( $_GET['post_type'] ) ? $_GET['post_type'] : $post_type ) ) {
+        return;
+    }
+
+    // jQuery UI sortable is included with WP
+    wp_enqueue_script( 'jquery-ui-sortable' );
+
+    // Small admin script for products
+    $handle = 'kingfact-product-admin';
+    wp_register_script( $handle, false, array( 'jquery', 'jquery-ui-sortable' ), '1.0', true );
+
+    $inline = <<<'JS'
+(function($){
+    $(function(){
+        var tbody = $('.wp-list-table.posts tbody');
+        if (!tbody.length) return;
+
+        tbody.sortable({
+           
+            items: 'tr[id^=post-]',
+            axis: 'y',
+            cursor: 'move',
+            helper: function(e, tr){
+                var originals = tr.children();
+                var helper = tr.clone();
+                helper.children().each(function(index){
+                    // Set helper cell widths to match
+                    $(this).width(originals.eq(index).width());
+                });
+                return helper;
+            },
+            update: function(event, ui){
+                var order = [];
+                tbody.find('tr[id^=post-]').each(function(i){
+                    var id = $(this).attr('id').replace('post-','');
+                    order.push(parseInt(id,10));
+                });
+
+                $.post(ajaxurl, {
+                    action: 'kingfact_update_product_order',
+                    nonce: '%s',
+                    order: order
+                }, function(resp){
+                    if (resp && resp.success) {
+                        $('#message.updated').remove();
+                        $('<div id="message" class="updated notice is-dismissible"><p>Product order saved.</p></div>').insertBefore('.wrap');
+                    } else {
+                        alert('Could not save product order.');
+                    }
+                }, 'json');
+            }
+        });
+    });
+})(jQuery);
+JS;
+
+    $nonce = wp_create_nonce( 'kingfact_product_order' );
+    $inline = sprintf( $inline, esc_js( $nonce ) );
+
+    wp_add_inline_script( $handle, $inline );
+    wp_enqueue_script( $handle );
+}
+
+// AJAX handler to save the menu_order for products
+add_action( 'wp_ajax_kingfact_update_product_order', 'kingfact_update_product_order' );
+function kingfact_update_product_order() {
+    if ( ! current_user_can( 'edit_posts' ) ) {
+        wp_send_json_error( 'no_permission' );
+    }
+
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'kingfact_product_order' ) ) {
+        wp_send_json_error( 'bad_nonce' );
+    }
+
+    if ( ! isset( $_POST['order'] ) || ! is_array( $_POST['order'] ) ) {
+        wp_send_json_error( 'bad_input' );
+    }
+
+    $order = array_map( 'absint', $_POST['order'] );
+
+    foreach ( $order as $position => $post_id ) {
+        $post = get_post( $post_id );
+        if ( ! $post || 'product' !== $post->post_type ) continue;
+
+        wp_update_post( array( 'ID' => $post_id, 'menu_order' => $position ) );
+    }
+
+    wp_send_json_success();
+}
+
+// 4) Products Display Shortcode
+function kingfact_products_display_shortcode( $atts, $content = null ) {
+    $base = get_template_directory_uri() . '/assets/';
+
+    $defaults = array(
+        // Layout settings
+        'columns'           => '3', // 2, 3, 4, 6
+        'posts_per_page'    => -1,  // -1 for all, or specific number
+        'orderby'           => 'menu_order',
+        'order'             => 'ASC',
+        'padding_top'       => 'pt-130',
+        'padding_bottom'    => 'pb-130',
+        'class'             => '',
+        
+        // Section title
+        'show_title'        => '0',
+        'section_title'     => 'Our Products',
+        'section_subtitle'  => 'what we offer',
+        
+        // Bottom button
+        'show_button'       => '1',
+        'button_text'       => 'view all products',
+        'button_url'        => '#',
+        
+        // Filter options
+        'include_ids'       => '', // Comma-separated post IDs
+        'exclude_ids'       => '', // Comma-separated post IDs
+        'category'          => '', // If you add categories later
+    );
+
+    $a = shortcode_atts( $defaults, $atts, 'products_display' );
+
+    // Calculate column classes
+    $col_class = 'col-xl-4 col-lg-4 col-md-6'; // default 3 columns
+    switch ( $a['columns'] ) {
+        case '2':
+            $col_class = 'col-xl-6 col-lg-6 col-md-6';
+            break;
+        case '4':
+            $col_class = 'col-xl-3 col-lg-3 col-md-6';
+            break;
+        case '6':
+            $col_class = 'col-xl-2 col-lg-2 col-md-4';
+            break;
+    }
+
+    // Query arguments
+    $query_args = array(
+        'post_type'      => 'product',
+        'posts_per_page' => intval( $a['posts_per_page'] ),
+        'orderby'        => $a['orderby'],
+        'order'          => $a['order'],
+        'post_status'    => 'publish',
+    );
+
+    // Handle include/exclude IDs
+    if ( ! empty( $a['include_ids'] ) ) {
+        $include_ids = array_map( 'intval', explode( ',', $a['include_ids'] ) );
+        $query_args['post__in'] = $include_ids;
+    }
+
+    if ( ! empty( $a['exclude_ids'] ) ) {
+        $exclude_ids = array_map( 'intval', explode( ',', $a['exclude_ids'] ) );
+        $query_args['post__not_in'] = $exclude_ids;
+    }
+
+    // Get products
+    $products_query = new WP_Query( $query_args );
+
+    if ( ! $products_query->have_posts() ) {
+        wp_reset_postdata();
+        
+        $debug_info = '<div class="no-products" style="padding: 20px; background: #f9f9f9; margin: 20px 0;">';
+        $debug_info .= '<h4>No products found</h4>';
+        $debug_info .= '<p><strong>Please make sure you have:</strong></p>';
+        $debug_info .= '<ol><li>Created products in WordPress Admin → Products</li>';
+        $debug_info .= '<li>Published the products (not saved as drafts)</li>';
+        $debug_info .= '<li>Added featured images and content</li></ol>';
+        $debug_info .= '</div>';
+        
+        return $debug_info;
+    }
+
+    ob_start();
+    ?>
+    <div class="products-area <?php echo esc_attr( $a['padding_top'] . ' ' . $a['padding_bottom'] . ' ' . $a['class'] ); ?>">
+        <div class="container">
+            
+            <?php if ( '1' === $a['show_title'] ) : ?>
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="section-title text-center mb-70">
+                        <span><?php echo esc_html( $a['section_subtitle'] ); ?></span>
+                        <h2><?php echo esc_html( $a['section_title'] ); ?></h2>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <div class="row" id="products-container">
+                <?php 
+                $product_count = 0;
+                $total_products = $products_query->found_posts;
+                while ( $products_query->have_posts() ) : $products_query->the_post(); ?>
+                <?php
+                    $product_count++;
+                    $product_id = get_the_ID();
+                    $product_url = get_post_meta( $product_id, '_product_url', true );
+                    $product_link_text = get_post_meta( $product_id, '_product_link_text', true );
+                    $product_icon = get_post_meta( $product_id, '_product_icon', true );
+                    $product_price = get_post_meta( $product_id, '_product_price', true );
+                    
+                    // Always use product detail page permalink for read more
+                    $product_detail_url = get_permalink( $product_id );
+                    
+                    // Fallback link text
+                    if ( empty( $product_link_text ) ) {
+                        $product_link_text = 'view details';
+                    }
+                    
+                    // Get description (excerpt or content)
+                    $description = get_the_excerpt();
+                    if ( empty( $description ) ) {
+                        $description = wp_trim_words( get_the_content(), 20, '...' );
+                    }
+                    
+                    // Add class to hide products after the 6th one
+                    $hide_class = $product_count > 6 ? 'product-hidden' : '';
+                ?>
+                
+                <div class="<?php echo esc_attr( $col_class ); ?> product-item <?php echo esc_attr( $hide_class ); ?>">
+                    <div class="b-products mb-30" style="border: 1px solid #ddd; padding: 20px; background: #fff;">
+                        <?php if ( has_post_thumbnail() ) : ?>
+                        <div class="b-products-img" style="margin-bottom: 15px;">
+                            <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title(), 'style' => 'width: 100%; height: auto; max-width: 100%;' ) ); ?>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="b-products-content">
+                            <h3 style="margin-bottom: 10px; color: #333;">
+                                <?php if ( ! empty( $product_icon ) ) : ?>
+                                <i class="<?php echo esc_attr( $product_icon ); ?>" style="margin-right: 8px;"></i> 
+                                <?php endif; ?>
+                                <a href="<?php echo esc_url( $product_detail_url ); ?>" style="text-decoration: none; color: #333;">
+                                    <?php the_title(); ?>
+                                </a>
+                            </h3>
+                            
+                            <?php if ( ! empty( $product_price ) ) : ?>
+                            <div class="product-price" style="margin-bottom: 10px;">
+                                <span style="font-size: 18px; font-weight: bold; color: #e74c3c;"><?php echo esc_html( $product_price ); ?></span>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <?php if ( ! empty( $description ) ) : ?>
+                            <p style="margin-bottom: 15px; color: #666;"><?php echo esc_html( $description ); ?></p>
+                            <?php endif; ?>
+                            
+                            <div class="pv-link">
+                                <a href="<?php echo esc_url( $product_detail_url ); ?>" style="color: #007cba; text-decoration: none; font-weight: bold;"><?php echo esc_html( $product_link_text ); ?> →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <?php endwhile; ?>
+                <?php wp_reset_postdata(); ?>
+            </div>
+            
+            <?php if ( $total_products > 6 ) : ?>
+            <!-- Show More / Show Less Button -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="fea-btn text-center">
+                        <button class="b-btn btn-black" id="toggle-products-btn" onclick="toggleProducts()">
+                            <span id="product-btn-text">View All Products (<?php echo ($total_products - 6); ?> more)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <?php elseif ( '1' === $a['show_button'] && ! empty( $a['button_text'] ) && $a['button_url'] !== '#' ) : ?>
+            <!-- Regular button if less than 6 products or custom URL provided -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="fea-btn text-center">
+                        <a class="b-btn btn-black" href="<?php echo esc_url( $a['button_url'] ); ?>">
+                            <span><?php echo esc_html( $a['button_text'] ); ?></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php if ( $total_products > 6 ) : ?>
+    <style>
+    .product-hidden {
+        display: none;
+    }
+    .product-show-animation {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    .product-hide-animation {
+        animation: fadeOutDown 0.4s ease-out;
+    }
+    #toggle-products-btn {
+        transition: all 0.3s ease;
+    }
+    #toggle-products-btn:hover {
+        transform: translateY(-2px);
+    }
+    </style>
+
+    <script>
+    function toggleProducts() {
+        const hiddenProducts = document.querySelectorAll('.product-hidden');
+        const button = document.getElementById('toggle-products-btn');
+        const buttonText = document.getElementById('product-btn-text');
+        const isExpanded = button.classList.contains('expanded');
+        
+        if (!isExpanded) {
+            // Show all products
+            hiddenProducts.forEach((product, index) => {
+                setTimeout(() => {
+                    product.classList.remove('product-hidden');
+                    product.classList.add('product-show-animation');
+                }, index * 100);
+            });
+            
+            button.classList.add('expanded');
+            buttonText.textContent = 'Show Less Products';
+            
+        } else {
+            // Hide extra products
+            const allProducts = document.querySelectorAll('.product-item');
+            const productsToHide = Array.from(allProducts).slice(6);
+            
+            productsToHide.forEach((product, index) => {
+                setTimeout(() => {
+                    product.classList.add('product-hide-animation');
+                    setTimeout(() => {
+                        product.classList.remove('product-show-animation', 'product-hide-animation');
+                        product.classList.add('product-hidden');
+                    }, 400);
+                }, index * 50);
+            });
+            
+            button.classList.remove('expanded');
+            buttonText.textContent = 'View All Products (<?php echo ($total_products - 6); ?> more)';
+            
+            // Smooth scroll to products container
+            setTimeout(() => {
+                document.getElementById('products-container').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 300);
+        }
+    }
+    </script>
+    <?php endif; ?>
+    
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'products_display', 'kingfact_products_display_shortcode' );
+
+
+
+

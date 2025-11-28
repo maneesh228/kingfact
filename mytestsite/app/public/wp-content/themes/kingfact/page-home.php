@@ -171,7 +171,10 @@ if ( $slides ) : ?>
         </div>
     </div>
     <!-- slider end -->
-<?php endif; ?>
+<?php endif; 
+
+ the_content();
+?>
 
 
     </main>
