@@ -51,8 +51,8 @@ if ( $slides ) : ?>
                         $data_thumb = $img_url ? esc_url( $img_url ) : '';
 
                     
-                        // build safe frames array (per-layer or default)
-                        $layer_frames = array(
+                        // build specific animation frames for different layers
+                        $group_frames = array(
                             array(
                                 'delay' => 10,
                                 'speed' => 300,
@@ -70,19 +70,83 @@ if ( $slides ) : ?>
                             ),
                         );
 
-                        // if caption frames are stored in meta (JSON string or array), try to use them
-                        if ( isset( $caption_frames_meta ) && $caption_frames_meta ) {
-                            // try decode if string
-                            if ( is_string( $caption_frames_meta ) ) {
-                                $candidate = json_decode( $caption_frames_meta, true );
-                                if ( json_last_error() === JSON_ERROR_NONE && is_array( $candidate ) ) {
-                                    $layer_frames = $candidate;
-                                }
-                            } elseif ( is_array( $caption_frames_meta ) ) {
-                                $layer_frames = $caption_frames_meta;
-                            }
-                        }
-                        // print layer with guaranteed data-frames (encoded safely)
+                        $subtitle_frames = array(
+                            array(
+                                'delay' => '+620',
+                                'speed' => 300,
+                                'frame' => '0',
+                                'from'  => 'x:-50px;opacity:0;',
+                                'to'    => 'o:1;',
+                                'ease'  => 'Power3.easeInOut',
+                            ),
+                            array(
+                                'delay' => 'wait',
+                                'speed' => 300,
+                                'frame' => '999',
+                                'to'    => 'opacity:0;',
+                                'ease'  => 'Power3.easeInOut',
+                            ),
+                        );
+
+                        $title_frames = array(
+                            array(
+                                'from'  => 'z:0;rX:0deg;rY:0;rZ:0;sX:1.5;sY:1.5;skX:0;skY:0;opacity:0;',
+                                'mask'  => 'x:0px;y:0px;',
+                                'speed' => 1500,
+                                'to'    => 'o:1;',
+                                'delay' => 1000,
+                                'ease'  => 'Power3.easeInOut',
+                            ),
+                            array(
+                                'delay' => 'wait',
+                                'speed' => 1000,
+                                'to'    => 'y:[100%];',
+                                'mask'  => 'x:inherit;y:inherit;',
+                                'ease'  => 'Power2.easeInOut',
+                            ),
+                        );
+
+                        $desc_frames = array(
+                            array(
+                                'from'  => 'z:0;rX:0deg;rY:0;rZ:0;sX:1.5;sY:1.5;skX:0;skY:0;opacity:0;',
+                                'mask'  => 'x:0px;y:0px;',
+                                'speed' => 1500,
+                                'to'    => 'o:1;',
+                                'delay' => 1000,
+                                'ease'  => 'Power3.easeInOut',
+                            ),
+                            array(
+                                'delay' => 'wait',
+                                'speed' => 1000,
+                                'to'    => 'y:[100%];',
+                                'mask'  => 'x:inherit;y:inherit;',
+                                'ease'  => 'Power2.easeInOut',
+                            ),
+                        );
+
+                        $button_frames = array(
+                            array(
+                                'delay' => '+1620',
+                                'speed' => 300,
+                                'frame' => '0',
+                                'from'  => 'y:50px;opacity:0;',
+                                'to'    => 'o:1;',
+                                'ease'  => 'Power3.easeInOut',
+                            ),
+                            array(
+                                'delay' => 'wait',
+                                'speed' => 300,
+                                'frame' => '999',
+                                'to'    => 'opacity:0;',
+                                'ease'  => 'Power3.easeInOut',
+                            ),
+                            array(
+                                'frame' => 'hover',
+                                'speed' => '0',
+                                'ease'  => 'Linear.easeNone',
+                                'to'    => 'o:1;rX:0;rY:0;rZ:0;z:0;',
+                            ),
+                        );
 
                     ?>
                         <li data-index="<?php echo esc_attr( $rs_index ); ?>" data-transition="boxslide" data-slotamount="default" data-hideafterloop="0"
@@ -99,53 +163,74 @@ if ( $slides ) : ?>
                             <?php endif; ?>
 
                             <!-- LAYERS -->
-                            <div class="tp-caption rev_group" id="rs-layes-<?php echo esc_attr( $i + 1 ); ?>" data-x="['center','center','center','center']"
+                            <div class="tp-caption     rev_group" id="rs-layes-<?php echo esc_attr( $i + 1 ); ?>" data-x="['center','center','center','center']"
                                 data-hoffset="['0','0','0','0']"
                                 data-y="['middle','middle','middle','middle']"
                                 data-voffset="['0','0','0','-80']"
                                 data-width="['988','772','595','99%']"
                                 data-height="['370','280','230','200']" data-whitespace="nowrap"
                                 data-type="group" data-responsive_offset="on" data-responsive="off"
-                                data-frames='<?php echo esc_attr( wp_json_encode( $layer_frames ) ); ?>'
-                                style="z-index: 5; min-width: 988px; max-width: 988px; white-space: nowrap;"> 
+                                data-frames='<?php echo esc_attr( wp_json_encode( $group_frames ) ); ?>'
+                                data-margintop="[0,0,0,0]" data-marginright="[0,0,0,0]" data-marginbottom="[0,0,0,0]"
+                                data-marginleft="[0,0,0,0]" data-textAlign="['inherit','inherit','inherit','inherit']"
+                                data-paddingtop="[0,0,0,0]" data-paddingright="[0,0,0,0]" data-paddingbottom="[0,0,0,0]"
+                                data-paddingleft="[0,0,0,0]"
+                                style="z-index: 5; min-width: 988px; max-width: 988px; max-width: 454px; max-width: 454px; white-space: nowrap; font-size: 20px; line-height: 22px; font-weight: 400; color: #ffffff; letter-spacing: 0px;"> 
 
                                 <!-- Subtitle -->
                                 <?php if ( $subtitle ) : ?>
-                                    <div class="tp-caption" id="rs-layes-sub-<?php echo esc_attr( $i + 1 ); ?>"
+                                    <div class="tp-caption  " id="rs-layes-sub-<?php echo esc_attr( $i + 1 ); ?>"
                                         data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
                                         data-y="['top','top','top','top']" data-voffset="['0','0','0','0']"
-                                        data-width="['988','772','595','350']" data-lineheight="['25','25','25','25']"
-                                        data-whitespace="normal" data-type="text" data-responsive_offset="off" data-responsive="off"
-                                        data-frames='<?php echo esc_attr( wp_json_encode( $layer_frames ) ); ?>'
-                                        style="z-index: 7; white-space: normal; font-size: 14px; line-height: 12px; font-weight: 700; color: #ffffff; text-transform:uppercase;text-align:center;">
+                                        data-width="['988','772','595','350']"
+                                        data-lineheight="['25','25','25','25']"
+                                        data-height="none"
+                                        data-whitespace="normal"
+                                        data-type="text"
+                                        data-responsive_offset="off"
+                                        data-responsive="off"
+                                        data-frames='<?php echo esc_attr( wp_json_encode( $subtitle_frames ) ); ?>'
+                                        data-margintop="[0,0,0,0]" data-marginright="[0,0,0,0]" data-marginbottom="[0,0,0,0]" data-marginleft="[0,0,0,0]"
+                                        data-textAlign="['center','center','center','center']" data-paddingtop="[10,10,10,10]"
+                                        data-paddingright="[10,10,10,10]" data-paddingbottom="[10,10,10,10]" data-paddingleft="[10,10,10,10]"
+                                        style="z-index: 7; white-space: normal; font-size: 14px; line-height: 12px; font-weight: 700; color: #ffffff; letter-spacing: 2px;font-family:'Roboto', sans-serif;text-transform:uppercase;text-align: center;">
                                         <?php echo esc_html( $subtitle ); ?>
                                     </div>
                                 <?php endif; ?>
 
                                 <!-- Big Title -->
-                                <div class="tp-caption" id="rs-layes-title-<?php echo esc_attr( $i + 1 ); ?>"
-                                    data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                    data-y="['top','top','top','top']"
-                                    data-voffset="['70','50','50','80']"
-                                    data-fontsize="['95','80','50','30']"
-                                    data-lineheight="['100','90','60','35']"
-                                    data-fontweight="['700','700','700','700']"
-                                    data-width="['970','900','550','350']" data-height="none" data-whitespace="normal"
-                                    data-type="text" data-responsive_offset="off" data-responsive="off"
-                                    data-frames='<?php echo esc_attr( wp_json_encode( $layer_frames ) ); ?>'
-                                    style="z-index: 6; min-width: 350px; max-width: 800px; white-space: normal; font-weight:900; text-align:center;">
-                                    <?php echo esc_html( $bigtitle ); ?>
+                                    <div class="tp-caption  " id="rs-layes-title-<?php echo esc_attr( $i + 1 ); ?>"
+                                        data-x="['center','center','center','center']"
+                                        data-hoffset="['0','0','0','0']"
+                                        data-y="['top','top','top','top']"
+                                        data-voffset="['70','50','50','80']"
+                                        data-fontsize="['95','80','50','30']"
+                                        data-lineheight="['100','90','60','35']"
+                                        data-fontweight="['700','700','700','700']" data-width="['970','900','550','350']" data-height="none"
+                                        data-whitespace="normal" data-type="text" data-responsive_offset="off" data-responsive="off"
+                                        data-frames='<?php echo esc_attr( wp_json_encode( $title_frames ) ); ?>'
+                                        data-margintop="[0,0,0,0]" data-marginright="[0,0,0,0]" data-marginbottom="[0,0,0,0]" data-marginleft="[0,0,0,0]"
+                                        data-textAlign="['center','center','center','center']" data-paddingtop="[0,0,0,0]" data-paddingright="[0,0,0,0]"
+                                        data-paddingbottom="[0,0,0,0]" data-paddingleft="[0,0,0,0]"
+                                        style="z-index: 6; min-width: 350px; max-width: 800px; white-space: normal; font-size: 90px; line-height: 105px; font-weight: 900; color: #ffffff; letter-spacing: 0px;font-family:'Roboto', sans-serif;">
+                                        <?php echo esc_html( $bigtitle ); ?>
                                 </div>
 
                                 <!-- Description (editor content) -->
                                 <?php if ( $content ) : ?>
-                                    <div class="tp-caption" id="rs-layes-desc-<?php echo esc_attr( $i + 1 ); ?>"
-                                        data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                        data-y="['top','top','top','top']" data-voffset="['190','150','120','130']"
+                                    <div class="tp-caption  " id="rs-layes-desc-<?php echo esc_attr( $i + 1 ); ?>"
+                                        data-x="['center','center','center','center']"
+                                        data-hoffset="['0','0','0','0']"
+                                        data-y="['top','top','top','top']"
+                                        data-voffset="['190','150','120','130']"
                                         data-fontsize="['16','16','16','16']" data-lineheight="['30','30','30','30']"
-                                        data-type="text" data-responsive_offset="off" data-responsive="off"
-                                        data-frames='<?php echo esc_attr( wp_json_encode( $layer_frames ) ); ?>'
-                                        style="z-index: 6; white-space: normal; font-size:16px; text-align:center;">
+                                        data-fontweight="['500','500','500','500']" data-width="['750','750','550','350']" data-height="none"
+                                        data-whitespace="normal" data-type="text" data-responsive_offset="off" data-responsive="off"
+                                        data-frames='<?php echo esc_attr( wp_json_encode( $desc_frames ) ); ?>'
+                                        data-margintop="[0,0,0,0]" data-marginright="[0,0,0,0]" data-marginbottom="[0,0,0,0]" data-marginleft="[0,0,0,0]"
+                                        data-textAlign="['center','center','center','center']" data-paddingtop="[0,0,0,0]" data-paddingright="[0,0,0,0]"
+                                        data-paddingbottom="[0,0,0,0]" data-paddingleft="[0,0,0,0]"
+                                        style="z-index: 6; white-space: normal; font-size: 16px; font-weight: 500; color: #ffffff; letter-spacing: 0px;font-family:'Roboto', sans-serif;">
                                         <?php echo wp_kses_post( $content ); ?>
                                     </div>
                                 <?php endif; ?>
@@ -153,9 +238,18 @@ if ( $slides ) : ?>
                                 <!-- Button -->
                                 <?php if ( $btn_text && $btn_url ) : ?>
                                     <div class="tp-caption" id="rs-layes-btn-<?php echo esc_attr( $i + 1 ); ?>"
-                                        data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                        data-y="['bottom','bottom','bottom','bottom']" data-voffset="['0','-20','-50','-130']"
-                                        data-type="button" data-responsive_offset="off" data-responsive="off" data-frames='<?php echo esc_attr( wp_json_encode( $layer_frames ) ); ?>' style="z-index:9;">
+                                        data-x="['center','center','center','center']"
+                                        data-hoffset="['0','0','0','0']"
+                                        data-y="['bottom','bottom','bottom','bottom']"
+                                        data-voffset="['0','-20','-50','-130']" data-width="none"
+                                        data-height="none" data-whitespace="nowrap" data-type="button" data-actions='' data-responsive_offset="off"
+                                        data-responsive="off"
+                                        data-frames='<?php echo esc_attr( wp_json_encode( $button_frames ) ); ?>'
+                                        data-margintop="[0,0,0,0]" data-marginright="[0,0,0,0]" data-marginbottom="[0,0,0,0]"
+                                        data-marginleft="[0,0,0,0]" data-textAlign="['inherit','inherit','inherit','inherit']"
+                                        data-paddingtop="[0,0,0,0]" data-paddingright="[0,0,0,0]" data-paddingbottom="[0,0,0,0]"
+                                        data-paddingleft="[0,0,0,0]"
+                                        style="z-index: 9;">
                                         <div class="bd-slider-button bd-slider-button-center">
                                             <a class="b-btn" href="<?php echo esc_url( $btn_url ); ?>"><span><?php echo esc_html( $btn_text ); ?></span></a>
                                         </div>
