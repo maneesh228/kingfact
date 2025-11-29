@@ -406,24 +406,6 @@ if ( function_exists('acf_add_local_field_group') ) {
                 ),
             ),
             array(
-                'key' => 'field_footer_contact_address',
-                'label' => 'Contact Address',
-                'name' => 'footer_contact_address',
-                'type' => 'text',
-            ),
-            array(
-                'key' => 'field_footer_contact_email',
-                'label' => 'Contact Email',
-                'name' => 'footer_contact_email',
-                'type' => 'email',
-            ),
-            array(
-                'key' => 'field_footer_contact_phone',
-                'label' => 'Contact Phone',
-                'name' => 'footer_contact_phone',
-                'type' => 'text',
-            ),
-            array(
                 'key' => 'field_footer_social_links',
                 'label' => 'Footer Social Links',
                 'name' => 'footer_social_links',
@@ -809,22 +791,11 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                         <td><textarea name="footer_text" id="footer_text" rows="5" class="large-text"><?php echo esc_textarea( $footer_text ); ?></textarea></td>
                     </tr>
                     <tr>
-                        <th><label for="footer_contact_address">Contact Address</label></th>
-                        <td><input name="footer_contact_address" id="footer_contact_address" class="regular-text" value="<?php echo esc_attr( $footer_contact_address ); ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="footer_contact_email">Contact Email</label></th>
-                        <td><input name="footer_contact_email" id="footer_contact_email" class="regular-text" value="<?php echo esc_attr( $footer_contact_email ); ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="footer_contact_phone">Contact Phone</label></th>
-                        <td><input name="footer_contact_phone" id="footer_contact_phone" class="regular-text" value="<?php echo esc_attr( $footer_contact_phone ); ?>"></td>
-                    </tr>
-                    <tr>
                         <th><label for="footer_copyright">Copyright Text</label></th>
                         <td><input name="footer_copyright" id="footer_copyright" class="regular-text" value="<?php echo esc_attr( $footer_copyright ); ?>"></td>
                     </tr>
                 </table>
+                <p><em>Note: Contact information (address, email, phone) is managed in the "Header Contact" section above and is shared across the site including footer.</em></p>
 
                 <h3>Footer Social Links</h3>
                 <table class="form-table" id="footer-social-table">

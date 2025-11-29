@@ -5,27 +5,30 @@ if ( function_exists( 'get_field' ) ) {
     $acf_footer_logo    = get_field( 'footer_logo', 'option' );
     $acf_footer_text    = get_field( 'footer_text', 'option' );
     $acf_quick_links    = get_field( 'footer_quick_links', 'option' );
-    $acf_contact_addr   = get_field( 'footer_contact_address', 'option' );
-    $acf_contact_email  = get_field( 'footer_contact_email', 'option' );
-    $acf_contact_phone  = get_field( 'footer_contact_phone', 'option' );
+    // Use header contact fields for footer
+    $acf_contact_addr   = get_field( 'header_contact_address', 'option' );
+    $acf_contact_email  = get_field( 'header_contact_email', 'option' );
+    $acf_contact_phone  = get_field( 'header_contact_phone', 'option' );
     $acf_footer_socials = get_field( 'footer_social_links', 'option' );
     $acf_copyright      = get_field( 'footer_copyright', 'option' );
 
     $footer_logo    = $acf_footer_logo ? $acf_footer_logo : ( ! empty( $opts['footer_logo'] ) ? $opts['footer_logo'] : false );
     $footer_text    = $acf_footer_text ? $acf_footer_text : ( ! empty( $opts['footer_text'] ) ? $opts['footer_text'] : '<p>But I must explain to you how all this misn idea of denouncing pleasure and prais pain</p><a href="#">Continue Reading</a>' );
     $quick_links    = $acf_quick_links ? $acf_quick_links : ( ! empty( $opts['footer_quick_links'] ) ? $opts['footer_quick_links'] : array() );
-    $footer_contact_address = $acf_contact_addr ? $acf_contact_addr : ( ! empty( $opts['footer_contact_address'] ) ? $opts['footer_contact_address'] : '1058 Meadowb, Mall Road' );
-    $footer_contact_email   = $acf_contact_email ? $acf_contact_email : ( ! empty( $opts['footer_contact_email'] ) ? $opts['footer_contact_email'] : 'support@gmail.com' );
-    $footer_contact_phone   = $acf_contact_phone ? $acf_contact_phone : ( ! empty( $opts['footer_contact_phone'] ) ? $opts['footer_contact_phone'] : '+000 (123) 44 558' );
+    // Use header contact data as fallback
+    $footer_contact_address = $acf_contact_addr ? $acf_contact_addr : ( ! empty( $opts['header_contact_address'] ) ? $opts['header_contact_address'] : '1058 Meadowb, Mall Road' );
+    $footer_contact_email   = $acf_contact_email ? $acf_contact_email : ( ! empty( $opts['header_contact_email'] ) ? $opts['header_contact_email'] : 'support@gmail.com' );
+    $footer_contact_phone   = $acf_contact_phone ? $acf_contact_phone : ( ! empty( $opts['header_contact_phone'] ) ? $opts['header_contact_phone'] : '+000 (123) 44 558' );
     $footer_socials = $acf_footer_socials ? $acf_footer_socials : ( ! empty( $opts['footer_social_links'] ) ? $opts['footer_social_links'] : array() );
     $footer_copyright = $acf_copyright ? $acf_copyright : ( ! empty( $opts['footer_copyright'] ) ? $opts['footer_copyright'] : 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.' );
 } else {
     $footer_logo    = ! empty( $opts['footer_logo'] ) ? $opts['footer_logo'] : false;
     $footer_text    = ! empty( $opts['footer_text'] ) ? $opts['footer_text'] : '<p>But I must explain to you how all this misn idea of denouncing pleasure and prais pain</p><a href="#">Continue Reading</a>';
     $quick_links    = ! empty( $opts['footer_quick_links'] ) ? $opts['footer_quick_links'] : array();
-    $footer_contact_address = ! empty( $opts['footer_contact_address'] ) ? $opts['footer_contact_address'] : '1058 Meadowb, Mall Road';
-    $footer_contact_email   = ! empty( $opts['footer_contact_email'] ) ? $opts['footer_contact_email'] : 'support@gmail.com';
-    $footer_contact_phone   = ! empty( $opts['footer_contact_phone'] ) ? $opts['footer_contact_phone'] : '+000 (123) 44 558';
+    // Use header contact data
+    $footer_contact_address = ! empty( $opts['header_contact_address'] ) ? $opts['header_contact_address'] : '1058 Meadowb, Mall Road';
+    $footer_contact_email   = ! empty( $opts['header_contact_email'] ) ? $opts['header_contact_email'] : 'support@gmail.com';
+    $footer_contact_phone   = ! empty( $opts['header_contact_phone'] ) ? $opts['header_contact_phone'] : '+000 (123) 44 558';
     $footer_socials = ! empty( $opts['footer_social_links'] ) ? $opts['footer_social_links'] : array();
     $footer_copyright = ! empty( $opts['footer_copyright'] ) ? $opts['footer_copyright'] : 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.';
 }
