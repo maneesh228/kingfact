@@ -104,6 +104,41 @@ add_action( 'wp_head', function() {
     }
 } );
 
+// Add custom CSS for active menu highlighting
+add_action( 'wp_head', function() {
+    ?>
+    <style>
+        /* Active menu item styles - WordPress default classes */
+        .main-menu nav > ul > li.current-menu-item > a,
+        .main-menu nav > ul > li.current-menu-ancestor > a,
+        .main-menu nav > ul > li.current-menu-parent > a,
+        .main-menu nav > ul > li.current_page_item > a,
+        .main-menu nav > ul > li.current_page_ancestor > a,
+        .main-menu nav > ul > li.current_page_parent > a {
+            color: #febc35;
+        }
+        
+        .main-menu > nav > ul > li.current-menu-item > a::before,
+        .main-menu > nav > ul > li.current-menu-ancestor > a::before,
+        .main-menu > nav > ul > li.current-menu-parent > a::before,
+        .main-menu > nav > ul > li.current_page_item > a::before,
+        .main-menu > nav > ul > li.current_page_ancestor > a::before,
+        .main-menu > nav > ul > li.current_page_parent > a::before {
+            width: 100%;
+            opacity: 1;
+            background-color: #febc35;
+        }
+        
+        /* Submenu active items */
+        .main-menu nav > ul > li .sub-menu li.current-menu-item > a,
+        .main-menu nav > ul > li .sub-menu li.current_page_item > a {
+            color: #febc35;
+            background-color: rgba(254, 188, 53, 0.1);
+        }
+    </style>
+    <?php
+}, 100 );
+
 // Enable featured image support for the theme (do this once)
 add_action( 'after_setup_theme', function() {
     add_theme_support( 'post-thumbnails' );
