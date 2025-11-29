@@ -4,6 +4,7 @@ function theme_enqueue_home_assets() {
     if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'page-products.php' )  || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' )
         || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_singular( 'product' ) || is_404() 
         || is_home() || is_archive() || is_single() || is_search() || is_category() || is_tag() || is_author()
+        || is_page_template( 'page-media.php' )  
         ){
 
         $base = get_template_directory_uri() . '/assets/';
@@ -2932,5 +2933,65 @@ function enqueue_newsletter_scripts() {
     }
 }
 add_action('wp_footer', 'enqueue_newsletter_scripts');
+
+// Register ACF fields for About Page History Section
+if ( function_exists( 'acf_add_local_field_group' ) ) {
+    acf_add_local_field_group( array(
+        'key' => 'group_about_history',
+        'title' => 'About Page - History Section',
+        'fields' => array(
+            array(
+                'key' => 'field_history_subtitle',
+                'label' => 'History Subtitle',
+                'name' => 'history_subtitle',
+                'type' => 'text',
+                'instructions' => 'Small text above the main title (e.g., "who we are")',
+                'default_value' => 'who we are',
+                'placeholder' => 'who we are',
+            ),
+            array(
+                'key' => 'field_history_title',
+                'label' => 'History Title',
+                'name' => 'history_title',
+                'type' => 'text',
+                'instructions' => 'Main heading for the history section',
+                'default_value' => 'Quality & Integrity Service Agency',
+                'placeholder' => 'Quality & Integrity Service Agency',
+            ),
+            array(
+                'key' => 'field_history_heading',
+                'label' => 'History Heading',
+                'name' => 'history_heading',
+                'type' => 'text',
+                'instructions' => 'Heading for the history content (e.g., "Company History")',
+                'default_value' => 'Company History',
+                'placeholder' => 'Company History',
+            ),
+            array(
+                'key' => 'field_history_content',
+                'label' => 'History Content',
+                'name' => 'history_content',
+                'type' => 'textarea',
+                'instructions' => 'Main content describing your company history',
+                'rows' => 6,
+                'default_value' => 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odite.',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'page_template',
+                    'operator' => '==',
+                    'value' => 'page-about.php',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+    ));
+}
 
 

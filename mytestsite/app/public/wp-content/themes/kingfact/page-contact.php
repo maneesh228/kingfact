@@ -5,8 +5,11 @@ Description: Contact page template with form and info
 */
 get_header();
 
-// Get breadcrumb background
-$breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+// Get featured image or fallback to default
+$breadcrumb_bg = get_the_post_thumbnail_url(get_the_ID(), 'full');
+if (!$breadcrumb_bg) {
+    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+}
 
 // Get contact info from header settings (ACF Options)
 $contact_address = '';

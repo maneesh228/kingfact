@@ -533,22 +533,30 @@ if ( $slides ) : ?>
                         <div class="col-xl-4 col-lg-4">
                             <div class="blog-banner-img mb-30">
                                 <?php
-                                // Get the latest blog post for the banner link
-                                $blog_query->rewind_posts();
-                                if ($blog_query->have_posts()) {
-                                    $blog_query->the_post();
+                                // Get the very latest blog post for the banner (separate query to ensure we get the most recent)
+                                $banner_query = new WP_Query(array(
+                                    'post_type' => 'post',
+                                    'posts_per_page' => 1,
+                                    'orderby' => 'date',
+                                    'order' => 'DESC',
+                                ));
+                                
+                                
+                                if ($banner_query->have_posts()) {
+                                    $banner_query->the_post();
                                     $banner_link = get_permalink();
                                     $banner_img = get_the_post_thumbnail_url(get_the_ID(), 'full');
                                     if (!$banner_img) {
                                         $banner_img = get_template_directory_uri() . '/assets/img/blog/blog.jpg';
                                     }
+                                    wp_reset_postdata();
                                 } else {
                                     $banner_link = home_url('/blog');
                                     $banner_img = get_template_directory_uri() . '/assets/img/blog/blog.jpg';
                                 }
                                 ?>
                                 <a href="<?php echo esc_url($banner_link); ?>">
-                                    <img src="<?php echo esc_url($banner_img); ?>" alt="Blog">
+                                    <img src="<?php echo esc_url($banner_img); ?>" alt="Latest Blog Post">
                                 </a>
                             </div>
                         </div>

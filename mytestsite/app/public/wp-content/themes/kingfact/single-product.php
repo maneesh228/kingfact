@@ -188,9 +188,10 @@
                             $current_id = get_the_ID();
                             $related_products = new WP_Query(array(
                                 'post_type' => 'product',
-                                'posts_per_page' => 4,
+                                'posts_per_page' => 3,
                                 'post__not_in' => array($current_id),
-                                'orderby' => 'rand',
+                                'orderby' => 'date',
+                                'order' => 'DESC',
                                 'post_status' => 'publish'
                             ));
                             

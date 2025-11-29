@@ -3,10 +3,17 @@
 Template Name: Products Page
 */
 
-get_header(); ?>
+get_header();
+
+// Get featured image or fallback to default
+$breadcrumb_bg = get_the_post_thumbnail_url(get_the_ID(), 'full');
+if (!$breadcrumb_bg) {
+    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+}
+?>
 
 <!-- breadcrumb-area-start -->
-<div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo get_template_directory_uri(); ?>/assets/img/bg/bg-9.jpg)">
+<div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url($breadcrumb_bg); ?>)">
     <div class="container">
         <div class="row">
             <div class="col-xl-12">

@@ -4,105 +4,70 @@ Template Name: About — Profile / Vision / Mission / Why Us
 Description: Custom About page template with Profile, Vision, Mission and Why Us sections.
 */
 get_header();
+
+// Get featured image or fallback to default
+$breadcrumb_bg = get_the_post_thumbnail_url(get_the_ID(), 'full');
+if (!$breadcrumb_bg) {
+    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+}
 ?>
 
-<main id="about-page" class="site-main">
-
-  <!-- Hero / Header -->
-  <section class="about-hero">
-    <div class="container">
-      <h1 class="about-title"><?php the_title(); ?></h1>
-      <p class="about-sub">Learn who we are and why we do what we do.</p>
+<main>
+      <div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url( $breadcrumb_bg ); ?>)">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="breadcrumb-text text-center">
+                        <h1>About Us</h1>
+                        <ul class="breadcrumb-menu">
+                            <li><a href="<?php echo esc_url( home_url( '/' ) ); ?>">home</a></li>
+                            <li><span>About Us</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
+    <!-- breadcrumb-area-end -->
 
-  <!-- Profile -->
-  <section id="about-profile" class="about-section container">
-    <div class="row">
-      <div class="col-6">
-        <div class="profile-image">
-          <!-- Replace src with theme image or use featured image -->
-          <img src="<?php echo get_template_directory_uri(); ?>/assets/img/about/profile.jpg" alt="Profile">
+    <!-- history-area-start -->
+    <div class="history-area pt-130 pb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-5 col-lg-5">
+                    <div class="single-history mb-30">
+                        <div class="history-text">
+                            <?php
+                            $history_subtitle = get_field('history_subtitle');
+                            $history_title = get_field('history_title');
+                            
+                            if (!$history_subtitle) $history_subtitle = 'who we are';
+                            if (!$history_title) $history_title = 'Quality & Integrity Service Agency';
+                            ?>
+                            <span><?php echo esc_html($history_subtitle); ?></span>
+                            <h1><?php echo esc_html($history_title); ?></h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-7 col-lg-7">
+                    <div class="history-wrapper mb-30">
+                        <div class="history-content">
+                            <?php
+                            $history_heading = get_field('history_heading');
+                            $history_content = get_field('history_content');
+                            
+                            if (!$history_heading) $history_heading = 'Company History';
+                            if (!$history_content) $history_content = 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odite.';
+                            ?>
+                            <h4><?php echo esc_html($history_heading); ?></h4>
+                            <p><?php echo wp_kses_post($history_content); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-6">
-        <h2>Profile</h2>
-        <p>Short summary about the company / person. Use this area to introduce your history, core capabilities and what makes you unique.</p>
-        <ul class="profile-list">
-          <li><strong>Founded:</strong> 2010</li>
-          <li><strong>Industry:</strong> Construction & Manufacturing</li>
-          <li><strong>Location:</strong> New York</li>
-        </ul>
-      </div>
     </div>
-  </section>
-
-  <!-- Vision -->
-  <section id="about-vision" class="about-section bg-light">
-    <div class="container">
-      <div class="row align-center">
-        <div class="col-12 text-center">
-          <h2>Vision</h2>
-          <p class="lead">To be the world’s most trusted industrial partner — delivering safe, efficient and sustainable solutions.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Mission -->
-  <section id="about-mission" class="about-section container">
-    <div class="row">
-      <div class="col-6">
-        <h2>Mission</h2>
-        <p>We deliver tailored engineering, construction and maintenance solutions that empower our clients to grow with confidence.</p>
-        <ol class="mission-list">
-          <li>Deliver projects on time and on budget</li>
-          <li>Maintain highest safety & compliance standards</li>
-          <li>Continuously innovate and reduce environmental impact</li>
-        </ol>
-      </div>
-      <div class="col-6">
-        <div class="mission-image">
-          <img src="<?php echo get_template_directory_uri(); ?>/assets/img/about/mission.jpg" alt="Mission">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Why Us / Our Goals -->
-  <section id="about-why-us" class="about-section bg-accent">
-    <div class="container">
-      <h2 class="text-center">Why Us / Our Goals</h2>
-
-      <div class="row goals-row">
-        <div class="col-3 goal">
-          <h3>Expertise</h3>
-          <p>Decades of field experience across major industries.</p>
-        </div>
-        <div class="col-3 goal">
-          <h3>Quality</h3>
-          <p>Certified processes, QA and strict inspection.</p>
-        </div>
-        <div class="col-3 goal">
-          <h3>Safety</h3>
-          <p>Safety-first culture, zero-tolerance approach to risk.</p>
-        </div>
-        <div class="col-3 goal">
-          <h3>Sustainability</h3>
-          <p>Eco-conscious engineering and resource optimization.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA / Contact -->
-  <section id="about-cta" class="about-section container">
-    <div class="row">
-      <div class="col-12 text-center">
-        <a class="b-btn btn-black" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact Us</a>
-      </div>
-    </div>
-  </section>
+    <!-- history-area-end -->
 
 </main>
 
