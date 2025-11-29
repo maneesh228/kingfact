@@ -4,7 +4,8 @@ function theme_enqueue_home_assets() {
     if (is_front_page() || is_page_template( 'page-home.php' )  || is_page_template( 'page-products.php' )  || is_page_template( 'front-home.php' ) || is_page_template( 'page-services.php' ) || is_page_template( 'page-about.php' )
         || is_page_template( 'page-contact.php' ) || is_singular( 'service' ) || is_singular( 'product' ) || is_404() 
         || is_home() || is_archive() || is_single() || is_search() || is_category() || is_tag() || is_author()
-        || is_page_template( 'page-media.php' )  
+        || is_page_template( 'page-media.php' ) ||  is_page_template( 'page-terms.php')  || is_page_template( 'page-sitemap.php' ) 
+        || is_page_template( 'page-settings-privacy.php' )
         ){
 
         $base = get_template_directory_uri() . '/assets/';
@@ -2728,13 +2729,46 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'default_value' => 'Qualified Staff',
                 'placeholder' => 'Qualified Staff',
             ),
+            
+            // Counter 4 Tab
+            array(
+                'key' => 'field_counter4_tab',
+                'label' => 'Counter 4',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_counter4_icon',
+                'label' => 'Icon Class',
+                'name' => 'counter4_icon',
+                'type' => 'text',
+                'instructions' => 'FontAwesome icon class (e.g., fal fa-smile)',
+                'default_value' => 'fal fa-smile',
+                'placeholder' => 'fal fa-smile',
+            ),
+            array(
+                'key' => 'field_counter4_number',
+                'label' => 'Number',
+                'name' => 'counter4_number',
+                'type' => 'text',
+                'default_value' => '100',
+                'placeholder' => '100',
+            ),
+            array(
+                'key' => 'field_counter4_label',
+                'label' => 'Label',
+                'name' => 'counter4_label',
+                'type' => 'text',
+                'default_value' => 'Happy Clients',
+                'placeholder' => 'Happy Clients',
+            ),
         ),
         'location' => array(
             array(
                 array(
-                    'param' => 'options_page',
+                    'param' => 'page_template',
                     'operator' => '==',
-                    'value' => 'counter-section-settings',
+                    'value' => 'page-home.php',
                 ),
             ),
         ),
@@ -2975,6 +3009,123 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'instructions' => 'Main content describing your company history',
                 'rows' => 6,
                 'default_value' => 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odite.',
+            ),
+            
+            // Vision Section
+            array(
+                'key' => 'field_vision_tab',
+                'label' => 'Vision',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_vision_image',
+                'label' => 'Vision Image',
+                'name' => 'vision_image',
+                'type' => 'image',
+                'instructions' => 'Upload an image for the vision section',
+                'return_format' => 'url',
+            ),
+            array(
+                'key' => 'field_vision_title',
+                'label' => 'Vision Title',
+                'name' => 'vision_title',
+                'type' => 'text',
+                'default_value' => 'Vision',
+                'placeholder' => 'Vision',
+            ),
+            array(
+                'key' => 'field_vision_content',
+                'label' => 'Vision Content',
+                'name' => 'vision_content',
+                'type' => 'textarea',
+                'rows' => 3,
+                'default_value' => 'But I must explain to you how all this mistaken denouncing pleasure',
+            ),
+            array(
+                'key' => 'field_vision_link',
+                'label' => 'Vision Link URL',
+                'name' => 'vision_link',
+                'type' => 'url',
+                'placeholder' => 'https://',
+            ),
+            
+            // Mission Section
+            array(
+                'key' => 'field_mission_tab',
+                'label' => 'Mission',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_mission_image',
+                'label' => 'Mission Image',
+                'name' => 'mission_image',
+                'type' => 'image',
+                'instructions' => 'Upload an image for the mission section',
+                'return_format' => 'url',
+            ),
+            array(
+                'key' => 'field_mission_title',
+                'label' => 'Mission Title',
+                'name' => 'mission_title',
+                'type' => 'text',
+                'default_value' => 'Mission',
+                'placeholder' => 'Mission',
+            ),
+            array(
+                'key' => 'field_mission_content',
+                'label' => 'Mission Content',
+                'name' => 'mission_content',
+                'type' => 'textarea',
+                'rows' => 3,
+                'default_value' => 'But I must explain to you how all this mistaken denouncing pleasure',
+            ),
+            array(
+                'key' => 'field_mission_link',
+                'label' => 'Mission Link URL',
+                'name' => 'mission_link',
+                'type' => 'url',
+                'placeholder' => 'https://',
+            ),
+            
+            // Goals Section
+            array(
+                'key' => 'field_goals_tab',
+                'label' => 'Goals / Why Us',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_goals_image',
+                'label' => 'Goals Image',
+                'name' => 'goals_image',
+                'type' => 'image',
+                'instructions' => 'Upload an image for the goals section',
+                'return_format' => 'url',
+            ),
+            array(
+                'key' => 'field_goals_title',
+                'label' => 'Goals Title',
+                'name' => 'goals_title',
+                'type' => 'text',
+                'default_value' => 'Why Us or Our Goals',
+                'placeholder' => 'Why Us or Our Goals',
+            ),
+            array(
+                'key' => 'field_goals_content',
+                'label' => 'Goals Content',
+                'name' => 'goals_content',
+                'type' => 'textarea',
+                'rows' => 3,
+                'default_value' => 'But I must explain to you how all this mistaken denouncing pleasure',
+            ),
+            array(
+                'key' => 'field_goals_link',
+                'label' => 'Goals Link URL',
+                'name' => 'goals_link',
+                'type' => 'url',
+                'placeholder' => 'https://',
             ),
         ),
         'location' => array(

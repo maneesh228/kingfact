@@ -169,9 +169,9 @@ if ( function_exists( 'get_field' ) ) {
                                             <?php endif; ?>
                                         </div>
                                         <ul class="footer-bottom-link f-right">
-                                            <li><a href="#">Setting & Privacy </a></li>
-                                            <li><a href="#">Terms of Use</a></li>
-                                            <li><a href="#">Site Map</a></li>
+                                            <li><a href="/settings-privacy">Setting & Privacy </a></li>
+                                            <li><a href="/terms-of-use">Terms of Use</a></li>
+                                            <li><a href="/sitemap">Site Map</a></li>
                                         </ul>
                                 </div>
                             </div>
