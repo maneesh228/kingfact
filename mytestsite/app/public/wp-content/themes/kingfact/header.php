@@ -18,20 +18,26 @@
 // If ACF is active and we used an Options page, use get_field('name', 'option').
 // Otherwise fall back to safe defaults.
 
+// Get theme options for fallback
+$opts = get_option( 'kingfact_theme_options', array() );
+
 if ( function_exists( 'get_field' ) ) {
     // ACF present — read options (returns false if not set)
     $show_top  = get_field( 'header_show_top', 'option' );
     $hours     = get_field( 'header_hours', 'option' );
     $links     = get_field( 'header_links', 'option' ); // repeater array or false
-    $logo      = get_field( 'header_logo', 'option' );
+    $acf_logo  = get_field( 'header_logo', 'option' );
     $quote_txt = get_field( 'header_quote_text', 'option' );
     $quote_url = get_field( 'header_quote_url', 'option' );
+    
+    // Logo: prefer ACF, then Theme Settings, then false
+    $logo = $acf_logo ? $acf_logo : ( ! empty( $opts['header_logo'] ) ? $opts['header_logo'] : false );
 } else {
     // ACF not available — provide safe defaults
     $show_top  = true;
     $hours     = 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends';
     $links     = false; // no top links
-    $logo      = false; // will use theme logo fallback
+    $logo      = ! empty( $opts['header_logo'] ) ? $opts['header_logo'] : false;
     $quote_txt = 'get a quote';
     $quote_url = home_url( '/contact/' );
 }
@@ -43,7 +49,6 @@ $quote_txt = $quote_txt ? $quote_txt : 'get a quote';
 $quote_url = $quote_url ? $quote_url : home_url( '/contact/' );
 
 // --- Header contact values: prefer ACF options, otherwise use fallback theme options saved by kingfact_theme_settings_page() ---
-$opts = get_option( 'kingfact_theme_options', array() );
 if ( function_exists( 'get_field' ) ) {
     // Read ACF option values (may be null/empty)
     $acf_addr    = get_field( 'header_contact_address', 'option' );
@@ -112,7 +117,11 @@ if ( function_exists( 'get_field' ) ) {
                     <div class="logo">
                         <a href="<?php echo esc_url( home_url() ); ?>">
                             <?php if ( $logo ) : ?>
-                                <img src="<?php echo esc_url( $logo['url'] ); ?>" alt="logo">
+                                <?php if ( is_array( $logo ) && isset( $logo['url'] ) ) : ?>
+                                    <img src="<?php echo esc_url( $logo['url'] ); ?>" alt="logo">
+                                <?php else : ?>
+                                    <img src="<?php echo esc_url( $logo ); ?>" alt="logo">
+                                <?php endif; ?>
                             <?php else : ?>
                                 <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo/logo.png' ); ?>">
                             <?php endif; ?>

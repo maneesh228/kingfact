@@ -9,7 +9,8 @@ if ( function_exists( 'get_field' ) ) {
     $acf_contact_addr   = get_field( 'header_contact_address', 'option' );
     $acf_contact_email  = get_field( 'header_contact_email', 'option' );
     $acf_contact_phone  = get_field( 'header_contact_phone', 'option' );
-    $acf_footer_socials = get_field( 'footer_social_links', 'option' );
+    // Use header social links for footer
+    $acf_footer_socials = get_field( 'header_social_links', 'option' );
     $acf_copyright      = get_field( 'footer_copyright', 'option' );
 
     $footer_logo    = $acf_footer_logo ? $acf_footer_logo : ( ! empty( $opts['footer_logo'] ) ? $opts['footer_logo'] : false );
@@ -19,7 +20,8 @@ if ( function_exists( 'get_field' ) ) {
     $footer_contact_address = $acf_contact_addr ? $acf_contact_addr : ( ! empty( $opts['header_contact_address'] ) ? $opts['header_contact_address'] : '1058 Meadowb, Mall Road' );
     $footer_contact_email   = $acf_contact_email ? $acf_contact_email : ( ! empty( $opts['header_contact_email'] ) ? $opts['header_contact_email'] : 'support@gmail.com' );
     $footer_contact_phone   = $acf_contact_phone ? $acf_contact_phone : ( ! empty( $opts['header_contact_phone'] ) ? $opts['header_contact_phone'] : '+000 (123) 44 558' );
-    $footer_socials = $acf_footer_socials ? $acf_footer_socials : ( ! empty( $opts['footer_social_links'] ) ? $opts['footer_social_links'] : array() );
+    // Use header social links for footer
+    $footer_socials = $acf_footer_socials ? $acf_footer_socials : ( ! empty( $opts['header_social_links'] ) ? $opts['header_social_links'] : array() );
     $footer_copyright = $acf_copyright ? $acf_copyright : ( ! empty( $opts['footer_copyright'] ) ? $opts['footer_copyright'] : 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.' );
 } else {
     $footer_logo    = ! empty( $opts['footer_logo'] ) ? $opts['footer_logo'] : false;
@@ -29,7 +31,8 @@ if ( function_exists( 'get_field' ) ) {
     $footer_contact_address = ! empty( $opts['header_contact_address'] ) ? $opts['header_contact_address'] : '1058 Meadowb, Mall Road';
     $footer_contact_email   = ! empty( $opts['header_contact_email'] ) ? $opts['header_contact_email'] : 'support@gmail.com';
     $footer_contact_phone   = ! empty( $opts['header_contact_phone'] ) ? $opts['header_contact_phone'] : '+000 (123) 44 558';
-    $footer_socials = ! empty( $opts['footer_social_links'] ) ? $opts['footer_social_links'] : array();
+    // Use header social links for footer
+    $footer_socials = ! empty( $opts['header_social_links'] ) ? $opts['header_social_links'] : array();
     $footer_copyright = ! empty( $opts['footer_copyright'] ) ? $opts['footer_copyright'] : 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.';
 }
 ?>
@@ -56,21 +59,27 @@ if ( function_exists( 'get_field' ) ) {
                             <div class="footer-wrapper pl-25 mb-30">
                                 <h3 class="footer-title">Quick Links</h3>
                                 <div class="footer-link">
-                                    <ul>
-                                        <?php $quick = get_field('footer_quick_links','option');
-                                        if ( $quick ) :
-                                            foreach ( $quick as $q ) : ?>
-                                                <li><a href="<?php echo esc_url( $q['url'] ); ?>"><?php echo esc_html( $q['text'] ); ?></a></li>
-                                            <?php endforeach;
-                                        else : ?>
-                                            <li><a href="#">About Company</a></li>
-                                            <li><a href="#">Latest Projects</a></li>
-                                            <li><a href="#">Lastest From Blog</a></li>
-                                            <li><a href="#">Our Mission</a></li>
-                                            <li><a href="#">Our Testimonials</a></li>
-                                            <li><a href="#">Contact Us</a></li>
-                                        <?php endif; ?>
-                                    </ul>
+                                    <?php
+                                    if ( has_nav_menu( 'footer' ) ) {
+                                        wp_nav_menu( array(
+                                            'theme_location' => 'footer',
+                                            'container'      => false,
+                                            'menu_class'     => '',
+                                            'items_wrap'     => '<ul>%3$s</ul>',
+                                            'depth'          => 1,
+                                        ) );
+                                    } else {
+                                        // Fallback menu if no menu is assigned
+                                        echo '<ul>';
+                                        echo '<li><a href="#">About Company</a></li>';
+                                        echo '<li><a href="#">Latest Projects</a></li>';
+                                        echo '<li><a href="#">Latest From Blog</a></li>';
+                                        echo '<li><a href="#">Our Mission</a></li>';
+                                        echo '<li><a href="#">Our Testimonials</a></li>';
+                                        echo '<li><a href="#">Contact Us</a></li>';
+                                        echo '</ul>';
+                                    }
+                                    ?>
                                 </div>
                             </div>
                         </div>

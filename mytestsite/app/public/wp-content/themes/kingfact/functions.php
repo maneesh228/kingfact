@@ -687,9 +687,15 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
             return;
         }
 
+        // Enqueue media uploader scripts
+        wp_enqueue_media();
+
         // Handle save
         if ( isset( $_POST['kingfact_theme_settings_nonce'] ) && wp_verify_nonce( $_POST['kingfact_theme_settings_nonce'], 'kingfact_save_theme_settings' ) ) {
             $save = array();
+            // Logos
+            $save['header_logo'] = esc_url_raw( wp_unslash( $_POST['header_logo'] ?? '' ) );
+            $save['footer_logo'] = esc_url_raw( wp_unslash( $_POST['footer_logo'] ?? '' ) );
             // Header
             $save['header_contact_address'] = sanitize_text_field( wp_unslash( $_POST['header_contact_address'] ?? '' ) );
             $save['header_contact_email']   = sanitize_email( wp_unslash( $_POST['header_contact_email'] ?? '' ) );
@@ -733,11 +739,13 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
         }
 
         // Load current values
+        $header_logo = kingfact_get_option( 'header_logo', '' );
         $header_address = kingfact_get_option( 'header_contact_address', 'Flat 20, Reynolds USA' );
         $header_email = kingfact_get_option( 'header_contact_email', 'support@rmail.com' );
         $header_phone = kingfact_get_option( 'header_contact_phone', '+812 (345) 6789' );
         $header_socials = kingfact_get_option( 'header_social_links', array() );
 
+        $footer_logo = kingfact_get_option( 'footer_logo', '' );
         $footer_text = kingfact_get_option( 'footer_text', 'But I must explain to you how all this misn idea of denouncing pleasure and prais pain <a href="#">Continue Reading</a>' );
         $footer_contact_address = kingfact_get_option( 'footer_contact_address', '1058 Meadowb, Mall Road' );
         $footer_contact_email = kingfact_get_option( 'footer_contact_email', 'support@gmail.com' );
@@ -750,6 +758,26 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
             <h1>Theme Settings</h1>
             <form method="post">
                 <?php wp_nonce_field( 'kingfact_save_theme_settings', 'kingfact_theme_settings_nonce' ); ?>
+
+                <h2>Header Logo</h2>
+                <table class="form-table">
+                    <tr>
+                        <th><label for="header_logo">Header Logo</label></th>
+                        <td>
+                            <input type="hidden" name="header_logo" id="header_logo" value="<?php echo esc_attr( $header_logo ); ?>">
+                            <div style="margin-bottom: 10px;">
+                                <?php if ( $header_logo ) : ?>
+                                    <img src="<?php echo esc_url( $header_logo ); ?>" style="max-width: 200px; height: auto; display: block; margin-bottom: 10px;" id="header_logo_preview">
+                                <?php else : ?>
+                                    <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo/logo.png' ); ?>" style="max-width: 200px; height: auto; display: block; margin-bottom: 10px;" id="header_logo_preview">
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="button" id="upload_header_logo_button">Upload Logo</button>
+                            <button type="button" class="button" id="remove_header_logo_button" style="<?php echo $header_logo ? '' : 'display:none;'; ?>">Remove Logo</button>
+                            <p class="description">Upload a custom header logo, or leave blank to use the default logo.</p>
+                        </td>
+                    </tr>
+                </table>
 
                 <h2>Header Contact</h2>
                 <table class="form-table">
@@ -787,6 +815,22 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                 <h2>Footer Settings</h2>
                 <table class="form-table">
                     <tr>
+                        <th><label for="footer_logo">Footer Logo</label></th>
+                        <td>
+                            <input type="hidden" name="footer_logo" id="footer_logo" value="<?php echo esc_attr( $footer_logo ); ?>">
+                            <div style="margin-bottom: 10px;">
+                                <?php if ( $footer_logo ) : ?>
+                                    <img src="<?php echo esc_url( $footer_logo ); ?>" style="max-width: 200px; height: auto; display: block; margin-bottom: 10px;" id="footer_logo_preview">
+                                <?php else : ?>
+                                    <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo/logo-2.png' ); ?>" style="max-width: 200px; height: auto; display: block; margin-bottom: 10px;" id="footer_logo_preview">
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="button" id="upload_footer_logo_button">Upload Logo</button>
+                            <button type="button" class="button" id="remove_footer_logo_button" style="<?php echo $footer_logo ? '' : 'display:none;'; ?>">Remove Logo</button>
+                            <p class="description">Upload a custom footer logo, or leave blank to use the default logo.</p>
+                        </td>
+                    </tr>
+                    <tr>
                         <th><label for="footer_text">Footer Text (HTML allowed)</label></th>
                         <td><textarea name="footer_text" id="footer_text" rows="5" class="large-text"><?php echo esc_textarea( $footer_text ); ?></textarea></td>
                     </tr>
@@ -795,22 +839,7 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                         <td><input name="footer_copyright" id="footer_copyright" class="regular-text" value="<?php echo esc_attr( $footer_copyright ); ?>"></td>
                     </tr>
                 </table>
-                <p><em>Note: Contact information (address, email, phone) is managed in the "Header Contact" section above and is shared across the site including footer.</em></p>
-
-                <h3>Footer Social Links</h3>
-                <table class="form-table" id="footer-social-table">
-                    <?php if ( $footer_socials ) : foreach ( $footer_socials as $f ) : ?>
-                        <tr>
-                            <th>Icon class</th>
-                            <td><input name="footer_social_icon[]" class="regular-text" value="<?php echo esc_attr( $f['icon'] ); ?>"> URL: <input name="footer_social_url[]" class="regular-text" value="<?php echo esc_attr( $f['url'] ); ?>"></td>
-                        </tr>
-                    <?php endforeach; endif; ?>
-                    <tr class="template-row" style="display:none;">
-                        <th>Icon class</th>
-                        <td><input name="footer_social_icon[]" class="regular-text"> URL: <input name="footer_social_url[]" class="regular-text"></td>
-                    </tr>
-                </table>
-                <p><button type="button" class="button" id="add-footer-social">Add Footer Social Link</button></p>
+                <p><em>Note: Contact information (address, email, phone) and social links are managed in the "Header Contact" and "Header Social Links" sections above and are shared across the site including footer.</em></p>
 
                 <p class="submit"><button type="submit" class="button button-primary">Save Settings</button></p>
             </form>
@@ -818,25 +847,81 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
 
         <script>
         (function(){
+            // Social link addition
             var addHeader = document.getElementById('add-header-social');
             if (addHeader) {
                 addHeader.addEventListener('click', function(){
                     var table = document.getElementById('header-social-table');
-                    var tpl = table.querySelector('.template-row');
-                    table.insertBefore(tpl.cloneNode(true), tpl);
-                    table.querySelectorAll('.template-row').forEach(function(row){ row.style.display=''; row.classList.remove('template-row'); });
-                });
-            }
-            var addFooter = document.getElementById('add-footer-social');
-            if (addFooter) {
-                addFooter.addEventListener('click', function(){
-                    var table = document.getElementById('footer-social-table');
-                    var tpl = table.querySelector('.template-row');
-                    table.insertBefore(tpl.cloneNode(true), tpl);
-                    table.querySelectorAll('.template-row').forEach(function(row){ row.style.display=''; row.classList.remove('template-row'); });
+                    var tbody = table.querySelector('tbody') || table;
+                    var tpl = tbody.querySelector('.template-row');
+                    if (tpl) {
+                        var newRow = tpl.cloneNode(true);
+                        newRow.style.display = '';
+                        newRow.classList.remove('template-row');
+                        tbody.insertBefore(newRow, tpl);
+                    }
                 });
             }
 
+            // Media uploader for Header Logo
+            jQuery(document).ready(function($){
+                var headerLogoFrame;
+                $('#upload_header_logo_button').on('click', function(e){
+                    e.preventDefault();
+                    if (headerLogoFrame) {
+                        headerLogoFrame.open();
+                        return;
+                    }
+                    headerLogoFrame = wp.media({
+                        title: 'Select Header Logo',
+                        button: { text: 'Use this logo' },
+                        multiple: false
+                    });
+                    headerLogoFrame.on('select', function(){
+                        var attachment = headerLogoFrame.state().get('selection').first().toJSON();
+                        $('#header_logo').val(attachment.url);
+                        $('#header_logo_preview').attr('src', attachment.url).show();
+                        $('#remove_header_logo_button').show();
+                    });
+                    headerLogoFrame.open();
+                });
+
+                $('#remove_header_logo_button').on('click', function(e){
+                    e.preventDefault();
+                    $('#header_logo').val('');
+                    $('#header_logo_preview').attr('src', '<?php echo esc_js( get_template_directory_uri() . '/assets/img/logo/logo.png' ); ?>');
+                    $(this).hide();
+                });
+
+                // Media uploader for Footer Logo
+                var footerLogoFrame;
+                $('#upload_footer_logo_button').on('click', function(e){
+                    e.preventDefault();
+                    if (footerLogoFrame) {
+                        footerLogoFrame.open();
+                        return;
+                    }
+                    footerLogoFrame = wp.media({
+                        title: 'Select Footer Logo',
+                        button: { text: 'Use this logo' },
+                        multiple: false
+                    });
+                    footerLogoFrame.on('select', function(){
+                        var attachment = footerLogoFrame.state().get('selection').first().toJSON();
+                        $('#footer_logo').val(attachment.url);
+                        $('#footer_logo_preview').attr('src', attachment.url).show();
+                        $('#remove_footer_logo_button').show();
+                    });
+                    footerLogoFrame.open();
+                });
+
+                $('#remove_footer_logo_button').on('click', function(e){
+                    e.preventDefault();
+                    $('#footer_logo').val('');
+                    $('#footer_logo_preview').attr('src', '<?php echo esc_js( get_template_directory_uri() . '/assets/img/logo/logo-2.png' ); ?>');
+                    $(this).hide();
+                });
+            });
         })();
         </script>
         <?php
