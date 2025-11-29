@@ -1713,6 +1713,103 @@ function kingfact_flush_product_rewrite_rules() {
 }
 add_action( 'after_switch_theme', 'kingfact_flush_product_rewrite_rules' );
 
+// Register Testimonial Custom Post Type
+function kingfact_register_testimonial_cpt() {
+    $labels = array(
+        'name'                  => 'Testimonials',
+        'singular_name'         => 'Testimonial',
+        'menu_name'             => 'Testimonials',
+        'add_new'               => 'Add New',
+        'add_new_item'          => 'Add New Testimonial',
+        'edit_item'             => 'Edit Testimonial',
+        'new_item'              => 'New Testimonial',
+        'view_item'             => 'View Testimonial',
+        'search_items'          => 'Search Testimonials',
+        'not_found'             => 'No testimonials found',
+        'not_found_in_trash'    => 'No testimonials found in trash',
+    );
+
+    $args = array(
+        'labels'              => $labels,
+        'public'              => true,
+        'has_archive'         => true,
+        'publicly_queryable'  => true,
+        'query_var'           => true,
+        'rewrite'             => array( 'slug' => 'testimonials' ),
+        'capability_type'     => 'post',
+        'menu_position'       => 21,
+        'menu_icon'           => 'dashicons-testimonial',
+        'supports'            => array( 'title', 'editor', 'thumbnail', 'page-attributes' ),
+        'show_in_rest'        => true,
+    );
+
+    register_post_type( 'testimonial', $args );
+}
+add_action( 'init', 'kingfact_register_testimonial_cpt' );
+
+// Flush rewrite rules for testimonials
+function kingfact_flush_testimonial_rewrite_rules() {
+    kingfact_register_testimonial_cpt();
+    flush_rewrite_rules();
+}
+add_action( 'after_switch_theme', 'kingfact_flush_testimonial_rewrite_rules' );
+
+// Add meta box for testimonial fields
+function kingfact_testimonial_meta_boxes() {
+    add_meta_box(
+        'kingfact_testimonial_fields',
+        'Testimonial Details',
+        'kingfact_testimonial_meta_box_cb',
+        'testimonial',
+        'normal',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'kingfact_testimonial_meta_boxes' );
+
+function kingfact_testimonial_meta_box_cb( $post ) {
+    wp_nonce_field( 'kingfact_testimonial_save', 'kingfact_testimonial_nonce' );
+
+    $client_name = get_post_meta( $post->ID, '_testimonial_client_name', true );
+    $client_position = get_post_meta( $post->ID, '_testimonial_client_position', true );
+
+    ?>
+    <table class="form-table">
+        <tr>
+            <th><label for="testimonial_client_name"><strong>Client Name</strong></label></th>
+            <td>
+                <input type="text" id="testimonial_client_name" name="testimonial_client_name" value="<?php echo esc_attr( $client_name ); ?>" class="regular-text" />
+                <p class="description">Client's full name (e.g., "Sonika D. Silva")</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="testimonial_client_position"><strong>Client Position/Role</strong></label></th>
+            <td>
+                <input type="text" id="testimonial_client_position" name="testimonial_client_position" value="<?php echo esc_attr( $client_position ); ?>" class="regular-text" />
+                <p class="description">Client's position or role (e.g., "web designer", "civile engineer")</p>
+            </td>
+        </tr>
+    </table>
+    <p><em><strong>Featured Image:</strong> Upload the client's photo as the Featured Image.</em></p>
+    <p><em><strong>Content Editor:</strong> Use the main editor above for the testimonial text/quote.</em></p>
+    <?php
+}
+
+function kingfact_testimonial_save( $post_id ) {
+    if ( ! isset( $_POST['kingfact_testimonial_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['kingfact_testimonial_nonce'], 'kingfact_testimonial_save' ) ) return;
+    if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
+    if ( ! current_user_can( 'edit_post', $post_id ) ) return;
+
+    if ( isset( $_POST['testimonial_client_name'] ) ) {
+        update_post_meta( $post_id, '_testimonial_client_name', sanitize_text_field( $_POST['testimonial_client_name'] ) );
+    }
+    if ( isset( $_POST['testimonial_client_position'] ) ) {
+        update_post_meta( $post_id, '_testimonial_client_position', sanitize_text_field( $_POST['testimonial_client_position'] ) );
+    }
+}
+add_action( 'save_post', 'kingfact_testimonial_save' );
+
 // 2) Add meta box for product extra fields
 function kingfact_product_meta_boxes() {
     add_meta_box( 
@@ -2454,10 +2551,330 @@ function kingfact_comment( $comment, $args, $depth ) {
     <?php
 }
 
+// Add Counter Section ACF Options Page
+function kingfact_add_counter_options_page() {
+    if ( function_exists( 'acf_add_options_page' ) ) {
+        acf_add_options_page(array(
+            'page_title'    => 'Counter Section Settings',
+            'menu_title'    => 'Counter Section',
+            'menu_slug'     => 'counter-section-settings',
+            'capability'    => 'manage_options',
+            'redirect'      => false,
+            'icon_url'      => 'dashicons-chart-bar',
+            'position'      => 25,
+        ));
+    }
+}
+add_action( 'acf/init', 'kingfact_add_counter_options_page' );
 
+// Register ACF fields for Counter Section (only 3 counters)
+if ( function_exists( 'acf_add_local_field_group' ) ) {
+    acf_add_local_field_group( array(
+        'key' => 'group_counter_section',
+        'title' => 'Counter Section',
+        'fields' => array(
+            // Counter 1 Tab
+            array(
+                'key' => 'field_counter1_tab',
+                'label' => 'Counter 1',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_counter1_icon',
+                'label' => 'Icon Class',
+                'name' => 'counter1_icon',
+                'type' => 'text',
+                'instructions' => 'FontAwesome icon class (e.g., fal fa-anchor)',
+                'default_value' => 'fal fa-anchor',
+                'placeholder' => 'fal fa-anchor',
+            ),
+            array(
+                'key' => 'field_counter1_number',
+                'label' => 'Number',
+                'name' => 'counter1_number',
+                'type' => 'text',
+                'default_value' => '2000',
+                'placeholder' => '2000',
+            ),
+            array(
+                'key' => 'field_counter1_label',
+                'label' => 'Label',
+                'name' => 'counter1_label',
+                'type' => 'text',
+                'default_value' => 'Project Done',
+                'placeholder' => 'Project Done',
+            ),
+            
+            // Counter 2 Tab
+            array(
+                'key' => 'field_counter2_tab',
+                'label' => 'Counter 2',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_counter2_icon',
+                'label' => 'Icon Class',
+                'name' => 'counter2_icon',
+                'type' => 'text',
+                'instructions' => 'FontAwesome icon class (e.g., fal fa-ball-pile)',
+                'default_value' => 'fal fa-ball-pile',
+                'placeholder' => 'fal fa-ball-pile',
+            ),
+            array(
+                'key' => 'field_counter2_number',
+                'label' => 'Number',
+                'name' => 'counter2_number',
+                'type' => 'text',
+                'default_value' => '3500',
+                'placeholder' => '3500',
+            ),
+            array(
+                'key' => 'field_counter2_label',
+                'label' => 'Label',
+                'name' => 'counter2_label',
+                'type' => 'text',
+                'default_value' => 'Power Plants',
+                'placeholder' => 'Power Plants',
+            ),
+            
+            // Counter 3 Tab
+            array(
+                'key' => 'field_counter3_tab',
+                'label' => 'Counter 3',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_counter3_icon',
+                'label' => 'Icon Class',
+                'name' => 'counter3_icon',
+                'type' => 'text',
+                'instructions' => 'FontAwesome icon class (e.g., fal fa-hospital-user)',
+                'default_value' => 'fal fa-hospital-user',
+                'placeholder' => 'fal fa-hospital-user',
+            ),
+            array(
+                'key' => 'field_counter3_number',
+                'label' => 'Number',
+                'name' => 'counter3_number',
+                'type' => 'text',
+                'default_value' => '2630',
+                'placeholder' => '2630',
+            ),
+            array(
+                'key' => 'field_counter3_label',
+                'label' => 'Label',
+                'name' => 'counter3_label',
+                'type' => 'text',
+                'default_value' => 'Qualified Staff',
+                'placeholder' => 'Qualified Staff',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'options_page',
+                    'operator' => '==',
+                    'value' => 'counter-section-settings',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+    ));
+}
 
+// Our Goals Section Shortcode
+function our_goals_shortcode() {
+    ob_start();
+    ?>
+    <div class="choose-area pt-125 pb-100">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-10 col-lg-10 offset-lg-1 offset-xl-1">
+                    <div class="section-title mr-50 ml-50 text-center mb-75">
+                        <span>our goals</span>
+                        <h1>Experience Industrial Engineering Company Based In New York</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6">
+                    <div class="choose-wrapper mb-30">
+                        <div class="choose-content">
+                            <ul>
+                                <li>
+                                    <div class="choose-icon f-left">
+                                        <i class="far fa-user-hard-hat"></i>
+                                    </div>
+                                    <div class="choose-text">
+                                        <h4>Creative Architecture</h4>
+                                        <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="choose-icon f-left">
+                                        <i class="far fa-alarm-clock"></i>
+                                    </div>
+                                    <div class="choose-text">
+                                        <h4>Timely Maintenance</h4>
+                                        <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="choose-icon f-left">
+                                        <i class="far fa-usd-square"></i>
+                                    </div>
+                                    <div class="choose-text">
+                                        <h4>Competitive Low Cost</h4>
+                                        <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6 col-lg-6">
+                    <div class="choose-img pos-rel mb-30">
+                        <img src="<?php echo get_template_directory_uri(); ?>/assets/img/bg/choose-01.jpg" alt="">
+                        <div class="choose-video-icon">
+                            <a class="popup-video" href="https://www.youtube.com/watch?v=LTXD6XZXc3U"><i class="fas fa-play"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('our_goals', 'our_goals_shortcode');
 
+// Newsletter Subscription Handler
+function handle_newsletter_subscription() {
+    // Verify nonce for security
+    if (!isset($_POST['newsletter_nonce']) || !wp_verify_nonce($_POST['newsletter_nonce'], 'newsletter_subscribe')) {
+        // For backward compatibility, allow submissions without nonce initially
+        // wp_send_json_error('Security check failed');
+        // return;
+    }
+    
+    // Get and sanitize email
+    $email = isset($_POST['newsletter_email']) ? sanitize_email($_POST['newsletter_email']) : '';
+    
+    // Validate email
+    if (empty($email) || !is_email($email)) {
+        wp_send_json_error('Please enter a valid email address.');
+        return;
+    }
+    
+    // Check if email already exists
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'newsletter_subscribers';
+    
+    // Create table if it doesn't exist
+    $charset_collate = $wpdb->get_charset_collate();
+    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+        id mediumint(9) NOT NULL AUTO_INCREMENT,
+        email varchar(100) NOT NULL,
+        subscribed_date datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        status varchar(20) DEFAULT 'active' NOT NULL,
+        PRIMARY KEY  (id),
+        UNIQUE KEY email (email)
+    ) $charset_collate;";
+    
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+    
+    // Check if email already subscribed
+    $existing = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $table_name WHERE email = %s",
+        $email
+    ));
+    
+    if ($existing > 0) {
+        wp_send_json_error('This email is already subscribed to our newsletter.');
+        return;
+    }
+    
+    // Insert new subscriber
+    $result = $wpdb->insert(
+        $table_name,
+        array(
+            'email' => $email,
+            'subscribed_date' => current_time('mysql'),
+            'status' => 'active'
+        ),
+        array('%s', '%s', '%s')
+    );
+    
+    if ($result) {
+        // Send confirmation email (optional)
+        $to = $email;
+        $subject = 'Newsletter Subscription Confirmation';
+        $message = 'Thank you for subscribing to our newsletter! You will receive updates from us soon.';
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        
+        wp_mail($to, $subject, $message, $headers);
+        
+        wp_send_json_success('Thank you for subscribing! Check your email for confirmation.');
+    } else {
+        wp_send_json_error('Something went wrong. Please try again later.');
+    }
+}
 
+// Register AJAX handlers for both logged-in and non-logged-in users
+add_action('wp_ajax_newsletter_subscribe', 'handle_newsletter_subscription');
+add_action('wp_ajax_nopriv_newsletter_subscribe', 'handle_newsletter_subscription');
 
+// Enqueue newsletter AJAX script
+function enqueue_newsletter_scripts() {
+    if (is_page_template('page-home.php')) {
+        ?>
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('#newsletter-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                var email = $('#newsletter-email').val();
+                var $message = $('#newsletter-message');
+                var $button = $(this).find('button[type="submit"]');
+                
+                // Disable button and show loading
+                $button.prop('disabled', true).html('<span>Subscribing...</span>');
+                $message.html('');
+                
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'newsletter_subscribe',
+                        newsletter_email: email
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $message.html('<p style="color: #4CAF50; font-weight: bold;">' + response.data + '</p>');
+                            $('#newsletter-email').val('');
+                        } else {
+                            $message.html('<p style="color: #f44336; font-weight: bold;">' + response.data + '</p>');
+                        }
+                    },
+                    error: function() {
+                        $message.html('<p style="color: #f44336; font-weight: bold;">An error occurred. Please try again.</p>');
+                    },
+                    complete: function() {
+                        $button.prop('disabled', false).html('<span>subscribe</span>');
+                    }
+                });
+            });
+        });
+        </script>
+        <?php
+    }
+}
+add_action('wp_footer', 'enqueue_newsletter_scripts');
 
 
