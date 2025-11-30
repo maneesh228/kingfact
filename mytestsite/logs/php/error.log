@@ -307,3 +307,41 @@ Stack trace:
 [27-Nov-2025 16:20:24 UTC] PHP Warning:  Attempt to read property "title" on null in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-customize-widgets.php on line 926
 [27-Nov-2025 16:20:29 UTC] PHP Warning:  Undefined variable $layer_content in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 101
 [27-Nov-2025 16:20:29 UTC] PHP Warning:  Undefined variable $layer_content in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 102
+[28-Nov-2025 18:59:21 UTC] PHP Fatal error:  Cannot redeclare kingfact_counter_section_shortcode() (previously declared in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php:2461) in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 2731
+[28-Nov-2025 18:59:30 UTC] PHP Fatal error:  Cannot redeclare kingfact_counter_section_shortcode() (previously declared in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php:2461) in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 2731
+[28-Nov-2025 18:59:33 UTC] PHP Fatal error:  Cannot redeclare kingfact_counter_section_shortcode() (previously declared in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php:2461) in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 2731
+[28-Nov-2025 18:59:36 UTC] PHP Fatal error:  Cannot redeclare kingfact_counter_section_shortcode() (previously declared in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php:2461) in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 2731
+[28-Nov-2025 18:59:37 UTC] PHP Fatal error:  Cannot redeclare kingfact_counter_section_shortcode() (previously declared in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php:2461) in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 2731
+[28-Nov-2025 18:59:38 UTC] PHP Fatal error:  Cannot redeclare kingfact_counter_section_shortcode() (previously declared in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php:2461) in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 2731
+[28-Nov-2025 19:21:28 UTC] PHP Warning:  Attempt to read property "title" on null in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-customize-widgets.php on line 926
+[29-Nov-2025 05:35:37 UTC] PHP Parse error:  Unclosed '{' on line 64 does not match ')' in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\header.php on line 68
+[29-Nov-2025 05:44:10 UTC] PHP Parse error:  syntax error, unexpected token "if" in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 546
+[29-Nov-2025 09:50:34 UTC] PHP Parse error:  syntax error, unexpected token ";" in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 11
+[29-Nov-2025 09:50:34 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-recovery-mode-email-service.php on line 367
+[29-Nov-2025 09:50:34 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-recovery-mode-email-service.php on line 368
+[29-Nov-2025 09:50:35 UTC] PHP Parse error:  syntax error, unexpected token ";" in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 11
+[29-Nov-2025 09:50:35 UTC] PHP Parse error:  syntax error, unexpected token ";" in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 11
+[30-Nov-2025 11:22:22 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function kingfact_get_current_slides_display() in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php:2738
+Stack trace:
+#0 C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-settings.php(695): include()
+#1 C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-config.php(103): require_once('C:\\Users\\mpmin\\...')
+#2 C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-load.php(50): require_once('C:\\Users\\mpmin\\...')
+#3 C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-admin\admin-ajax.php(22): require_once('C:\\Users\\mpmin\\...')
+#4 {main}
+  thrown in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 2738
+[30-Nov-2025 11:22:22 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-recovery-mode-email-service.php on line 367
+[30-Nov-2025 11:22:22 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-recovery-mode-email-service.php on line 368
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_bg in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 26
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_subtitle in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 31
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_title in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 32
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_paragraph in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 34
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_btn_url in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 36
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_btn_text in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 37
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item1_image in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 45
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item1_title in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 45
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item1_title in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 48
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item1_text in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 49
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item2_image in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 56
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item2_title in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 56
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item2_title in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 59
+[30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item2_text in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 60

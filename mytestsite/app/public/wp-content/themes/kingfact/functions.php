@@ -192,15 +192,91 @@ function kingfact_slide_meta_boxes() {
 }
 add_action( 'add_meta_boxes', 'kingfact_slide_meta_boxes' );
 
+// Add metabox to Home page showing all slides
+function kingfact_add_slides_manager_metabox() {
+    $screen = get_current_screen();
+    if ( $screen && $screen->id === 'page' ) {
+        $template = get_page_template_slug();
+        if ( $template === 'page-home.php' ) {
+            add_meta_box(
+                'kingfact_slides_manager',
+                'Manage Slider Slides',
+                'kingfact_slides_manager_metabox_cb',
+                'page',
+                'side',
+                'high'
+            );
+        }
+    }
+}
+add_action( 'add_meta_boxes', 'kingfact_add_slides_manager_metabox' );
+
+function kingfact_slides_manager_metabox_cb( $post ) {
+    // Get all slides
+    $slides = get_posts( array(
+        'post_type'      => 'slide',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+        'orderby'        => 'menu_order',
+        'order'          => 'ASC',
+    ) );
+    
+    echo '<div style="margin: 10px 0;">';
+    echo '<p style="margin-bottom: 15px;"><strong>Current Slides:</strong></p>';
+    
+    if ( $slides ) {
+        echo '<ul style="margin: 0; padding-left: 20px;">';
+        foreach ( $slides as $slide ) {
+            $edit_link = get_edit_post_link( $slide->ID );
+            echo '<li style="margin-bottom: 8px;">';
+            echo '<a href="' . esc_url( $edit_link ) . '" target="_blank">' . esc_html( get_the_title( $slide->ID ) ) . '</a>';
+            echo '</li>';
+        }
+        echo '</ul>';
+    } else {
+        echo '<p style="color: #999; font-style: italic;">No slides yet.</p>';
+    }
+    
+    echo '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">';
+    echo '<a href="' . admin_url( 'post-new.php?post_type=slide' ) . '" class="button button-primary" target="_blank">+ Add New Slide</a>';
+    echo '</div>';
+    
+    echo '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">';
+    echo '<a href="' . admin_url( 'edit.php?post_type=slide' ) . '" class="button" target="_blank">View All Slides</a>';
+    echo '</div>';
+    
+    echo '</div>';
+}
+
 function kingfact_slide_meta_box_cb( $post ) {
     wp_nonce_field( 'kingfact_slide_save', 'kingfact_slide_nonce' );
 
     $subtitle = get_post_meta( $post->ID, '_slide_subtitle', true );
-    $bigtitle = get_post_meta( $post->ID, '_slide_bigtitle', true ); // optional: can use post_title
+    $bigtitle = get_post_meta( $post->ID, '_slide_bigtitle', true );
     $btn_text = get_post_meta( $post->ID, '_slide_btn_text', true );
     $btn_url  = get_post_meta( $post->ID, '_slide_btn_url', true );
+    $slide_image = get_post_meta( $post->ID, '_slide_image', true );
+    $slide_image_url = $slide_image ? wp_get_attachment_image_url( $slide_image, 'full' ) : '';
 
     ?>
+    <p>
+      <label><strong>Slide Background Image</strong></label><br>
+      <div class="slide-image-wrapper" style="margin-top: 10px;">
+        <div class="slide-image-preview" style="margin-bottom: 10px;">
+          <?php if ( $slide_image_url ) : ?>
+            <img src="<?php echo esc_url( $slide_image_url ); ?>" style="max-width: 100%; height: auto; border: 1px solid #ddd;" />
+          <?php else : ?>
+            <img src="" style="display: none; max-width: 100%; height: auto; border: 1px solid #ddd;" />
+          <?php endif; ?>
+        </div>
+        <input type="hidden" id="slide_image" name="slide_image" value="<?php echo esc_attr( $slide_image ); ?>" />
+        <button type="button" class="button slide-image-upload"><?php echo $slide_image ? 'Change Image' : 'Upload Image'; ?></button>
+        <?php if ( $slide_image ) : ?>
+          <button type="button" class="button slide-image-remove" style="margin-left: 5px;">Remove Image</button>
+        <?php endif; ?>
+      </div>
+    </p>
+
     <p>
       <label for="slide_subtitle"><strong>Subtitle (small line)</strong></label><br>
       <input type="text" id="slide_subtitle" name="slide_subtitle" value="<?php echo esc_attr( $subtitle ); ?>" style="width:100%;">
@@ -223,8 +299,52 @@ function kingfact_slide_meta_box_cb( $post ) {
     </p>
 
     <p>
-      <em>Use the main editor (above) for the slide description / paragraph text. Set the Featured Image to be the slide background image.</em>
+      <em>Use the main editor (above) for the slide description / paragraph text.</em>
     </p>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        var slideImageFrame;
+        
+        $('.slide-image-upload').on('click', function(e) {
+            e.preventDefault();
+            
+            if (slideImageFrame) {
+                slideImageFrame.open();
+                return;
+            }
+            
+            slideImageFrame = wp.media({
+                title: 'Select Slide Background Image',
+                button: {
+                    text: 'Use This Image'
+                },
+                multiple: false
+            });
+            
+            slideImageFrame.on('select', function() {
+                var attachment = slideImageFrame.state().get('selection').first().toJSON();
+                $('#slide_image').val(attachment.id);
+                $('.slide-image-preview img').attr('src', attachment.url).show();
+                $('.slide-image-upload').text('Change Image');
+                
+                if ($('.slide-image-remove').length === 0) {
+                    $('.slide-image-upload').after('<button type="button" class="button slide-image-remove" style="margin-left: 5px;">Remove Image</button>');
+                }
+            });
+            
+            slideImageFrame.open();
+        });
+        
+        $(document).on('click', '.slide-image-remove', function(e) {
+            e.preventDefault();
+            $('#slide_image').val('');
+            $('.slide-image-preview img').attr('src', '').hide();
+            $('.slide-image-upload').text('Upload Image');
+            $(this).remove();
+        });
+    });
+    </script>
     <?php
 }
 
@@ -237,6 +357,7 @@ function kingfact_slide_save( $post_id ) {
 
     // save fields
     $fields = array(
+        'slide_image'    => '_slide_image',
         'slide_subtitle' => '_slide_subtitle',
         'slide_bigtitle' => '_slide_bigtitle',
         'slide_btn_text' => '_slide_btn_text',
@@ -247,6 +368,8 @@ function kingfact_slide_save( $post_id ) {
             $value = wp_unslash( $_POST[ $input ] );
             if ( $input === 'slide_btn_url' ) {
                 update_post_meta( $post_id, $meta_key, esc_url_raw( $value ) );
+            } elseif ( $input === 'slide_image' ) {
+                update_post_meta( $post_id, $meta_key, absint( $value ) );
             } else {
                 update_post_meta( $post_id, $meta_key, sanitize_text_field( $value ) );
             }
@@ -256,6 +379,15 @@ function kingfact_slide_save( $post_id ) {
     }
 }
 add_action( 'save_post', 'kingfact_slide_save' );
+
+// Enqueue media uploader for slide edit screen
+function kingfact_slide_enqueue_media() {
+    global $post_type;
+    if ( 'slide' === $post_type ) {
+        wp_enqueue_media();
+    }
+}
+add_action( 'admin_enqueue_scripts', 'kingfact_slide_enqueue_media' );
 
 
 // ACF: Header Settings Fields
@@ -2660,22 +2792,229 @@ function kingfact_add_counter_options_page() {
 }
 add_action( 'acf/init', 'kingfact_add_counter_options_page' );
 
-// Register ACF fields for Counter Section (only 3 counters)
+// Register ACF fields for Home Page Sections with Tabs
 if ( function_exists( 'acf_add_local_field_group' ) ) {
     acf_add_local_field_group( array(
-        'key' => 'group_counter_section',
-        'title' => 'Counter Section',
+        'key' => 'group_home_sections',
+        'title' => 'Home Page Sections',
         'fields' => array(
-            // Counter 1 Tab
+            
+            // Slides Section Tab
             array(
-                'key' => 'field_counter1_tab',
-                'label' => 'Counter 1',
+                'key' => 'field_slides_tab',
+                'label' => 'Slides Section',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
             array(
+                'key' => 'field_slides_message',
+                'label' => 'Manage Slides',
+                'name' => 'slides_message',
+                'type' => 'message',
+                'message' => 'To manage slider slides (add, edit, or delete), go to <a href="' . admin_url('edit.php?post_type=slide') . '" target="_blank"><strong>Slides</strong></a> in the WordPress admin menu.<br><br>Each slide has the following fields:<br>• <strong>Slide Background Image</strong> - Upload image with dedicated image picker<br>• <strong>Title</strong> - Post title (used if Big Heading is empty)<br>• <strong>Description</strong> - Post content/editor (displays on slide)<br>• <strong>Subtitle</strong> - Small text line above heading<br>• <strong>Big Heading</strong> - Main title displayed on slide<br>• <strong>Button Text</strong> - Text for call-to-action button<br>• <strong>Button URL</strong> - Link for the button<br><br>Slides are displayed in menu order (drag to reorder in slides list).<br><br><a href="' . admin_url('post-new.php?post_type=slide') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Slide</a><a href="' . admin_url('edit.php?post_type=slide') . '" class="button button-secondary" target="_blank">View All Slides</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
+            ),
+            
+            // Features Section Tab
+            array(
+                'key' => 'field_features_tab',
+                'label' => 'Features Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_features_bg',
+                'label' => 'Background Image',
+                'name' => 'features_bg',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+            ),
+            array(
+                'key' => 'field_features_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'features_subtitle',
+                'type' => 'text',
+                'default_value' => 'who we are',
+            ),
+            array(
+                'key' => 'field_features_title',
+                'label' => 'Title',
+                'name' => 'features_title',
+                'type' => 'text',
+                'default_value' => 'Explore Features',
+            ),
+            array(
+                'key' => 'field_features_paragraph',
+                'label' => 'Description',
+                'name' => 'features_paragraph',
+                'type' => 'textarea',
+                'default_value' => 'But I must explain to you how all this mistaken is denouncing pleasure and praising pain was borners will give you a complete account of the system and expound the actual teachings',
+            ),
+            array(
+                'key' => 'field_features_btn_text',
+                'label' => 'Button Text',
+                'name' => 'features_btn_text',
+                'type' => 'text',
+                'default_value' => 'read more',
+            ),
+            array(
+                'key' => 'field_features_btn_url',
+                'label' => 'Button URL',
+                'name' => 'features_btn_url',
+                'type' => 'url',
+                'default_value' => '#',
+            ),
+            array(
+                'key' => 'field_features_item1_image',
+                'label' => 'Feature 1 Image',
+                'name' => 'features_item1_image',
+                'type' => 'image',
+                'return_format' => 'url',
+            ),
+            array(
+                'key' => 'field_features_item1_title',
+                'label' => 'Feature 1 Title',
+                'name' => 'features_item1_title',
+                'type' => 'text',
+                'default_value' => 'Technology Buildup',
+            ),
+            array(
+                'key' => 'field_features_item1_text',
+                'label' => 'Feature 1 Text',
+                'name' => 'features_item1_text',
+                'type' => 'textarea',
+                'default_value' => 'Avoids pleasure itself, because it is pleasure because those who do not know how',
+            ),
+            array(
+                'key' => 'field_features_item2_image',
+                'label' => 'Feature 2 Image',
+                'name' => 'features_item2_image',
+                'type' => 'image',
+                'return_format' => 'url',
+            ),
+            array(
+                'key' => 'field_features_item2_title',
+                'label' => 'Feature 2 Title',
+                'name' => 'features_item2_title',
+                'type' => 'text',
+                'default_value' => 'Awards & Accolades',
+            ),
+            array(
+                'key' => 'field_features_item2_text',
+                'label' => 'Feature 2 Text',
+                'name' => 'features_item2_text',
+                'type' => 'textarea',
+                'default_value' => 'Avoids pleasure itself, because it is pleasure because those who do not know how',
+            ),
+            
+            // Video Section Tab
+            array(
+                'key' => 'field_video_tab',
+                'label' => 'Video Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_video_bg',
+                'label' => 'Background Image',
+                'name' => 'video_bg',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+            ),
+            array(
+                'key' => 'field_video_url',
+                'label' => 'Video URL',
+                'name' => 'video_url',
+                'type' => 'url',
+                'instructions' => 'YouTube or Vimeo video URL',
+                'default_value' => '#',
+            ),
+            array(
+                'key' => 'field_video_title',
+                'label' => 'Title',
+                'name' => 'video_title',
+                'type' => 'textarea',
+                'default_value' => 'Need Our Premium Services Full Free & More',
+            ),
+            array(
+                'key' => 'field_video_btn_text',
+                'label' => 'Button Text',
+                'name' => 'video_btn_text',
+                'type' => 'text',
+                'default_value' => 'read more',
+            ),
+            array(
+                'key' => 'field_video_btn_url',
+                'label' => 'Button URL',
+                'name' => 'video_btn_url',
+                'type' => 'url',
+                'default_value' => '/services',
+            ),
+            
+            // Counter Section Tab
+            array(
+                'key' => 'field_counter_section_tab',
+                'label' => 'Counter Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_counter_bg',
+                'label' => 'Background Image',
+                'name' => 'counter_bg',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+            ),
+            array(
+                'key' => 'field_counter_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'counter_subtitle',
+                'type' => 'text',
+                'default_value' => 'fun fact',
+            ),
+            array(
+                'key' => 'field_counter_title',
+                'label' => 'Title',
+                'name' => 'counter_title',
+                'type' => 'text',
+                'default_value' => 'Let\'s See Our Fun Facts',
+            ),
+            array(
+                'key' => 'field_counter_description',
+                'label' => 'Description',
+                'name' => 'counter_description',
+                'type' => 'textarea',
+                'default_value' => 'But I must explain to you how amistaken idea denouncing pleasure praising',
+            ),
+            array(
+                'key' => 'field_counter_btn_text',
+                'label' => 'Button Text',
+                'name' => 'counter_btn_text',
+                'type' => 'text',
+                'default_value' => 'read more',
+            ),
+            array(
+                'key' => 'field_counter_btn_url',
+                'label' => 'Button URL',
+                'name' => 'counter_btn_url',
+                'type' => 'url',
+                'default_value' => '/products',
+            ),
+            
+            // Counter 1 Group
+            array(
+                'key' => 'field_counter1_group',
+                'label' => '— Counter 1 —',
+                'type' => 'message',
+                'message' => '',
+            ),
+            array(
                 'key' => 'field_counter1_icon',
-                'label' => 'Icon Class',
+                'label' => 'Counter 1 - Icon Class',
                 'name' => 'counter1_icon',
                 'type' => 'text',
                 'instructions' => 'FontAwesome icon class (e.g., fal fa-anchor)',
@@ -2684,7 +3023,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_counter1_number',
-                'label' => 'Number',
+                'label' => 'Counter 1 - Number',
                 'name' => 'counter1_number',
                 'type' => 'text',
                 'default_value' => '2000',
@@ -2692,23 +3031,23 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_counter1_label',
-                'label' => 'Label',
+                'label' => 'Counter 1 - Label',
                 'name' => 'counter1_label',
                 'type' => 'text',
                 'default_value' => 'Project Done',
                 'placeholder' => 'Project Done',
             ),
             
-            // Counter 2 Tab
+            // Counter 2 Group
             array(
-                'key' => 'field_counter2_tab',
-                'label' => 'Counter 2',
-                'type' => 'tab',
-                'placement' => 'top',
+                'key' => 'field_counter2_group',
+                'label' => '— Counter 2 —',
+                'type' => 'message',
+                'message' => '',
             ),
             array(
                 'key' => 'field_counter2_icon',
-                'label' => 'Icon Class',
+                'label' => 'Counter 2 - Icon Class',
                 'name' => 'counter2_icon',
                 'type' => 'text',
                 'instructions' => 'FontAwesome icon class (e.g., fal fa-ball-pile)',
@@ -2717,7 +3056,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_counter2_number',
-                'label' => 'Number',
+                'label' => 'Counter 2 - Number',
                 'name' => 'counter2_number',
                 'type' => 'text',
                 'default_value' => '3500',
@@ -2725,23 +3064,23 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_counter2_label',
-                'label' => 'Label',
+                'label' => 'Counter 2 - Label',
                 'name' => 'counter2_label',
                 'type' => 'text',
                 'default_value' => 'Power Plants',
                 'placeholder' => 'Power Plants',
             ),
             
-            // Counter 3 Tab
+            // Counter 3 Group
             array(
-                'key' => 'field_counter3_tab',
-                'label' => 'Counter 3',
-                'type' => 'tab',
-                'placement' => 'top',
+                'key' => 'field_counter3_group',
+                'label' => '— Counter 3 —',
+                'type' => 'message',
+                'message' => '',
             ),
             array(
                 'key' => 'field_counter3_icon',
-                'label' => 'Icon Class',
+                'label' => 'Counter 3 - Icon Class',
                 'name' => 'counter3_icon',
                 'type' => 'text',
                 'instructions' => 'FontAwesome icon class (e.g., fal fa-hospital-user)',
@@ -2750,7 +3089,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_counter3_number',
-                'label' => 'Number',
+                'label' => 'Counter 3 - Number',
                 'name' => 'counter3_number',
                 'type' => 'text',
                 'default_value' => '2630',
@@ -2758,44 +3097,168 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_counter3_label',
-                'label' => 'Label',
+                'label' => 'Counter 3 - Label',
                 'name' => 'counter3_label',
                 'type' => 'text',
                 'default_value' => 'Qualified Staff',
                 'placeholder' => 'Qualified Staff',
             ),
             
-            // Counter 4 Tab
+            // Our Goals Section Tab
             array(
-                'key' => 'field_counter4_tab',
-                'label' => 'Counter 4',
+                'key' => 'field_goals_tab',
+                'label' => 'Our Goals Section',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
             array(
-                'key' => 'field_counter4_icon',
-                'label' => 'Icon Class',
-                'name' => 'counter4_icon',
+                'key' => 'field_goals_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'goals_subtitle',
                 'type' => 'text',
-                'instructions' => 'FontAwesome icon class (e.g., fal fa-smile)',
-                'default_value' => 'fal fa-smile',
-                'placeholder' => 'fal fa-smile',
+                'default_value' => 'our goals',
             ),
             array(
-                'key' => 'field_counter4_number',
-                'label' => 'Number',
-                'name' => 'counter4_number',
+                'key' => 'field_goals_title',
+                'label' => 'Title',
+                'name' => 'goals_title',
                 'type' => 'text',
-                'default_value' => '100',
-                'placeholder' => '100',
+                'default_value' => 'Experience Industrial Engineering Company Based In New York',
             ),
             array(
-                'key' => 'field_counter4_label',
-                'label' => 'Label',
-                'name' => 'counter4_label',
+                'key' => 'field_goals_image',
+                'label' => 'Right Side Image',
+                'name' => 'goals_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+            ),
+            array(
+                'key' => 'field_goals_video_url',
+                'label' => 'Video URL',
+                'name' => 'goals_video_url',
+                'type' => 'url',
+                'instructions' => 'YouTube or Vimeo video URL for popup',
+                'default_value' => 'https://www.youtube.com/watch?v=LTXD6XZXc3U',
+            ),
+            
+            // Goal Item 1
+            array(
+                'key' => 'field_goal1_icon',
+                'label' => 'Goal 1 - Icon Class',
+                'name' => 'goal1_icon',
                 'type' => 'text',
-                'default_value' => 'Happy Clients',
-                'placeholder' => 'Happy Clients',
+                'instructions' => 'FontAwesome icon class (e.g., far fa-user-hard-hat)',
+                'default_value' => 'far fa-user-hard-hat',
+            ),
+            array(
+                'key' => 'field_goal1_title',
+                'label' => 'Goal 1 - Title',
+                'name' => 'goal1_title',
+                'type' => 'text',
+                'default_value' => 'Creative Architecture',
+            ),
+            array(
+                'key' => 'field_goal1_description',
+                'label' => 'Goal 1 - Description',
+                'name' => 'goal1_description',
+                'type' => 'textarea',
+                'rows' => 3,
+                'default_value' => 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque',
+            ),
+            
+            // Goal Item 2
+            array(
+                'key' => 'field_goal2_icon',
+                'label' => 'Goal 2 - Icon Class',
+                'name' => 'goal2_icon',
+                'type' => 'text',
+                'instructions' => 'FontAwesome icon class (e.g., far fa-alarm-clock)',
+                'default_value' => 'far fa-alarm-clock',
+            ),
+            array(
+                'key' => 'field_goal2_title',
+                'label' => 'Goal 2 - Title',
+                'name' => 'goal2_title',
+                'type' => 'text',
+                'default_value' => 'Timely Maintenance',
+            ),
+            array(
+                'key' => 'field_goal2_description',
+                'label' => 'Goal 2 - Description',
+                'name' => 'goal2_description',
+                'type' => 'textarea',
+                'rows' => 3,
+                'default_value' => 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque',
+            ),
+            
+            // Goal Item 3
+            array(
+                'key' => 'field_goal3_icon',
+                'label' => 'Goal 3 - Icon Class',
+                'name' => 'goal3_icon',
+                'type' => 'text',
+                'instructions' => 'FontAwesome icon class (e.g., far fa-usd-square)',
+                'default_value' => 'far fa-usd-square',
+            ),
+            array(
+                'key' => 'field_goal3_title',
+                'label' => 'Goal 3 - Title',
+                'name' => 'goal3_title',
+                'type' => 'text',
+                'default_value' => 'Competitive Low Cost',
+            ),
+            array(
+                'key' => 'field_goal3_description',
+                'label' => 'Goal 3 - Description',
+                'name' => 'goal3_description',
+                'type' => 'textarea',
+                'rows' => 3,
+                'default_value' => 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque',
+            ),
+            
+            // Newsletter Section Tab
+            array(
+                'key' => 'field_newsletter_tab',
+                'label' => 'Newsletter Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_newsletter_bg',
+                'label' => 'Background Image',
+                'name' => 'newsletter_bg',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+            ),
+            array(
+                'key' => 'field_newsletter_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'newsletter_subtitle',
+                'type' => 'text',
+                'default_value' => 'to get more information',
+            ),
+            array(
+                'key' => 'field_newsletter_title',
+                'label' => 'Title',
+                'name' => 'newsletter_title',
+                'type' => 'text',
+                'default_value' => 'Subscribe Newsletter',
+            ),
+            array(
+                'key' => 'field_newsletter_placeholder',
+                'label' => 'Email Placeholder',
+                'name' => 'newsletter_placeholder',
+                'type' => 'text',
+                'default_value' => 'Enter Your Email :',
+            ),
+            array(
+                'key' => 'field_newsletter_btn_text',
+                'label' => 'Button Text',
+                'name' => 'newsletter_btn_text',
+                'type' => 'text',
+                'default_value' => 'subscribe',
             ),
         ),
         'location' => array(
@@ -2807,7 +3270,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 ),
             ),
         ),
-        'menu_order' => 0,
+        'menu_order' => 1,
         'position' => 'normal',
         'style' => 'default',
     ));

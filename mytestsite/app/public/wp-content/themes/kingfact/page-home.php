@@ -25,9 +25,9 @@ if ( $slides ) : ?>
             <div id="rs_slider_01" class="rev_slider fullwidthabanner" style="display:none;" data-version="5.4.7">
                 <ul>
                     <?php foreach ( $slides as $i => $slide ) :
-                        // image (featured)
-                        $thumb_id = get_post_thumbnail_id( $slide->ID );
-                        $img_url = $thumb_id ? wp_get_attachment_image_url( $thumb_id, 'full' ) : '';
+                        // Get custom slide image field
+                        $slide_image_id = get_post_meta( $slide->ID, '_slide_image', true );
+                        $img_url = $slide_image_id ? wp_get_attachment_image_url( $slide_image_id, 'full' ) : '';
 
                         // fields
                         $subtitle = get_post_meta( $slide->ID, '_slide_subtitle', true );
@@ -267,8 +267,64 @@ if ( $slides ) : ?>
     <!-- slider end -->
 <?php endif; 
 
- the_content();
+// Get Features Section fields
+$features_bg = get_field('features_bg') ?: get_template_directory_uri() . '/assets/img/features/fea-bg.jpg';
+$features_subtitle = get_field('features_subtitle') ?: 'who we are';
+$features_title = get_field('features_title') ?: 'Explore Features';
+$features_paragraph = get_field('features_paragraph') ?: 'But I must explain to you how all this mistaken is denouncing pleasure and praising pain was borners will give you a complete account of the system and expound the actual teachings';
+$features_btn_text = get_field('features_btn_text') ?: 'read more';
+$features_btn_url = get_field('features_btn_url') ?: '#';
+$features_item1_image = get_field('features_item1_image') ?: get_template_directory_uri() . '/assets/img/features/who-01.jpg';
+$features_item1_title = get_field('features_item1_title') ?: 'Technology Buildup';
+$features_item1_text = get_field('features_item1_text') ?: 'Avoids pleasure itself, because it is pleasure because those who do not know how';
+$features_item2_image = get_field('features_item2_image') ?: get_template_directory_uri() . '/assets/img/features/who-02.jpg';
+$features_item2_title = get_field('features_item2_title') ?: 'Awards & Accolades';
+$features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itself, because it is pleasure because those who do not know how';
 ?>
+
+            <!-- features start  -->
+            <div class="features-area pt-120 pb-90" style="background-image:url(<?php echo esc_url($features_bg); ?>)">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="section-title mb-30">
+                                <span><?php echo esc_html($features_subtitle); ?></span>
+                                <h1><?php echo esc_html($features_title); ?></h1>
+                                <div class="mb-20"></div>
+                                <p><?php echo esc_html($features_paragraph); ?></p>
+                                <div class="fea-btn mt-30">
+                                    <a class="b-btn btn-black" href="<?php echo esc_url($features_btn_url); ?>">
+                                        <span><?php echo esc_html($features_btn_text); ?></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="b-features text-center mb-30">
+                                <div class="b-fea-img">
+                                    <img src="<?php echo esc_url($features_item1_image); ?>" alt="<?php echo esc_attr($features_item1_title); ?>">
+                                </div>
+                                <div class="b-fea-content">
+                                    <h3><?php echo esc_html($features_item1_title); ?></h3>
+                                    <p><?php echo esc_html($features_item1_text); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="b-features text-center mb-30">
+                                <div class="b-fea-img">
+                                    <img src="<?php echo esc_url($features_item2_image); ?>" alt="<?php echo esc_attr($features_item2_title); ?>">
+                                </div>
+                                <div class="b-fea-content">
+                                    <h3><?php echo esc_html($features_item2_title); ?></h3>
+                                    <p><?php echo esc_html($features_item2_text); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- features end  -->
 
             <!-- services-area start  -->
             <div class="services-area pt-120 pb-90">
@@ -337,20 +393,25 @@ if ( $slides ) : ?>
             <!-- services-area end  -->
 
              <!-- video-bg-area start  -->
-              
-            <div class="video-bg-area pt-120 pb-120" style="background-image:url(<?php echo get_template_directory_uri(); ?>/assets/img/bg/video.jpg)">
+              <?php
+              $video_bg = get_field('video_bg') ?: get_template_directory_uri() . '/assets/img/bg/video.jpg';
+              $video_url = get_field('video_url') ?: '#';
+              $video_title = get_field('video_title') ?: 'Need Our Premium Services Full Free & More';
+              $video_btn_text = get_field('video_btn_text') ?: 'read more';
+              $video_btn_url = get_field('video_btn_url') ?: '/services';
+              ?>
+            <div class="video-bg-area pt-120 pb-120" style="background-image:url(<?php echo esc_url($video_bg); ?>)">
                 <div class="container">
                     <div class="row">
                         <div class="col-xl-8 offset-xl-2 text-center">
                             <div class="b-video">
                                 <div class="b-play mb-40">
-                                    <a href="#"><i class="fal fa-play"></i></a>
+                                    <a href="<?php echo esc_url($video_url); ?>"><i class="fal fa-play"></i></a>
                                 </div>
-                                <h2>Need Our Premium Services
-                                Full Free & More</h2>
+                                <h2><?php echo esc_html($video_title); ?></h2>
                                 <div class="b-main-btn">
-                                    <a class="b-btn" href="/services">
-                                        <span>read more</span>
+                                    <a class="b-btn" href="<?php echo esc_url($video_btn_url); ?>">
+                                        <span><?php echo esc_html($video_btn_text); ?></span>
                                     </a>
                                 </div>
                             </div>
@@ -426,7 +487,15 @@ if ( $slides ) : ?>
 
             <!-- counter-area-start -->
             <?php
-            // Counter 1
+            // Get Counter Section Info fields
+            $counter_bg = get_field('counter_bg') ?: get_template_directory_uri() . '/assets/img/bg/fact-bg.jpg';
+            $counter_subtitle = get_field('counter_subtitle') ?: 'fun fact';
+            $counter_title = get_field('counter_title') ?: 'Let\'s See Our Fun Facts';
+            $counter_description = get_field('counter_description') ?: 'But I must explain to you how amistaken idea denouncing pleasure praising';
+            $counter_btn_text = get_field('counter_btn_text') ?: 'read more';
+            $counter_btn_url = get_field('counter_btn_url') ?: '/products';
+            
+            // Counter values
             $counter1_icon = get_field('counter1_icon');
             $counter1_number = get_field('counter1_number');
             $counter1_label = get_field('counter1_label');
@@ -441,18 +510,18 @@ if ( $slides ) : ?>
             $counter3_number = get_field('counter3_number');
             $counter3_label = get_field('counter3_label');
             ?>
-            <div class="counter-area pos-rel pt-120 pb-90" style="background-image:url(<?php echo get_template_directory_uri(); ?>/assets/img/bg/fact-bg.jpg)">
+            <div class="counter-area pos-rel pt-120 pb-90" style="background-image:url(<?php echo esc_url($counter_bg); ?>)">
                 <div class="container">
                     <div class="row">
                         <div class="col-xl-3 col-lg-3 col-md-6">
                             <div class="section-title mt-15 mb-30">
-                                <span>fun fact</span>
-                                <h1>Let's See Our Fun Facts</h1>
+                                <span><?php echo esc_html($counter_subtitle); ?></span>
+                                <h1><?php echo esc_html($counter_title); ?></h1>
                                 <div class="mb-20"></div>
-                                <p>But I must explain to you how amistaken idea denouncing pleasure praising</p>
+                                <p><?php echo esc_html($counter_description); ?></p>
                                 <div class="fact-btn mt-20">
-                                    <a class="text-btn" href="/products">
-                                        read more
+                                    <a class="text-btn" href="<?php echo esc_url($counter_btn_url); ?>">
+                                        <?php echo esc_html($counter_btn_text); ?>
                                     </a>
                                 </div>
                             </div>
@@ -720,6 +789,88 @@ if ( $slides ) : ?>
                 </div>
             </div>
             <!-- brand-area-end -->
+
+            <!-- choose-area-start -->
+            <?php
+            // Get Our Goals Section fields
+            $goals_subtitle = get_field('goals_subtitle') ?: 'our goals';
+            $goals_title = get_field('goals_title') ?: 'Experience Industrial Engineering Company Based In New York';
+            $goals_image = get_field('goals_image') ?: get_template_directory_uri() . '/assets/img/bg/choose-01.jpg';
+            $goals_video_url = get_field('goals_video_url') ?: 'https://www.youtube.com/watch?v=LTXD6XZXc3U';
+            
+            // Goal 1
+            $goal1_icon = get_field('goal1_icon') ?: 'far fa-user-hard-hat';
+            $goal1_title = get_field('goal1_title') ?: 'Creative Architecture';
+            $goal1_description = get_field('goal1_description') ?: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque';
+            
+            // Goal 2
+            $goal2_icon = get_field('goal2_icon') ?: 'far fa-alarm-clock';
+            $goal2_title = get_field('goal2_title') ?: 'Timely Maintenance';
+            $goal2_description = get_field('goal2_description') ?: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque';
+            
+            // Goal 3
+            $goal3_icon = get_field('goal3_icon') ?: 'far fa-usd-square';
+            $goal3_title = get_field('goal3_title') ?: 'Competitive Low Cost';
+            $goal3_description = get_field('goal3_description') ?: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque';
+            ?>
+            <div class="choose-area pt-125 pb-100">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-10 col-lg-10 offset-lg-1 offset-xl-1">
+                            <div class="section-title mr-50 ml-50 text-center mb-75">
+                                <span><?php echo esc_html($goals_subtitle); ?></span>
+                                <h1><?php echo esc_html($goals_title); ?></h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="choose-wrapper mb-30">
+                                <div class="choose-content">
+                                    <ul>
+                                        <li>
+                                            <div class="choose-icon f-left">
+                                                <i class="<?php echo esc_attr($goal1_icon); ?>"></i>
+                                            </div>
+                                            <div class="choose-text">
+                                                <h4><?php echo esc_html($goal1_title); ?></h4>
+                                                <p><?php echo esc_html($goal1_description); ?></p>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="choose-icon f-left">
+                                                <i class="<?php echo esc_attr($goal2_icon); ?>"></i>
+                                            </div>
+                                            <div class="choose-text">
+                                                <h4><?php echo esc_html($goal2_title); ?></h4>
+                                                <p><?php echo esc_html($goal2_description); ?></p>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="choose-icon f-left">
+                                                <i class="<?php echo esc_attr($goal3_icon); ?>"></i>
+                                            </div>
+                                            <div class="choose-text">
+                                                <h4><?php echo esc_html($goal3_title); ?></h4>
+                                                <p><?php echo esc_html($goal3_description); ?></p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="choose-img pos-rel mb-30">
+                                <img src="<?php echo esc_url($goals_image); ?>" alt="">
+                                <div class="choose-video-icon">
+                                    <a class="popup-video" href="<?php echo esc_url($goals_video_url); ?>"><i class="fas fa-play"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- choose-area-end -->
 
             <!-- newsletter-area-start -->
             <div class="newsletter-area pt-60 pb-30" style="background-image:url(<?php echo get_template_directory_uri(); ?>/assets/img/bg/newsletter.jpg)">
