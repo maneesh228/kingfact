@@ -71,9 +71,12 @@ echo do_shortcode('[kingfact_breadcrumb title="' . esc_attr( $service_title ) . 
         <div class="row">
             <div class="col-xl-8 col-lg-8">
                 <div class="service-details-content">
-                    <?php if ( has_post_thumbnail() ) : ?>
+                    <?php
+                    $service_banner_id = get_post_meta( $service_id, '_service_banner', true );
+                    $service_banner_url = $service_banner_id ? wp_get_attachment_image_url( $service_banner_id, 'large' ) : '';
+                    if ( $service_banner_url ) : ?>
                     <div class="service-details-img mb-40">
-                        <?php the_post_thumbnail( 'large', array( 'alt' => get_the_title(), 'style' => 'width: 100%; height: auto;' ) ); ?>
+                        <img src="<?php echo esc_url( $service_banner_url ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" style="width: 100%; height: auto;">
                     </div>
                     <?php endif; ?>
                     

@@ -327,13 +327,17 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
             <!-- features end  -->
 
             <!-- services-area start  -->
+            <?php
+            $services_subtitle = get_field('services_subtitle') ?: 'what we do';
+            $services_title = get_field('services_title') ?: 'Latest Services';
+            ?>
             <div class="services-area pt-120 pb-90">
                 <div class="container">
                     <div class="row">
                         <div class="col-xl-6 col-lg-6 offset-lg-3 offset-xl-3">
                             <div class="section-title text-center mb-75">
-                                <span>what we do</span>
-                                <h1>Latest Services</h1>
+                                <span><?php echo esc_html($services_subtitle); ?></span>
+                                <h1><?php echo esc_html($services_title); ?></h1>
                             </div>
                         </div>
                     </div>
@@ -364,9 +368,13 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                         ?>
                         <div class="col-xl-4">
                             <div class="b-services mb-30">
-                                <?php if (has_post_thumbnail()) : ?>
+                                <?php 
+                                $service_banner_id = get_post_meta(get_the_ID(), '_service_banner', true);
+                                $service_banner_url = $service_banner_id ? wp_get_attachment_image_url($service_banner_id, 'medium') : '';
+                                if ($service_banner_url) : 
+                                ?>
                                 <div class="b-services-img">
-                                    <?php the_post_thumbnail('medium', array('alt' => get_the_title(), 'style' => 'width: 100%; height: auto;')); ?>
+                                    <img src="<?php echo esc_url($service_banner_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" style="width: 100%; height: auto;" />
                                 </div>
                                 <?php endif; ?>
                                 <div class="b-services-content">
@@ -422,13 +430,17 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
             <!-- video-bg-area end  -->
 
             <!-- work start  -->
+            <?php
+            $products_subtitle = get_field('products_subtitle') ?: 'our works';
+            $products_title = get_field('products_title') ?: 'Project We Have Done';
+            ?>
             <div class="work-area-start pt-120 pb-90">
                 <div class="container">
                     <div class="row">
                         <div class="col-xl-6 col-lg-6 offset-lg-3 offset-xl-3">
                             <div class="section-title text-center mb-75">
-                                <span>our works</span>
-                                <h1>Project We Have Done</h1>
+                                <span><?php echo esc_html($products_subtitle); ?></span>
+                                <h1><?php echo esc_html($products_title); ?></h1>
                             </div>
                         </div>
                     </div>

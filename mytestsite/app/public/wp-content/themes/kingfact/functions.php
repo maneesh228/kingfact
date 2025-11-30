@@ -1339,12 +1339,34 @@ add_action( 'add_meta_boxes', 'kingfact_service_meta_boxes' );
 function kingfact_service_meta_box_cb( $post ) {
     wp_nonce_field( 'kingfact_service_save', 'kingfact_service_nonce' );
 
+    $service_banner = get_post_meta( $post->ID, '_service_banner', true );
+    $service_banner_url = $service_banner ? wp_get_attachment_image_url( $service_banner, 'full' ) : '';
     $service_url = get_post_meta( $post->ID, '_service_url', true );
     $service_link_text = get_post_meta( $post->ID, '_service_link_text', true );
     $service_icon = get_post_meta( $post->ID, '_service_icon', true );
 
     ?>
     <table class="form-table">
+        <tr>
+            <th><label><strong>Service Banner Image</strong></label></th>
+            <td>
+                <div class="service-banner-wrapper" style="margin-top: 10px;">
+                    <div class="service-banner-preview" style="margin-bottom: 10px;">
+                        <?php if ( $service_banner_url ) : ?>
+                            <img src="<?php echo esc_url( $service_banner_url ); ?>" style="max-width: 100%; height: auto; border: 1px solid #ddd;" />
+                        <?php else : ?>
+                            <img src="" style="display: none; max-width: 100%; height: auto; border: 1px solid #ddd;" />
+                        <?php endif; ?>
+                    </div>
+                    <input type="hidden" id="service_banner" name="service_banner" value="<?php echo esc_attr( $service_banner ); ?>" />
+                    <button type="button" class="button service-banner-upload"><?php echo $service_banner ? 'Change Image' : 'Upload Image'; ?></button>
+                    <?php if ( $service_banner ) : ?>
+                        <button type="button" class="button service-banner-remove" style="margin-left: 5px;">Remove Image</button>
+                    <?php endif; ?>
+                    <p class="description" style="margin-top: 5px;">Upload a banner image for this service (displayed on home page)</p>
+                </div>
+            </td>
+        </tr>
         <tr>
             <th><label for="service_url"><strong>Service Link URL</strong></label></th>
             <td>
@@ -1373,11 +1395,55 @@ function kingfact_service_meta_box_cb( $post ) {
         <ul>
             <li><strong>Title:</strong> Use the main title field above for the service name</li>
             <li><strong>Description:</strong> Use the main editor for the service description</li>
-            <li><strong>Featured Image:</strong> Set the service image using the Featured Image box</li>
+            <li><strong>Banner Image:</strong> Upload using the banner image field above</li>
             <li><strong>Excerpt:</strong> Use excerpt for short description (will fallback to description if empty)</li>
             <li><strong>Order:</strong> Use the Order field in Page Attributes to control display order</li>
         </ul>
     </div>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        var serviceBannerFrame;
+        
+        $('.service-banner-upload').on('click', function(e) {
+            e.preventDefault();
+            
+            if (serviceBannerFrame) {
+                serviceBannerFrame.open();
+                return;
+            }
+            
+            serviceBannerFrame = wp.media({
+                title: 'Select Service Banner Image',
+                button: {
+                    text: 'Use This Image'
+                },
+                multiple: false
+            });
+            
+            serviceBannerFrame.on('select', function() {
+                var attachment = serviceBannerFrame.state().get('selection').first().toJSON();
+                $('#service_banner').val(attachment.id);
+                $('.service-banner-preview img').attr('src', attachment.url).show();
+                $('.service-banner-upload').text('Change Image');
+                
+                if ($('.service-banner-remove').length === 0) {
+                    $('.service-banner-upload').after('<button type="button" class="button service-banner-remove" style="margin-left: 5px;">Remove Image</button>');
+                }
+            });
+            
+            serviceBannerFrame.open();
+        });
+        
+        $(document).on('click', '.service-banner-remove', function(e) {
+            e.preventDefault();
+            $('#service_banner').val('');
+            $('.service-banner-preview img').attr('src', '').hide();
+            $('.service-banner-upload').text('Upload Image');
+            $(this).remove();
+        });
+    });
+    </script>
     <?php
 }
 
@@ -1390,6 +1456,7 @@ function kingfact_service_save( $post_id ) {
 
     // Save custom fields
     $fields = array(
+        'service_banner' => '_service_banner',
         'service_url' => '_service_url',
         'service_link_text' => '_service_link_text',
         'service_icon' => '_service_icon',
@@ -1400,6 +1467,8 @@ function kingfact_service_save( $post_id ) {
             $value = wp_unslash( $_POST[ $input ] );
             if ( $input === 'service_url' ) {
                 update_post_meta( $post_id, $meta_key, esc_url_raw( $value ) );
+            } elseif ( $input === 'service_banner' ) {
+                update_post_meta( $post_id, $meta_key, absint( $value ) );
             } else {
                 update_post_meta( $post_id, $meta_key, sanitize_text_field( $value ) );
             }
@@ -1409,6 +1478,15 @@ function kingfact_service_save( $post_id ) {
     }
 }
 add_action( 'save_post', 'kingfact_service_save' );
+
+// Enqueue media uploader for service edit screen
+function kingfact_service_enqueue_media() {
+    global $post_type;
+    if ( 'service' === $post_type ) {
+        wp_enqueue_media();
+    }
+}
+add_action( 'admin_enqueue_scripts', 'kingfact_service_enqueue_media' );
 
 // 3) Admin columns for Service CPT
 add_filter( 'manage_edit-service_columns', 'kingfact_service_manage_columns' );
@@ -1719,9 +1797,12 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
                 
                 <div class="<?php echo esc_attr( $col_class ); ?> service-item <?php echo esc_attr( $hide_class ); ?>">
                     <div class="b-services b-services-02 mb-80">
-                        <?php if ( has_post_thumbnail() ) : ?>
+                        <?php
+                        $service_banner_id = get_post_meta(get_the_ID(), '_service_banner', true);
+                        $service_banner_url = $service_banner_id ? wp_get_attachment_image_url($service_banner_id, 'medium') : '';
+                        if ($service_banner_url) : ?>
                         <div class="b-services-img">
-                            <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title(), 'style' => 'width: 100%; height: auto;' ) ); ?>
+                            <img src="<?php echo esc_url($service_banner_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" style="width: 100%; height: auto;">
                         </div>
                         <?php endif; ?>
                         
@@ -2909,6 +2990,37 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'default_value' => 'Avoids pleasure itself, because it is pleasure because those who do not know how',
             ),
             
+            // Services Section Tab
+            array(
+                'key' => 'field_services_tab',
+                'label' => 'Services Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_services_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'services_subtitle',
+                'type' => 'text',
+                'default_value' => 'what we do',
+            ),
+            array(
+                'key' => 'field_services_title',
+                'label' => 'Title',
+                'name' => 'services_title',
+                'type' => 'text',
+                'default_value' => 'Latest Services',
+            ),
+            array(
+                'key' => 'field_services_message',
+                'label' => 'Manage Services',
+                'name' => 'services_message',
+                'type' => 'message',
+                'message' => 'Services are displayed from the <strong>Services</strong> custom post type. Each service shows its featured image, title, description, and link.<br><br>Services are ordered by menu order and limited to 6 items on the home page.<br><br><a href="' . admin_url('post-new.php?post_type=service') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Service</a><a href="' . admin_url('edit.php?post_type=service') . '" class="button button-secondary" target="_blank">View All Services</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
+            ),
+            
             // Video Section Tab
             array(
                 'key' => 'field_video_tab',
@@ -2952,6 +3064,37 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'name' => 'video_btn_url',
                 'type' => 'url',
                 'default_value' => '/services',
+            ),
+            
+            // Products Section Tab
+            array(
+                'key' => 'field_products_tab',
+                'label' => 'Products Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_products_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'products_subtitle',
+                'type' => 'text',
+                'default_value' => 'our works',
+            ),
+            array(
+                'key' => 'field_products_title',
+                'label' => 'Title',
+                'name' => 'products_title',
+                'type' => 'text',
+                'default_value' => 'Project We Have Done',
+            ),
+            array(
+                'key' => 'field_products_message',
+                'label' => 'Manage Products',
+                'name' => 'products_message',
+                'type' => 'message',
+                'message' => 'Products are displayed from the <strong>Products</strong> custom post type. Each product shows its featured image, title, and description.<br><br>Products are ordered by menu order and limited to 6 items on the home page.<br><br><a href="' . admin_url('post-new.php?post_type=product') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Product</a><a href="' . admin_url('edit.php?post_type=product') . '" class="button button-secondary" target="_blank">View All Products</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
             ),
             
             // Counter Section Tab
@@ -3271,6 +3414,66 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
         ),
         'menu_order' => 1,
+        'position' => 'normal',
+        'style' => 'default',
+    ));
+    
+    // Services Page ACF Fields
+    acf_add_local_field_group(array(
+        'key' => 'group_services_page',
+        'title' => 'Services Page Settings',
+        'fields' => array(
+            // Banner Section Tab
+            array(
+                'key' => 'field_services_page_banner_tab',
+                'label' => 'Banner Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_services_page_banner_image',
+                'label' => 'Banner Background Image',
+                'name' => 'services_page_banner_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'instructions' => 'Upload a custom banner image. If not set, will use page featured image or default.',
+            ),
+            array(
+                'key' => 'field_services_page_banner_title',
+                'label' => 'Banner Title',
+                'name' => 'services_page_banner_title',
+                'type' => 'text',
+                'instructions' => 'Leave empty to use page title',
+                'placeholder' => 'Page title will be used if empty',
+            ),
+            array(
+                'key' => 'field_services_page_breadcrumb_home',
+                'label' => 'Breadcrumb - Home Text',
+                'name' => 'services_page_breadcrumb_home',
+                'type' => 'text',
+                'default_value' => 'home',
+                'placeholder' => 'home',
+            ),
+            array(
+                'key' => 'field_services_page_breadcrumb_current',
+                'label' => 'Breadcrumb - Current Page Text',
+                'name' => 'services_page_breadcrumb_current',
+                'type' => 'text',
+                'instructions' => 'Leave empty to use page title',
+                'placeholder' => 'Page title will be used if empty',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'page_template',
+                    'operator' => '==',
+                    'value' => 'page-services.php',
+                ),
+            ),
+        ),
+        'menu_order' => 2,
         'position' => 'normal',
         'style' => 'default',
     ));
