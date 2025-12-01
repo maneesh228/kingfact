@@ -38,14 +38,18 @@ if ( function_exists( 'get_field' ) ) {
     
     // Links: prefer ACF, then Theme Settings
     $links = $links ? $links : ( ! empty( $opts['header_links'] ) ? $opts['header_links'] : false );
+    
+    // Quote Button: prefer ACF, then Theme Settings
+    $quote_txt = $quote_txt ? $quote_txt : ( ! empty( $opts['header_quote_text'] ) ? $opts['header_quote_text'] : 'get a quote' );
+    $quote_url = $quote_url ? $quote_url : ( ! empty( $opts['header_quote_url'] ) ? $opts['header_quote_url'] : home_url( '/contact/' ) );
 } else {
     // ACF not available — provide safe defaults from theme options
     $show_top  = true;
     $hours     = ! empty( $opts['header_hours'] ) ? $opts['header_hours'] : 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends';
     $links     = ! empty( $opts['header_links'] ) ? $opts['header_links'] : false;
     $logo      = ! empty( $opts['header_logo'] ) ? $opts['header_logo'] : false;
-    $quote_txt = 'get a quote';
-    $quote_url = home_url( '/contact/' );
+    $quote_txt = ! empty( $opts['header_quote_text'] ) ? $opts['header_quote_text'] : 'get a quote';
+    $quote_url = ! empty( $opts['header_quote_url'] ) ? $opts['header_quote_url'] : home_url( '/contact/' );
 }
 
 // Normalize values (avoid null)

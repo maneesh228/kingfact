@@ -851,6 +851,8 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
             $save['footer_logo'] = esc_url_raw( wp_unslash( $_POST['footer_logo'] ?? '' ) );
             // Header
             $save['header_hours'] = sanitize_text_field( wp_unslash( $_POST['header_hours'] ?? '' ) );
+            $save['header_quote_text'] = sanitize_text_field( wp_unslash( $_POST['header_quote_text'] ?? '' ) );
+            $save['header_quote_url'] = esc_url_raw( wp_unslash( $_POST['header_quote_url'] ?? '' ) );
             $save['header_contact_address'] = sanitize_text_field( wp_unslash( $_POST['header_contact_address'] ?? '' ) );
             $save['header_contact_email']   = sanitize_email( wp_unslash( $_POST['header_contact_email'] ?? '' ) );
             $save['header_contact_phone']   = sanitize_text_field( wp_unslash( $_POST['header_contact_phone'] ?? '' ) );
@@ -921,6 +923,8 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
         // Load current values
         $header_logo = kingfact_get_option( 'header_logo', '' );
         $header_hours = kingfact_get_option( 'header_hours', 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends' );
+        $header_quote_text = kingfact_get_option( 'header_quote_text', 'get a quote' );
+        $header_quote_url = kingfact_get_option( 'header_quote_url', home_url( '/contact/' ) );
         $header_address = kingfact_get_option( 'header_contact_address', 'Flat 20, Reynolds USA' );
         $header_email = kingfact_get_option( 'header_contact_email', 'support@rmail.com' );
         $header_phone = kingfact_get_option( 'header_contact_phone', '+812 (345) 6789' );
@@ -969,6 +973,20 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                         <td>
                             <input name="header_hours" id="header_hours" class="large-text" value="<?php echo esc_attr( $header_hours ); ?>">
                             <p class="description">Text displayed in the header top bar showing your opening hours.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="header_quote_text">Quote Button Text</label></th>
+                        <td>
+                            <input name="header_quote_text" id="header_quote_text" class="regular-text" value="<?php echo esc_attr( $header_quote_text ); ?>">
+                            <p class="description">Text displayed on the header quote button (e.g., "get a quote").</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="header_quote_url">Quote Button URL</label></th>
+                        <td>
+                            <input name="header_quote_url" id="header_quote_url" class="regular-text" value="<?php echo esc_attr( $header_quote_url ); ?>">
+                            <p class="description">URL where the quote button should link to (e.g., /contact/).</p>
                         </td>
                     </tr>
                     <tr>
