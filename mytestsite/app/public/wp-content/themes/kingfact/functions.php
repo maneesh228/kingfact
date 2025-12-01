@@ -192,62 +192,6 @@ function kingfact_slide_meta_boxes() {
 }
 add_action( 'add_meta_boxes', 'kingfact_slide_meta_boxes' );
 
-// Add metabox to Home page showing all slides
-function kingfact_add_slides_manager_metabox() {
-    $screen = get_current_screen();
-    if ( $screen && $screen->id === 'page' ) {
-        $template = get_page_template_slug();
-        if ( $template === 'page-home.php' ) {
-            add_meta_box(
-                'kingfact_slides_manager',
-                'Manage Slider Slides',
-                'kingfact_slides_manager_metabox_cb',
-                'page',
-                'side',
-                'high'
-            );
-        }
-    }
-}
-add_action( 'add_meta_boxes', 'kingfact_add_slides_manager_metabox' );
-
-function kingfact_slides_manager_metabox_cb( $post ) {
-    // Get all slides
-    $slides = get_posts( array(
-        'post_type'      => 'slide',
-        'posts_per_page' => -1,
-        'post_status'    => 'publish',
-        'orderby'        => 'menu_order',
-        'order'          => 'ASC',
-    ) );
-    
-    echo '<div style="margin: 10px 0;">';
-    echo '<p style="margin-bottom: 15px;"><strong>Current Slides:</strong></p>';
-    
-    if ( $slides ) {
-        echo '<ul style="margin: 0; padding-left: 20px;">';
-        foreach ( $slides as $slide ) {
-            $edit_link = get_edit_post_link( $slide->ID );
-            echo '<li style="margin-bottom: 8px;">';
-            echo '<a href="' . esc_url( $edit_link ) . '" target="_blank">' . esc_html( get_the_title( $slide->ID ) ) . '</a>';
-            echo '</li>';
-        }
-        echo '</ul>';
-    } else {
-        echo '<p style="color: #999; font-style: italic;">No slides yet.</p>';
-    }
-    
-    echo '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">';
-    echo '<a href="' . admin_url( 'post-new.php?post_type=slide' ) . '" class="button button-primary" target="_blank">+ Add New Slide</a>';
-    echo '</div>';
-    
-    echo '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">';
-    echo '<a href="' . admin_url( 'edit.php?post_type=slide' ) . '" class="button" target="_blank">View All Slides</a>';
-    echo '</div>';
-    
-    echo '</div>';
-}
-
 function kingfact_slide_meta_box_cb( $post ) {
     wp_nonce_field( 'kingfact_slide_save', 'kingfact_slide_nonce' );
 
@@ -2076,11 +2020,32 @@ add_action( 'add_meta_boxes', 'kingfact_testimonial_meta_boxes' );
 function kingfact_testimonial_meta_box_cb( $post ) {
     wp_nonce_field( 'kingfact_testimonial_save', 'kingfact_testimonial_nonce' );
 
+    $testimonial_photo = get_post_meta( $post->ID, '_testimonial_photo', true );
     $client_name = get_post_meta( $post->ID, '_testimonial_client_name', true );
     $client_position = get_post_meta( $post->ID, '_testimonial_client_position', true );
 
     ?>
     <table class="form-table">
+        <tr>
+            <th><label for="testimonial_photo"><strong>Client Photo</strong></label></th>
+            <td>
+                <div class="testimonial-photo-upload-wrapper">
+                    <input type="hidden" id="testimonial_photo" name="testimonial_photo" value="<?php echo esc_attr( $testimonial_photo ); ?>" />
+                    <div id="testimonial-photo-preview" style="margin-bottom: 10px;">
+                        <?php if ( $testimonial_photo ) : 
+                            $photo_url = wp_get_attachment_image_url( $testimonial_photo, 'thumbnail' );
+                            if ( $photo_url ) : ?>
+                            <img src="<?php echo esc_url( $photo_url ); ?>" style="max-width: 150px; height: auto; display: block; margin-bottom: 10px; border-radius: 50%;" />
+                        <?php endif; endif; ?>
+                    </div>
+                    <button type="button" class="button testimonial-photo-upload"><?php echo $testimonial_photo ? 'Change Photo' : 'Upload Photo'; ?></button>
+                    <?php if ( $testimonial_photo ) : ?>
+                    <button type="button" class="button testimonial-photo-remove" style="margin-left: 5px;">Remove Photo</button>
+                    <?php endif; ?>
+                    <p class="description">Upload the client's photo. Use this instead of Featured Image for testimonial displays.</p>
+                </div>
+            </td>
+        </tr>
         <tr>
             <th><label for="testimonial_client_name"><strong>Client Name</strong></label></th>
             <td>
@@ -2096,8 +2061,51 @@ function kingfact_testimonial_meta_box_cb( $post ) {
             </td>
         </tr>
     </table>
-    <p><em><strong>Featured Image:</strong> Upload the client's photo as the Featured Image.</em></p>
+    <p><em><strong>Client Photo:</strong> Upload using the photo field above.</em></p>
     <p><em><strong>Content Editor:</strong> Use the main editor above for the testimonial text/quote.</em></p>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        var testimonialPhotoUploader;
+        
+        $('.testimonial-photo-upload').on('click', function(e) {
+            e.preventDefault();
+            
+            if (testimonialPhotoUploader) {
+                testimonialPhotoUploader.open();
+                return;
+            }
+            
+            testimonialPhotoUploader = wp.media({
+                title: 'Select Client Photo',
+                button: { text: 'Use this photo' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            
+            testimonialPhotoUploader.on('select', function() {
+                var attachment = testimonialPhotoUploader.state().get('selection').first().toJSON();
+                $('#testimonial_photo').val(attachment.id);
+                var imgUrl = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+                $('#testimonial-photo-preview').html('<img src="' + imgUrl + '" style="max-width: 150px; height: auto; display: block; margin-bottom: 10px; border-radius: 50%;" />');
+                $('.testimonial-photo-upload').text('Change Photo');
+                if ($('.testimonial-photo-remove').length === 0) {
+                    $('.testimonial-photo-upload').after('<button type="button" class="button testimonial-photo-remove" style="margin-left: 5px;">Remove Photo</button>');
+                }
+            });
+            
+            testimonialPhotoUploader.open();
+        });
+        
+        $(document).on('click', '.testimonial-photo-remove', function(e) {
+            e.preventDefault();
+            $('#testimonial_photo').val('');
+            $('#testimonial-photo-preview').html('');
+            $('.testimonial-photo-upload').text('Upload Photo');
+            $(this).remove();
+        });
+    });
+    </script>
     <?php
 }
 
@@ -2107,6 +2115,9 @@ function kingfact_testimonial_save( $post_id ) {
     if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
     if ( ! current_user_can( 'edit_post', $post_id ) ) return;
 
+    if ( isset( $_POST['testimonial_photo'] ) ) {
+        update_post_meta( $post_id, '_testimonial_photo', absint( $_POST['testimonial_photo'] ) );
+    }
     if ( isset( $_POST['testimonial_client_name'] ) ) {
         update_post_meta( $post_id, '_testimonial_client_name', sanitize_text_field( $_POST['testimonial_client_name'] ) );
     }
@@ -2115,6 +2126,15 @@ function kingfact_testimonial_save( $post_id ) {
     }
 }
 add_action( 'save_post', 'kingfact_testimonial_save' );
+
+// Enqueue media uploader for testimonial edit screen
+function kingfact_testimonial_enqueue_media() {
+    global $post_type;
+    if ( 'testimonial' === $post_type ) {
+        wp_enqueue_media();
+    }
+}
+add_action( 'admin_enqueue_scripts', 'kingfact_testimonial_enqueue_media' );
 
 // 2) Add meta box for product extra fields
 function kingfact_product_meta_boxes() {
@@ -2132,6 +2152,7 @@ add_action( 'add_meta_boxes', 'kingfact_product_meta_boxes' );
 function kingfact_product_meta_box_cb( $post ) {
     wp_nonce_field( 'kingfact_product_save', 'kingfact_product_nonce' );
 
+    $product_banner = get_post_meta( $post->ID, '_product_banner', true );
     $product_url = get_post_meta( $post->ID, '_product_url', true );
     $product_link_text = get_post_meta( $post->ID, '_product_link_text', true );
     $product_icon = get_post_meta( $post->ID, '_product_icon', true );
@@ -2141,6 +2162,26 @@ function kingfact_product_meta_box_cb( $post ) {
 
     ?>
     <table class="form-table">
+        <tr>
+            <th><label for="product_banner"><strong>Banner Image</strong></label></th>
+            <td>
+                <div class="product-banner-upload-wrapper">
+                    <input type="hidden" id="product_banner" name="product_banner" value="<?php echo esc_attr( $product_banner ); ?>" />
+                    <div id="product-banner-preview" style="margin-bottom: 10px;">
+                        <?php if ( $product_banner ) : 
+                            $banner_url = wp_get_attachment_image_url( $product_banner, 'medium' );
+                            if ( $banner_url ) : ?>
+                            <img src="<?php echo esc_url( $banner_url ); ?>" style="max-width: 300px; height: auto; display: block; margin-bottom: 10px;" />
+                        <?php endif; endif; ?>
+                    </div>
+                    <button type="button" class="button product-banner-upload"><?php echo $product_banner ? 'Change Banner Image' : 'Upload Banner Image'; ?></button>
+                    <?php if ( $product_banner ) : ?>
+                    <button type="button" class="button product-banner-remove" style="margin-left: 5px;">Remove Banner</button>
+                    <?php endif; ?>
+                    <p class="description">Banner image for product detail page and listings. Use this instead of Featured Image for product displays.</p>
+                </div>
+            </td>
+        </tr>
         <tr>
             <th><label for="product_price"><strong>Product Price</strong></label></th>
             <td>
@@ -2212,7 +2253,7 @@ function kingfact_product_meta_box_cb( $post ) {
         <ul>
             <li><strong>Title:</strong> Use the main title field above for the product name</li>
             <li><strong>Description:</strong> Use the main editor for the product description</li>
-            <li><strong>Featured Image:</strong> Set the product image using the Featured Image box</li>
+            <li><strong>Banner Image:</strong> Upload a custom banner image for product displays (replaces Featured Image)</li>
             <li><strong>Excerpt:</strong> Use excerpt for short description (will fallback to description if empty)</li>
             <li><strong>Order:</strong> Use the Order field in Page Attributes to control display order</li>
             <li><strong>Images:</strong> Use the "Select Images" button to add product gallery images</li>
@@ -2222,6 +2263,47 @@ function kingfact_product_meta_box_cb( $post ) {
     
     <script>
     jQuery(document).ready(function($) {
+        // Product Banner Upload
+        var productBannerUploader;
+        
+        $('.product-banner-upload').on('click', function(e) {
+            e.preventDefault();
+            
+            if (productBannerUploader) {
+                productBannerUploader.open();
+                return;
+            }
+            
+            productBannerUploader = wp.media({
+                title: 'Select Banner Image',
+                button: { text: 'Use this image' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            
+            productBannerUploader.on('select', function() {
+                var attachment = productBannerUploader.state().get('selection').first().toJSON();
+                $('#product_banner').val(attachment.id);
+                var imgUrl = attachment.sizes && attachment.sizes.medium ? attachment.sizes.medium.url : attachment.url;
+                $('#product-banner-preview').html('<img src="' + imgUrl + '" style="max-width: 300px; height: auto; display: block; margin-bottom: 10px;" />');
+                $('.product-banner-upload').text('Change Banner Image');
+                if ($('.product-banner-remove').length === 0) {
+                    $('.product-banner-upload').after('<button type="button" class="button product-banner-remove" style="margin-left: 5px;">Remove Banner</button>');
+                }
+            });
+            
+            productBannerUploader.open();
+        });
+        
+        $(document).on('click', '.product-banner-remove', function(e) {
+            e.preventDefault();
+            $('#product_banner').val('');
+            $('#product-banner-preview').html('');
+            $('.product-banner-upload').text('Upload Banner Image');
+            $(this).remove();
+        });
+        
+        // Product Images Gallery
         var productImagesUploader;
         
         $('#select_product_images').on('click', function(e) {
@@ -2276,6 +2358,7 @@ function kingfact_product_save( $post_id ) {
 
     // Save custom fields
     $fields = array(
+        'product_banner' => '_product_banner',
         'product_url' => '_product_url',
         'product_link_text' => '_product_link_text',
         'product_icon' => '_product_icon',
@@ -2289,6 +2372,8 @@ function kingfact_product_save( $post_id ) {
             $value = wp_unslash( $_POST[ $input ] );
             if ( $input === 'product_url' ) {
                 update_post_meta( $post_id, $meta_key, esc_url_raw( $value ) );
+            } elseif ( $input === 'product_banner' ) {
+                update_post_meta( $post_id, $meta_key, absint( $value ) );
             } else {
                 update_post_meta( $post_id, $meta_key, sanitize_text_field( $value ) );
             }
@@ -2600,9 +2685,13 @@ function kingfact_products_display_shortcode( $atts, $content = null ) {
                 
                 <div class="<?php echo esc_attr( $col_class ); ?> product-item <?php echo esc_attr( $hide_class ); ?>">
                     <div class="b-products mb-30" style="border: 1px solid #ddd; padding: 20px; background: #fff;">
-                        <?php if ( has_post_thumbnail() ) : ?>
+                        <?php 
+                        $product_banner_id = get_post_meta(get_the_ID(), '_product_banner', true);
+                        $product_banner_url = $product_banner_id ? wp_get_attachment_image_url($product_banner_id, 'medium') : '';
+                        if ($product_banner_url) : 
+                        ?>
                         <div class="b-products-img" style="margin-bottom: 15px;">
-                            <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title(), 'style' => 'width: 100%; height: auto; max-width: 100%;' ) ); ?>
+                            <img src="<?php echo esc_url($product_banner_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" style="width: 100%; height: auto; max-width: 100%;" />
                         </div>
                         <?php endif; ?>
                         
@@ -2801,6 +2890,137 @@ function kingfact_excerpt_more( $more ) {
 }
 add_filter( 'excerpt_more', 'kingfact_excerpt_more' );
 
+// Add Blog Post Banner Image Meta Box
+function kingfact_add_post_banner_meta_box() {
+    add_meta_box(
+        'post_banner_meta_box',
+        'Blog Post Banner Image',
+        'kingfact_post_banner_meta_box_callback',
+        'post',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'kingfact_add_post_banner_meta_box');
+
+// Blog Post Banner Meta Box Callback
+function kingfact_post_banner_meta_box_callback($post) {
+    wp_nonce_field('kingfact_save_post_banner', 'kingfact_post_banner_nonce');
+    
+    $post_banner_id = get_post_meta($post->ID, '_post_banner', true);
+    $post_banner_url = $post_banner_id ? wp_get_attachment_image_url($post_banner_id, 'medium') : '';
+    ?>
+    <div class="post-banner-field-wrapper">
+        <p class="description">Upload a custom banner image for this blog post. This will be used instead of the featured image wherever blog tiles are displayed.</p>
+        
+        <div class="post-banner-upload-container" style="margin: 15px 0;">
+            <div class="post-banner-preview" style="margin-bottom: 10px;">
+                <?php if ($post_banner_url) : ?>
+                    <img src="<?php echo esc_url($post_banner_url); ?>" style="max-width: 100%; height: auto; display: block;" />
+                <?php else : ?>
+                    <img src="" style="max-width: 100%; height: auto; display: none;" />
+                <?php endif; ?>
+            </div>
+            
+            <input type="hidden" name="post_banner" id="post_banner" value="<?php echo esc_attr($post_banner_id); ?>" />
+            
+            <button type="button" class="button post-banner-upload" <?php echo $post_banner_url ? 'style="display:none;"' : ''; ?>>
+                Upload Banner Image
+            </button>
+            
+            <button type="button" class="button post-banner-change" <?php echo $post_banner_url ? '' : 'style="display:none;"'; ?>>
+                Change Banner Image
+            </button>
+            
+            <button type="button" class="button post-banner-remove" <?php echo $post_banner_url ? '' : 'style="display:none;"'; ?>>
+                Remove Banner Image
+            </button>
+        </div>
+    </div>
+    
+    <style>
+        .post-banner-preview img {
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: #f9f9f9;
+        }
+    </style>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        var mediaUploader;
+        
+        $('.post-banner-upload, .post-banner-change').on('click', function(e) {
+            e.preventDefault();
+            
+            if (mediaUploader) {
+                mediaUploader.open();
+                return;
+            }
+            
+            mediaUploader = wp.media({
+                title: 'Choose Blog Post Banner Image',
+                button: {
+                    text: 'Use this image'
+                },
+                multiple: false
+            });
+            
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                $('#post_banner').val(attachment.id);
+                $('.post-banner-preview img').attr('src', attachment.url).show();
+                $('.post-banner-upload').hide();
+                $('.post-banner-change, .post-banner-remove').show();
+            });
+            
+            mediaUploader.open();
+        });
+        
+        $('.post-banner-remove').on('click', function(e) {
+            e.preventDefault();
+            $('#post_banner').val('');
+            $('.post-banner-preview img').attr('src', '').hide();
+            $('.post-banner-upload').show();
+            $('.post-banner-change, .post-banner-remove').hide();
+        });
+    });
+    </script>
+    <?php
+}
+
+// Save Blog Post Banner Meta
+function kingfact_save_post_banner($post_id) {
+    if (!isset($_POST['kingfact_post_banner_nonce']) || !wp_verify_nonce($_POST['kingfact_post_banner_nonce'], 'kingfact_save_post_banner')) {
+        return;
+    }
+    
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+    
+    if (isset($_POST['post_banner'])) {
+        update_post_meta($post_id, '_post_banner', absint($_POST['post_banner']));
+    } else {
+        delete_post_meta($post_id, '_post_banner');
+    }
+}
+add_action('save_post', 'kingfact_save_post_banner');
+
+// Enqueue media uploader for blog posts
+function kingfact_enqueue_post_media_scripts($hook) {
+    global $post_type;
+    
+    if ('post' === $post_type && ('post.php' === $hook || 'post-new.php' === $hook)) {
+        wp_enqueue_media();
+    }
+}
+add_action('admin_enqueue_scripts', 'kingfact_enqueue_post_media_scripts');
+
 // Add custom image sizes for blog
 add_action( 'after_setup_theme', 'kingfact_blog_image_sizes' );
 function kingfact_blog_image_sizes() {
@@ -2883,24 +3103,15 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             // Slides Section Tab
             array(
                 'key' => 'field_slides_tab',
-                'label' => 'Slides Section',
+                'label' => 'Slides',
                 'type' => 'tab',
                 'placement' => 'top',
-            ),
-            array(
-                'key' => 'field_slides_message',
-                'label' => 'Manage Slides',
-                'name' => 'slides_message',
-                'type' => 'message',
-                'message' => 'To manage slider slides (add, edit, or delete), go to <a href="' . admin_url('edit.php?post_type=slide') . '" target="_blank"><strong>Slides</strong></a> in the WordPress admin menu.<br><br>Each slide has the following fields:<br>• <strong>Slide Background Image</strong> - Upload image with dedicated image picker<br>• <strong>Title</strong> - Post title (used if Big Heading is empty)<br>• <strong>Description</strong> - Post content/editor (displays on slide)<br>• <strong>Subtitle</strong> - Small text line above heading<br>• <strong>Big Heading</strong> - Main title displayed on slide<br>• <strong>Button Text</strong> - Text for call-to-action button<br>• <strong>Button URL</strong> - Link for the button<br><br>Slides are displayed in menu order (drag to reorder in slides list).<br><br><a href="' . admin_url('post-new.php?post_type=slide') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Slide</a><a href="' . admin_url('edit.php?post_type=slide') . '" class="button button-secondary" target="_blank">View All Slides</a>',
-                'new_lines' => 'wpautop',
-                'esc_html' => 0,
             ),
             
             // Features Section Tab
             array(
                 'key' => 'field_features_tab',
-                'label' => 'Features Section',
+                'label' => 'Features',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
@@ -2993,7 +3204,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             // Services Section Tab
             array(
                 'key' => 'field_services_tab',
-                'label' => 'Services Section',
+                'label' => 'Services',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
@@ -3024,7 +3235,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             // Video Section Tab
             array(
                 'key' => 'field_video_tab',
-                'label' => 'Video Section',
+                'label' => 'Video',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
@@ -3069,7 +3280,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             // Products Section Tab
             array(
                 'key' => 'field_products_tab',
-                'label' => 'Products Section',
+                'label' => 'Products',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
@@ -3100,7 +3311,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             // Counter Section Tab
             array(
                 'key' => 'field_counter_section_tab',
-                'label' => 'Counter Section',
+                'label' => 'Counter',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
@@ -3246,11 +3457,75 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'default_value' => 'Qualified Staff',
                 'placeholder' => 'Qualified Staff',
             ),
+
+            // Counter 4 Group
+            array(
+                'key' => 'field_counter4_group',
+                'label' => '— Counter 4 —',
+                'type' => 'message',
+                'message' => '',
+            ),
+            array(
+                'key' => 'field_counter4_icon',
+                'label' => 'Counter 4 - Icon Class',
+                'name' => 'counter4_icon',
+                'type' => 'text',
+                'instructions' => 'FontAwesome icon class (e.g., fal fa-hospital-user)',
+                'default_value' => 'fal fa-smile',
+                'placeholder' => 'fal fa-smile',
+            ),
+            array(
+                'key' => 'field_counter4_number',
+                'label' => 'Counter 4 - Number',
+                'name' => 'counter4_number',
+                'type' => 'text',
+                'default_value' => '101',
+                'placeholder' => '101',
+            ),
+            array(
+                'key' => 'field_counter4_label',
+                'label' => 'Counter 4 - Label',
+                'name' => 'counter4_label',
+                'type' => 'text',
+                'default_value' => 'Happy Clients',
+                'placeholder' => 'Happy Clients',
+            ),
+            
+            // Testimonials Section Tab
+            array(
+                'key' => 'field_testimonials_tab',
+                'label' => 'Testimonials',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_testimonials_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'testimonials_subtitle',
+                'type' => 'text',
+                'default_value' => 'what our clients say',
+            ),
+            array(
+                'key' => 'field_testimonials_title',
+                'label' => 'Title',
+                'name' => 'testimonials_title',
+                'type' => 'text',
+                'default_value' => 'Clients Testimonials',
+            ),
+            array(
+                'key' => 'field_testimonials_message',
+                'label' => 'Manage Testimonials',
+                'name' => 'testimonials_message',
+                'type' => 'message',
+                'message' => 'Testimonials are displayed from the <strong>Testimonials</strong> custom post type. Each testimonial shows client photo, testimonial text, name, and position.<br><br>Testimonials are ordered by menu order and all published testimonials will be shown in the slider.<br><br><a href="' . admin_url('post-new.php?post_type=testimonial') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Testimonial</a><a href="' . admin_url('edit.php?post_type=testimonial') . '" class="button button-secondary" target="_blank">View All Testimonials</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
+            ),
             
             // Our Goals Section Tab
             array(
                 'key' => 'field_goals_tab',
-                'label' => 'Our Goals Section',
+                'label' => 'Our Goals',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
@@ -3263,14 +3538,14 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_goals_title',
-                'label' => 'Title',
+                'label' => 'Goals Title',
                 'name' => 'goals_title',
                 'type' => 'text',
                 'default_value' => 'Experience Industrial Engineering Company Based In New York',
             ),
             array(
                 'key' => 'field_goals_image',
-                'label' => 'Right Side Image',
+                'label' => 'Goals Image',
                 'name' => 'goals_image',
                 'type' => 'image',
                 'return_format' => 'url',
@@ -3278,7 +3553,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
             array(
                 'key' => 'field_goals_video_url',
-                'label' => 'Video URL',
+                'label' => 'Goals Video URL',
                 'name' => 'goals_video_url',
                 'type' => 'url',
                 'instructions' => 'YouTube or Vimeo video URL for popup',
@@ -3359,11 +3634,52 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'rows' => 3,
                 'default_value' => 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque',
             ),
+
+            
+            // Latest News & Blogs Section Tab
+            array(
+                'key' => 'field_blogs_tab',
+                'label' => 'Latest News & Blogs',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_blogs_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'blogs_subtitle',
+                'type' => 'text',
+                'default_value' => 'articles & tips',
+            ),
+            array(
+                'key' => 'field_blogs_title',
+                'label' => 'Title',
+                'name' => 'blogs_title',
+                'type' => 'text',
+                'default_value' => 'Latest News & Blog',
+            ),
+            array(
+                'key' => 'field_blogs_banner',
+                'label' => 'Right Side Banner Image',
+                'name' => 'blogs_banner',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'instructions' => 'Upload image to display in the right column banner area',
+            ),
+            array(
+                'key' => 'field_blogs_message',
+                'label' => 'Manage Blog Posts',
+                'name' => 'blogs_message',
+                'type' => 'message',
+                'message' => 'Blog posts are displayed from WordPress <strong>Posts</strong>. The latest 2 posts will be shown in the left column.<br><br>The section displays post date, comments count, featured image, title, and excerpt.<br><br><a href="' . admin_url('post-new.php') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Blog Post</a><a href="' . admin_url('edit.php') . '" class="button button-secondary" target="_blank">View All Blog Posts</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
+            ),
             
             // Newsletter Section Tab
             array(
                 'key' => 'field_newsletter_tab',
-                'label' => 'Newsletter Section',
+                'label' => 'Newsletter',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
@@ -3402,6 +3718,114 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'name' => 'newsletter_btn_text',
                 'type' => 'text',
                 'default_value' => 'subscribe',
+            ),
+            
+            // Brand Section Tab
+            array(
+                'key' => 'field_brand_tab',
+                'label' => 'Brand Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_brand_logo_1',
+                'label' => 'Brand Logo 1',
+                'name' => 'brand_logo_1',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 1',
+            ),
+            array(
+                'key' => 'field_brand_logo_2',
+                'label' => 'Brand Logo 2',
+                'name' => 'brand_logo_2',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 2',
+            ),
+            array(
+                'key' => 'field_brand_logo_3',
+                'label' => 'Brand Logo 3',
+                'name' => 'brand_logo_3',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 3',
+            ),
+            array(
+                'key' => 'field_brand_logo_4',
+                'label' => 'Brand Logo 4',
+                'name' => 'brand_logo_4',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 4',
+            ),
+            array(
+                'key' => 'field_brand_logo_5',
+                'label' => 'Brand Logo 5',
+                'name' => 'brand_logo_5',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 5',
+            ),
+            array(
+                'key' => 'field_brand_logo_6',
+                'label' => 'Brand Logo 6',
+                'name' => 'brand_logo_6',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 6',
+            ),
+            array(
+                'key' => 'field_brand_logo_7',
+                'label' => 'Brand Logo 7',
+                'name' => 'brand_logo_7',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 7',
+            ),
+            array(
+                'key' => 'field_brand_logo_8',
+                'label' => 'Brand Logo 8',
+                'name' => 'brand_logo_8',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 8',
+            ),
+            array(
+                'key' => 'field_brand_logo_9',
+                'label' => 'Brand Logo 9',
+                'name' => 'brand_logo_9',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 9',
+            ),
+            array(
+                'key' => 'field_brand_logo_10',
+                'label' => 'Brand Logo 10',
+                'name' => 'brand_logo_10',
+                'type' => 'image',
+                'return_format' => 'array',
+                'preview_size' => 'thumbnail',
+                'library' => 'all',
+                'instructions' => 'Upload brand logo image 10',
             ),
         ),
         'location' => array(
@@ -3463,6 +3887,15 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'instructions' => 'Leave empty to use page title',
                 'placeholder' => 'Page title will be used if empty',
             ),
+            array(
+                'key' => 'field_services_page_message',
+                'label' => 'Manage Services',
+                'name' => 'services_page_message',
+                'type' => 'message',
+                'message' => 'Services are displayed from the <strong>Services</strong> custom post type. Each service shows custom banner image, title, description, icon, and link details.<br><br>Services are ordered by menu order and displayed in a responsive grid layout.<br><br><a href="' . admin_url('post-new.php?post_type=service') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Service</a><a href="' . admin_url('edit.php?post_type=service') . '" class="button button-secondary" target="_blank">View All Services</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
+            ),
         ),
         'location' => array(
             array(
@@ -3474,6 +3907,144 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
             ),
         ),
         'menu_order' => 2,
+        'position' => 'normal',
+        'style' => 'default',
+    ));
+    
+    // Products Page ACF Fields
+    acf_add_local_field_group(array(
+        'key' => 'group_products_page',
+        'title' => 'Products Page Settings',
+        'fields' => array(
+            // Banner Section Tab
+            array(
+                'key' => 'field_products_page_banner_tab',
+                'label' => 'Banner Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_products_page_banner_image',
+                'label' => 'Banner Background Image',
+                'name' => 'products_page_banner_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'instructions' => 'Upload a custom banner image. If not set, will use default.',
+            ),
+            array(
+                'key' => 'field_products_page_banner_title',
+                'label' => 'Banner Title',
+                'name' => 'products_page_banner_title',
+                'type' => 'text',
+                'instructions' => 'Leave empty to use page title',
+                'placeholder' => 'Page title will be used if empty',
+            ),
+            array(
+                'key' => 'field_products_page_breadcrumb_home',
+                'label' => 'Breadcrumb - Home Text',
+                'name' => 'products_page_breadcrumb_home',
+                'type' => 'text',
+                'default_value' => 'home',
+                'placeholder' => 'home',
+            ),
+            array(
+                'key' => 'field_products_page_breadcrumb_current',
+                'label' => 'Breadcrumb - Current Page Text',
+                'name' => 'products_page_breadcrumb_current',
+                'type' => 'text',
+                'instructions' => 'Leave empty to use page title',
+                'placeholder' => 'Page title will be used if empty',
+            ),
+            array(
+                'key' => 'field_products_page_message',
+                'label' => 'Manage Products',
+                'name' => 'products_page_message',
+                'type' => 'message',
+                'message' => 'Products are displayed from the <strong>Products</strong> custom post type. Each product shows custom banner image, title, description, price, and additional details.<br><br>Products are ordered by menu order and include features like image galleries, video links, and custom icons.<br><br><a href="' . admin_url('post-new.php?post_type=product') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Product</a><a href="' . admin_url('edit.php?post_type=product') . '" class="button button-secondary" target="_blank">View All Products</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'page_template',
+                    'operator' => '==',
+                    'value' => 'page-products.php',
+                ),
+            ),
+        ),
+        'menu_order' => 3,
+        'position' => 'normal',
+        'style' => 'default',
+    ));
+    
+    // Blog Page ACF Fields
+    acf_add_local_field_group(array(
+        'key' => 'group_blog_page',
+        'title' => 'Blog Page Settings',
+        'fields' => array(
+            // Banner Section Tab
+            array(
+                'key' => 'field_blog_page_banner_tab',
+                'label' => 'Banner Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_blog_page_banner_image',
+                'label' => 'Banner Background Image',
+                'name' => 'blog_page_banner_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'instructions' => 'Upload a custom banner image. If not set, will use default.',
+            ),
+            array(
+                'key' => 'field_blog_page_banner_title',
+                'label' => 'Banner Title',
+                'name' => 'blog_page_banner_title',
+                'type' => 'text',
+                'instructions' => 'Leave empty to use page title',
+                'placeholder' => 'Page title will be used if empty',
+            ),
+            array(
+                'key' => 'field_blog_page_breadcrumb_home',
+                'label' => 'Breadcrumb - Home Text',
+                'name' => 'blog_page_breadcrumb_home',
+                'type' => 'text',
+                'default_value' => 'home',
+                'placeholder' => 'home',
+            ),
+            array(
+                'key' => 'field_blog_page_breadcrumb_current',
+                'label' => 'Breadcrumb - Current Page Text',
+                'name' => 'blog_page_breadcrumb_current',
+                'type' => 'text',
+                'instructions' => 'Leave empty to use page title',
+                'placeholder' => 'Page title will be used if empty',
+            ),
+            array(
+                'key' => 'field_blog_page_message',
+                'label' => 'Manage Blog Posts',
+                'name' => 'blog_page_message',
+                'type' => 'message',
+                'message' => 'Blog posts are displayed from WordPress <strong>Posts</strong>. The blog listing page shows all published posts with featured images, titles, excerpts, dates, and comment counts.<br><br>Posts are ordered by publish date (newest first) and include pagination for easy navigation.<br><br><a href="' . admin_url('post-new.php') . '" class="button button-primary button-large" target="_blank" style="margin-right: 10px;">+ Add New Blog Post</a><a href="' . admin_url('edit.php') . '" class="button button-secondary" target="_blank">View All Blog Posts</a>',
+                'new_lines' => 'wpautop',
+                'esc_html' => 0,
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'page_type',
+                    'operator' => '==',
+                    'value' => 'posts_page',
+                ),
+            ),
+        ),
+        'menu_order' => 4,
         'position' => 'normal',
         'style' => 'default',
     ));
@@ -3673,8 +4244,60 @@ add_action('wp_footer', 'enqueue_newsletter_scripts');
 if ( function_exists( 'acf_add_local_field_group' ) ) {
     acf_add_local_field_group( array(
         'key' => 'group_about_history',
-        'title' => 'About Page - History Section',
+        'title' => 'About Page Settings',
         'fields' => array(
+            // Banner & Breadcrumb Tab
+            array(
+                'key' => 'field_about_banner_tab',
+                'label' => 'Banner Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_about_banner_image',
+                'label' => 'Banner Background Image',
+                'name' => 'about_banner_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'library' => 'all',
+                'instructions' => 'Upload a banner background image for the About page. Recommended size: 1920x600px',
+            ),
+            array(
+                'key' => 'field_about_banner_title',
+                'label' => 'Banner Title',
+                'name' => 'about_banner_title',
+                'type' => 'text',
+                'default_value' => 'About Us',
+                'placeholder' => 'About Us',
+                'instructions' => 'Main title displayed in the banner center',
+            ),
+            array(
+                'key' => 'field_about_breadcrumb_home',
+                'label' => 'Breadcrumb - Home Text',
+                'name' => 'about_breadcrumb_home',
+                'type' => 'text',
+                'default_value' => 'home',
+                'placeholder' => 'home',
+                'instructions' => 'Text for the home breadcrumb link',
+            ),
+            array(
+                'key' => 'field_about_breadcrumb_current',
+                'label' => 'Breadcrumb - Current Page Text',
+                'name' => 'about_breadcrumb_current',
+                'type' => 'text',
+                'default_value' => 'About Us',
+                'placeholder' => 'About Us',
+                'instructions' => 'Text for the current page in breadcrumb',
+            ),
+            
+            // History Section Tab
+            array(
+                'key' => 'field_history_tab',
+                'label' => 'History Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
             array(
                 'key' => 'field_history_subtitle',
                 'label' => 'History Subtitle',
@@ -3712,13 +4335,15 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'default_value' => 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odite.',
             ),
             
-            // Vision Section
+            // Vision, Mission & Goals Tab
             array(
-                'key' => 'field_vision_tab',
-                'label' => 'Vision',
+                'key' => 'field_vmg_tab',
+                'label' => 'Vision, Mission & Goals',
                 'type' => 'tab',
                 'placement' => 'top',
             ),
+            
+            // Vision Fields
             array(
                 'key' => 'field_vision_image',
                 'label' => 'Vision Image',
@@ -3751,13 +4376,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'placeholder' => 'https://',
             ),
             
-            // Mission Section
-            array(
-                'key' => 'field_mission_tab',
-                'label' => 'Mission',
-                'type' => 'tab',
-                'placement' => 'top',
-            ),
+            // Mission Fields
             array(
                 'key' => 'field_mission_image',
                 'label' => 'Mission Image',
@@ -3790,13 +4409,7 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'placeholder' => 'https://',
             ),
             
-            // Goals Section
-            array(
-                'key' => 'field_goals_tab',
-                'label' => 'Goals / Why Us',
-                'type' => 'tab',
-                'placement' => 'top',
-            ),
+            // Goals Fields
             array(
                 'key' => 'field_goals_image',
                 'label' => 'Goals Image',
@@ -3827,6 +4440,152 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'name' => 'goals_link',
                 'type' => 'url',
                 'placeholder' => 'https://',
+            ),
+            
+            // Counter Section Info Tab
+            array(
+                'key' => 'field_counter_info_tab',
+                'label' => 'Counter Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_counter_section_info',
+                'label' => 'Counter Section Information',
+                'name' => 'counter_section_info',
+                'type' => 'message',
+                'message' => '<div style="padding: 15px; background: #f0f6fc; border-left: 4px solid #2271b1; margin: 10px 0;">
+                    <h3 style="margin-top: 0; color: #1d2327;">Edit Counter Section</h3>
+                    <p style="margin: 10px 0; font-size: 14px;">The counter/statistics section displayed on the About page is managed from the Home page settings.</p>
+                    <p style="margin: 10px 0; font-size: 14px;">Click the button below to edit counter values, icons, and labels:</p>
+                    <a href="' . admin_url('post.php?post=' . get_option('page_on_front') . '&action=edit') . '" class="button button-primary" style="margin-top: 10px;" target="_blank">
+                        <span class="dashicons dashicons-admin-home" style="vertical-align: middle; margin-right: 5px;"></span>
+                        Go to Home Page Counter Section
+                    </a>
+                </div>',
+                'new_lines' => '',
+            ),
+            
+            // Featured Section Tab
+            array(
+                'key' => 'field_about_features_tab',
+                'label' => 'Featured Section',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_about_features_bg',
+                'label' => 'Background Image',
+                'name' => 'about_features_bg',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'instructions' => 'Upload background image for featured section',
+            ),
+            array(
+                'key' => 'field_about_features_subtitle',
+                'label' => 'Subtitle',
+                'name' => 'about_features_subtitle',
+                'type' => 'text',
+                'default_value' => 'who we are',
+                'placeholder' => 'who we are',
+            ),
+            array(
+                'key' => 'field_about_features_title',
+                'label' => 'Title',
+                'name' => 'about_features_title',
+                'type' => 'text',
+                'default_value' => 'Explore Features',
+                'placeholder' => 'Explore Features',
+            ),
+            array(
+                'key' => 'field_about_features_paragraph',
+                'label' => 'Description',
+                'name' => 'about_features_paragraph',
+                'type' => 'textarea',
+                'rows' => 4,
+                'default_value' => 'But I must explain to you how all this mistaken is denouncing pleasure and praising pain was borners will give you a complete account of the system and expound the actual teachings',
+            ),
+            array(
+                'key' => 'field_about_features_item1_image',
+                'label' => 'Feature 1 Image',
+                'name' => 'about_features_item1_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'thumbnail',
+                'instructions' => 'Upload image for first feature',
+            ),
+            array(
+                'key' => 'field_about_features_item1_title',
+                'label' => 'Feature 1 Title',
+                'name' => 'about_features_item1_title',
+                'type' => 'text',
+                'default_value' => 'Technology Buildup',
+                'placeholder' => 'Technology Buildup',
+            ),
+            array(
+                'key' => 'field_about_features_item1_text',
+                'label' => 'Feature 1 Text',
+                'name' => 'about_features_item1_text',
+                'type' => 'textarea',
+                'rows' => 2,
+                'default_value' => 'Avoids pleasure itself, because it is pleasure because those who do not know how',
+            ),
+            array(
+                'key' => 'field_about_features_item2_image',
+                'label' => 'Feature 2 Image',
+                'name' => 'about_features_item2_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'thumbnail',
+                'instructions' => 'Upload image for second feature',
+            ),
+            array(
+                'key' => 'field_about_features_item2_title',
+                'label' => 'Feature 2 Title',
+                'name' => 'about_features_item2_title',
+                'type' => 'text',
+                'default_value' => 'Awards & Accolades',
+                'placeholder' => 'Awards & Accolades',
+            ),
+            array(
+                'key' => 'field_about_features_item2_text',
+                'label' => 'Feature 2 Text',
+                'name' => 'about_features_item2_text',
+                'type' => 'textarea',
+                'rows' => 2,
+                'default_value' => 'Avoids pleasure itself, because it is pleasure because those who do not know how',
+            ),
+            
+            // Testimonials Section Info Tab
+            array(
+                'key' => 'field_about_testimonials_info_tab',
+                'label' => 'Testimonials',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_about_testimonials_section_info',
+                'label' => 'Testimonials Section Information',
+                'name' => 'about_testimonials_section_info',
+                'type' => 'message',
+                'message' => '<div style="padding: 15px; background: #f0f6fc; border-left: 4px solid #2271b1; margin: 10px 0;">
+                    <h3 style="margin-top: 0; color: #1d2327;">Edit Testimonials</h3>
+                    <p style="margin: 10px 0; font-size: 14px;">The testimonials section displayed on the About page is managed from the Home page settings.</p>
+                    <p style="margin: 10px 0; font-size: 14px;">You can also manage individual testimonials from the Testimonials post type.</p>
+                    <p style="margin: 10px 0; font-size: 14px;"><strong>Click the buttons below:</strong></p>
+                    <div style="margin-top: 15px;">
+                        <a href="' . admin_url('post.php?post=' . get_option('page_on_front') . '&action=edit') . '" class="button button-primary" style="margin-right: 10px;" target="_blank">
+                            <span class="dashicons dashicons-admin-home" style="vertical-align: middle; margin-right: 5px;"></span>
+                            Go to Home Page Testimonials Section
+                        </a>
+                        <a href="' . admin_url('edit.php?post_type=testimonial') . '" class="button button-secondary" target="_blank">
+                            <span class="dashicons dashicons-admin-comments" style="vertical-align: middle; margin-right: 5px;"></span>
+                            Manage All Testimonials
+                        </a>
+                    </div>
+                </div>',
+                'new_lines' => '',
             ),
         ),
         'location' => array(

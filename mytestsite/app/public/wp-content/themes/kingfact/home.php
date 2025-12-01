@@ -5,30 +5,55 @@
 
 get_header();
 
-// Get breadcrumb background from theme options or ACF
-$breadcrumb_bg = '';
-if ( function_exists( 'get_field' ) ) {
-    $bg_field = get_field( 'blog_breadcrumb_bg', 'option' );
-    if ( $bg_field ) {
-        $breadcrumb_bg = is_array( $bg_field ) ? $bg_field['url'] : $bg_field;
+// Get the ID of the page set as "Posts page" in Settings > Reading
+$posts_page_id = get_option('page_for_posts');
+
+// Get ACF fields for blog page
+$banner_image = '';
+$banner_title = 'Blog';
+$breadcrumb_home = 'home';
+$breadcrumb_current = 'blog';
+
+if ($posts_page_id && function_exists('get_field')) {
+    $banner_image = get_field('blog_page_banner_image', $posts_page_id);
+    $banner_title_field = get_field('blog_page_banner_title', $posts_page_id);
+    $breadcrumb_home_field = get_field('blog_page_breadcrumb_home', $posts_page_id);
+    $breadcrumb_current_field = get_field('blog_page_breadcrumb_current', $posts_page_id);
+    
+    if ($banner_title_field) {
+        $banner_title = $banner_title_field;
+    } elseif ($posts_page_id) {
+        $banner_title = get_the_title($posts_page_id);
+    }
+    
+    if ($breadcrumb_home_field) {
+        $breadcrumb_home = $breadcrumb_home_field;
+    }
+    
+    if ($breadcrumb_current_field) {
+        $breadcrumb_current = $breadcrumb_current_field;
+    } elseif ($posts_page_id) {
+        $breadcrumb_current = get_the_title($posts_page_id);
     }
 }
-if ( ! $breadcrumb_bg ) {
-    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+
+// Fallback to default banner image if not set
+if (!$banner_image) {
+    $banner_image = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
 }
 ?>
 
 <main>
     <!-- breadcrumb-area-start -->
-    <div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url( $breadcrumb_bg ); ?>)">
+    <div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url($banner_image); ?>)">
         <div class="container">
             <div class="row">
                 <div class="col-xl-12">
                     <div class="breadcrumb-text text-center">
-                        <h1>Blog</h1>
+                        <h1><?php echo esc_html($banner_title); ?></h1>
                         <ul class="breadcrumb-menu">
-                            <li><a href="<?php echo esc_url( home_url( '/' ) ); ?>">home</a></li>
-                            <li><span>blog</span></li>
+                            <li><a href="<?php echo esc_url(home_url('/')); ?>"><?php echo esc_html($breadcrumb_home); ?></a></li>
+                            <li><span><?php echo esc_html($breadcrumb_current); ?></span></li>
                         </ul>
                     </div>
                 </div>
@@ -50,14 +75,18 @@ if ( ! $breadcrumb_bg ) {
                                 <div class="blog-img">
                                     <a href="<?php the_permalink(); ?>">
                                         <?php 
-                                        if ( has_post_thumbnail() ) {
-                                            the_post_thumbnail( 'large', array( 
+                                        $post_banner_id = get_post_meta(get_the_ID(), '_post_banner', true);
+                                        $post_banner_url = $post_banner_id ? wp_get_attachment_image_url($post_banner_id, 'large') : '';
+                                        
+                                        if ($post_banner_url) {
+                                            echo '<img src="' . esc_url($post_banner_url) . '" alt="' . esc_attr(get_the_title()) . '" class="img-fluid">';
+                                        } elseif (has_post_thumbnail()) {
+                                            the_post_thumbnail('large', array(
                                                 'alt' => get_the_title(),
                                                 'class' => 'img-fluid'
-                                            ) );
+                                            ));
                                         } else {
-                                            // Default placeholder image
-                                            echo '<img src="' . esc_url( get_template_directory_uri() . '/assets/img/blog/blog-01.jpg' ) . '" alt="' . esc_attr( get_the_title() ) . '" class="img-fluid">';
+                                            echo '<img src="' . esc_url(get_template_directory_uri() . '/assets/img/blog/blog-01.jpg') . '" alt="' . esc_attr(get_the_title()) . '" class="img-fluid">';
                                         }
                                         ?>
                                     </a>

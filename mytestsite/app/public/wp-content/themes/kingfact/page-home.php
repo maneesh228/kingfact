@@ -467,9 +467,13 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                         ?>
                         <div class="col-xl-4 col-lg-4 col-md-6">
                             <div class="b-work position-relative mb-30">
-                                <?php if (has_post_thumbnail()) : ?>
+                                <?php 
+                                $product_banner_id = get_post_meta(get_the_ID(), '_product_banner', true);
+                                $product_banner_url = $product_banner_id ? wp_get_attachment_image_url($product_banner_id, 'medium') : '';
+                                if ($product_banner_url) : 
+                                ?>
                                 <div class="b-work-img">
-                                    <?php the_post_thumbnail('medium', array('alt' => get_the_title(), 'style' => 'width: 100%; height: auto;')); ?>
+                                    <img src="<?php echo esc_url($product_banner_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" style="width: 100%; height: auto;">
                                 </div>
                                 <?php endif; ?>
                                 <div class="b-work-content-2">
@@ -577,13 +581,17 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
             <!-- counter-area-end -->
 
             <!-- testimonial-area -->
+            <?php
+            $testimonials_subtitle = get_field('testimonials_subtitle') ?: 'what our clients say';
+            $testimonials_title = get_field('testimonials_title') ?: 'Clients Testimonials';
+            ?>
             <div class="client-area black-bg pt-125 pb-130">
                 <div class="container">
                     <div class="row">
                         <div class="col-xl-6 col-lg-6 offset-lg-3 offset-xl-3">
                             <div class="section-title white-title text-center mb-75">
-                                <span>what our clients say</span>
-                                <h1>Clients Testimonials</h1>
+                                <span><?php echo esc_html($testimonials_subtitle); ?></span>
+                                <h1><?php echo esc_html($testimonials_title); ?></h1>
                             </div>
                         </div>
                     </div>
@@ -610,9 +618,13 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                         ?>
                         <div class="col-xl-12">
                             <div class="client-wrapper text-center">
-                                <?php if (has_post_thumbnail()) : ?>
+                                <?php 
+                                $testimonial_photo_id = get_post_meta(get_the_ID(), '_testimonial_photo', true);
+                                $testimonial_photo_url = $testimonial_photo_id ? wp_get_attachment_image_url($testimonial_photo_id, 'thumbnail') : '';
+                                if ($testimonial_photo_url) : 
+                                ?>
                                 <div class="client-img pos-rel">
-                                    <?php the_post_thumbnail('thumbnail', array('alt' => esc_attr($client_name))); ?>
+                                    <img src="<?php echo esc_url($testimonial_photo_url); ?>" alt="<?php echo esc_attr($client_name); ?>" />
                                 </div>
                                 <?php endif; ?>
                                 <div class="client-content">
@@ -642,167 +654,8 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
             </div>
             <!-- testimonial-area end -->
 
-            <!-- our goals section -->
-            <?php echo do_shortcode('[our_goals]'); ?>
-            <!-- our goals section end -->
-
-            <!-- blog-area-start -->
-            <div class="blog-area pt-125 pb-100 grey-2-bg">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-xl-6 col-lg-6 offset-lg-3 offset-xl-3">
-                            <div class="section-title text-center mb-75">
-                                <span>articles & tips</span>
-                                <h1>Latest News & Blog</h1>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <?php
-                        // Query for latest 2 blog posts
-                        $blog_args = array(
-                            'post_type' => 'post',
-                            'posts_per_page' => 2,
-                            'orderby' => 'date',
-                            'order' => 'DESC',
-                        );
-                        $blog_query = new WP_Query($blog_args);
-                        
-                        if ($blog_query->have_posts()) : 
-                        ?>
-                        <div class="col-xl-8 col-lg-8">
-                            <?php 
-                            while ($blog_query->have_posts()) : $blog_query->the_post(); 
-                                $post_date = get_the_date('d M Y');
-                                $comments_count = get_comments_number();
-                                $featured_img = get_the_post_thumbnail_url(get_the_ID(), 'full');
-                                if (!$featured_img) {
-                                    $featured_img = get_template_directory_uri() . '/assets/img/blog/blog-01.jpg';
-                                }
-                            ?>
-                            <div class="blog-bg bg-white mb-30">
-                                <div class="row no-gutters">
-                                    <div class="col-xl-6">
-                                        <div class="blog-img">
-                                            <a href="<?php the_permalink(); ?>"><img src="<?php echo esc_url($featured_img); ?>" alt="<?php the_title_attribute(); ?>"></a>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-6">
-                                        <div class="single-blog">
-                                            <div class="blog-text">
-                                                <div class="blog-meta">
-                                                    <span class="meta-date-bg"> <i class="far fa-calendar-alt"></i> <?php echo esc_html($post_date); ?></span>
-                                                    <span> <a href="<?php the_permalink(); ?>"><i class="far fa-comment"></i> Comments (<?php echo esc_html($comments_count); ?>)</a></span>
-                                                </div>
-                                                <h4><a href="<?php the_permalink(); ?>"><?php echo wp_trim_words(get_the_title(), 12, '...'); ?></a></h4>
-                                                <a href="<?php the_permalink(); ?>">Read More <i class="dripicons-arrow-thin-right"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php 
-                            endwhile;
-                            ?>
-                        </div>
-                        <div class="col-xl-4 col-lg-4">
-                            <div class="blog-banner-img mb-30">
-                                <?php
-                                // Get the very latest blog post for the banner (separate query to ensure we get the most recent)
-                                $banner_query = new WP_Query(array(
-                                    'post_type' => 'post',
-                                    'posts_per_page' => 1,
-                                    'orderby' => 'date',
-                                    'order' => 'DESC',
-                                ));
-                                
-                                
-                                if ($banner_query->have_posts()) {
-                                    $banner_query->the_post();
-                                    $banner_link = get_permalink();
-                                    $banner_img = get_the_post_thumbnail_url(get_the_ID(), 'full');
-                                    if (!$banner_img) {
-                                        $banner_img = get_template_directory_uri() . '/assets/img/blog/blog.jpg';
-                                    }
-                                    wp_reset_postdata();
-                                } else {
-                                    $banner_link = home_url('/blog');
-                                    $banner_img = get_template_directory_uri() . '/assets/img/blog/blog.jpg';
-                                }
-                                ?>
-                                <a href="<?php echo esc_url($banner_link); ?>">
-                                    <img src="<?php echo esc_url($banner_img); ?>" alt="Latest Blog Post">
-                                </a>
-                            </div>
-                        </div>
-                        <?php 
-                            wp_reset_postdata();
-                        else : ?>
-                        <div class="col-xl-12">
-                            <p class="text-center">No blog posts found.</p>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-            <!-- blog-area-end -->
-
-            <!-- brand-area-start -->
-            <div class="brand-area pt-130 pb-130">
-                <div class="container">
-                    <div class="row brand-active">
-                        <?php
-                        // Query for brand images from WordPress Media Library
-                        $brand_args = array(
-                            'post_type' => 'attachment',
-                            'post_mime_type' => 'image',
-                            'post_status' => 'inherit',
-                            'posts_per_page' => -1,
-                            'orderby' => 'date',
-                            'order' => 'DESC',
-                            'meta_query' => array(
-                                array(
-                                    'key' => '_wp_attachment_image_alt',
-                                    'value' => 'brand',
-                                    'compare' => 'LIKE'
-                                )
-                            )
-                        );
-                        
-                        $brand_query = new WP_Query($brand_args);
-                        
-                        if ($brand_query->have_posts()) :
-                            while ($brand_query->have_posts()) : $brand_query->the_post();
-                                $brand_img_url = wp_get_attachment_url(get_the_ID());
-                                $brand_alt = get_post_meta(get_the_ID(), '_wp_attachment_image_alt', true);
-                        ?>
-                        <div class="col-xl-12">
-                            <div class="brand-img text-center">
-                                <img src="<?php echo esc_url($brand_img_url); ?>" alt="<?php echo esc_attr($brand_alt); ?>" />
-                            </div>
-                        </div>
-                        <?php 
-                            endwhile;
-                            wp_reset_postdata();
-                        else : 
-                            // Fallback to default brand images if no media found
-                            for ($i = 1; $i <= 5; $i++) :
-                        ?>
-                        <div class="col-xl-12">
-                            <div class="brand-img text-center">
-                                <img src="<?php echo get_template_directory_uri(); ?>/assets/img/brand/0<?php echo $i; ?>.png" alt="Brand <?php echo $i; ?>" />
-                            </div>
-                        </div>
-                        <?php 
-                            endfor;
-                        endif; 
-                        ?>
-                    </div>
-                </div>
-            </div>
-            <!-- brand-area-end -->
-
             <!-- choose-area-start -->
+            <!-- our goals section -->
             <?php
             // Get Our Goals Section fields
             $goals_subtitle = get_field('goals_subtitle') ?: 'our goals';
@@ -884,6 +737,141 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
             </div>
             <!-- choose-area-end -->
 
+            <!-- our goals section end -->
+
+            <!-- blog-area-start -->
+            <?php
+            $blogs_subtitle = get_field('blogs_subtitle') ?: 'articles & tips';
+            $blogs_title = get_field('blogs_title') ?: 'Latest News & Blog';
+            $blogs_banner = get_field('blogs_banner') ?: get_template_directory_uri() . '/assets/img/blog/blog.jpg';
+            ?>
+                <div class="blog-area pt-125 pb-100 grey-2-bg">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-6 offset-lg-3 offset-xl-3">
+                                <div class="section-title text-center mb-75">
+                                    <span><?php echo esc_html($blogs_subtitle); ?></span>
+                                    <h1><?php echo esc_html($blogs_title); ?></h1>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <?php
+                            // Query for latest 2 blog posts
+                            $blog_args = array(
+                                'post_type' => 'post',
+                                'posts_per_page' => 2,
+                                'orderby' => 'date',
+                                'order' => 'DESC',
+                            );
+                            $blog_query = new WP_Query($blog_args);
+                            
+                            if ($blog_query->have_posts()) : 
+                            ?>
+                            <div class="col-xl-8 col-lg-8">
+                                <?php 
+                                while ($blog_query->have_posts()) : $blog_query->the_post(); 
+                                    $post_date = get_the_date('d M Y');
+                                    $comments_count = get_comments_number();
+                                    
+                                    // Get custom banner image first, then fall back to featured image
+                                    $post_banner_id = get_post_meta(get_the_ID(), '_post_banner', true);
+                                    $blog_img = $post_banner_id ? wp_get_attachment_image_url($post_banner_id, 'full') : '';
+                                    
+                                    if (!$blog_img) {
+                                        $blog_img = get_the_post_thumbnail_url(get_the_ID(), 'full');
+                                    }
+                                    
+                                    if (!$blog_img) {
+                                        $blog_img = get_template_directory_uri() . '/assets/img/blog/blog-01.jpg';
+                                    }
+                                ?>
+                                <div class="blog-bg bg-white mb-30">
+                                    <div class="row no-gutters">
+                                        <div class="col-xl-6">
+                                            <div class="blog-img">
+                                                <a href="<?php the_permalink(); ?>"><img src="<?php echo esc_url($blog_img); ?>" alt="<?php the_title_attribute(); ?>"></a>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6">
+                                            <div class="single-blog">
+                                                <div class="blog-text">
+                                                    <div class="blog-meta">
+                                                        <span class="meta-date-bg"> <i class="far fa-calendar-alt"></i> <?php echo esc_html($post_date); ?></span>
+                                                        <span> <a href="<?php the_permalink(); ?>"><i class="far fa-comment"></i> Comments (<?php echo esc_html($comments_count); ?>)</a></span>
+                                                    </div>
+                                                    <h4><a href="<?php the_permalink(); ?>"><?php echo wp_trim_words(get_the_title(), 12, '...'); ?></a></h4>
+                                                    <a href="<?php the_permalink(); ?>">Read More <i class="dripicons-arrow-thin-right"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php 
+                                endwhile;
+                                ?>
+                            </div>
+                            <div class="col-xl-4 col-lg-4">
+                                <div class="blog-banner-img mb-30">
+                                    <a href="<?php echo admin_url('edit.php'); ?>"><img src="<?php echo esc_url($blogs_banner); ?>" alt="Blog Banner"></a>
+                                </div>
+                            </div>
+                            <?php 
+                                wp_reset_postdata();
+                            else : ?>
+                            <div class="col-xl-12">
+                                <p class="text-center">No blog posts found.</p>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <!-- blog-area-end -->
+
+            <!-- brand-area-start -->
+            <div class="brand-area pt-130 pb-130">
+                <div class="container">
+                    <div class="row brand-active">
+                        <?php
+                        // Get brand logos from ACF individual image fields (ACF Free compatible)
+                        $brand_logos = array();
+                        for ($i = 1; $i <= 10; $i++) {
+                            $brand_logo = get_field('brand_logo_' . $i);
+                            if ($brand_logo && !empty($brand_logo)) {
+                                $brand_logos[] = $brand_logo;
+                            }
+                        }
+                        
+                        if (!empty($brand_logos)) :
+                            foreach ($brand_logos as $brand_logo) :
+                                $brand_img_url = isset($brand_logo['url']) ? $brand_logo['url'] : '';
+                                $brand_alt = isset($brand_logo['alt']) ? $brand_logo['alt'] : 'Brand Logo';
+                        ?>
+                        <div class="col-xl-12">
+                            <div class="brand-img text-center">
+                                <img src="<?php echo esc_url($brand_img_url); ?>" alt="<?php echo esc_attr($brand_alt); ?>" />
+                            </div>
+                        </div>
+                        <?php 
+                            endforeach;
+                        else : 
+                            // Fallback to default brand images if no ACF images uploaded
+                            for ($i = 1; $i <= 5; $i++) :
+                        ?>
+                        <div class="col-xl-12">
+                            <div class="brand-img text-center">
+                                <img src="<?php echo get_template_directory_uri(); ?>/assets/img/brand/0<?php echo $i; ?>.png" alt="Brand <?php echo $i; ?>" />
+                            </div>
+                        </div>
+                        <?php 
+                            endfor;
+                        endif; 
+                        ?>
+                    </div>
+                </div>
+            </div>
+            <!-- brand-area-end -->
+           
             <!-- newsletter-area-start -->
             <div class="newsletter-area pt-60 pb-30" style="background-image:url(<?php echo get_template_directory_uri(); ?>/assets/img/bg/newsletter.jpg)">
                 <div class="container">

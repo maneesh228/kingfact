@@ -22,9 +22,13 @@
                         </div>
                         <?php endif; ?>
                         
-                        <?php if (has_post_thumbnail()) : ?>
+                        <?php
+                        $product_banner_id = get_post_meta(get_the_ID(), '_product_banner', true);
+                        $product_banner_url = $product_banner_id ? wp_get_attachment_image_url($product_banner_id, 'large') : '';
+                        if ($product_banner_url) : 
+                        ?>
                         <div class="product-image mb-30">
-                            <?php the_post_thumbnail('large', array('alt' => get_the_title(), 'class' => 'img-fluid')); ?>
+                            <img src="<?php echo esc_url($product_banner_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="img-fluid" />
                         </div>
                         <?php endif; ?>
                         
@@ -202,11 +206,15 @@
                             
                             <div class="recent-product-item mb-20">
                                 <div class="row">
-                                    <?php if (has_post_thumbnail()) : ?>
+                                    <?php 
+                                    $related_banner_id = get_post_meta(get_the_ID(), '_product_banner', true);
+                                    $related_banner_url = $related_banner_id ? wp_get_attachment_image_url($related_banner_id, 'thumbnail') : '';
+                                    if ($related_banner_url) : 
+                                    ?>
                                     <div class="col-4">
                                         <div class="recent-product-thumb">
                                             <a href="<?php the_permalink(); ?>">
-                                                <?php the_post_thumbnail('thumbnail', array('alt' => get_the_title())); ?>
+                                                <img src="<?php echo esc_url($related_banner_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" />
                                             </a>
                                         </div>
                                     </div>

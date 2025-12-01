@@ -74,12 +74,16 @@ if ( ! $breadcrumb_bg ) {
                             <div class="blog-wrapper mb-30">
                                 <div class="blog-img">
                                     <a href="<?php the_permalink(); ?>">
-                                        <?php 
-                                        if ( has_post_thumbnail() ) {
-                                            the_post_thumbnail( 'medium', array( 'alt' => get_the_title() ) );
+                                        <?php
+                                        $post_banner_id = get_post_meta(get_the_ID(), '_post_banner', true);
+                                        $post_banner_url = $post_banner_id ? wp_get_attachment_image_url($post_banner_id, 'medium') : '';
+                                        
+                                        if ($post_banner_url) {
+                                            echo '<img src="' . esc_url($post_banner_url) . '" alt="' . esc_attr(get_the_title()) . '">';
+                                        } elseif (has_post_thumbnail()) {
+                                            the_post_thumbnail('medium', array('alt' => get_the_title()));
                                         } else {
-                                            // Default placeholder image
-                                            echo '<img src="' . esc_url( get_template_directory_uri() . '/assets/img/blog/default.jpg' ) . '" alt="' . esc_attr( get_the_title() ) . '">';
+                                            echo '<img src="' . esc_url(get_template_directory_uri() . '/assets/img/blog/default.jpg') . '" alt="' . esc_attr(get_the_title()) . '">';
                                         }
                                         ?>
                                     </a>

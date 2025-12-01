@@ -103,11 +103,18 @@ if ( function_exists( 'get_field' ) ) {
                                         <li>
                                             <div class="footer-news-img f-left">
                                                 <a href="<?php the_permalink(); ?>">
-                                                    <?php if ( has_post_thumbnail() ) : ?>
-                                                        <?php the_post_thumbnail( 'thumbnail', array( 'alt' => get_the_title() ) ); ?>
-                                                    <?php else : ?>
-                                                        <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/blog/blog-01.jpg' ); ?>" alt="<?php the_title_attribute(); ?>">
-                                                    <?php endif; ?>
+                                                    <?php
+                                                    $post_banner_id = get_post_meta(get_the_ID(), '_post_banner', true);
+                                                    $post_banner_url = $post_banner_id ? wp_get_attachment_image_url($post_banner_id, 'thumbnail') : '';
+                                                    
+                                                    if ($post_banner_url) {
+                                                        echo '<img src="' . esc_url($post_banner_url) . '" alt="' . esc_attr(get_the_title()) . '">';
+                                                    } elseif (has_post_thumbnail()) {
+                                                        the_post_thumbnail('thumbnail', array('alt' => get_the_title()));
+                                                    } else {
+                                                        echo '<img src="' . esc_url(get_template_directory_uri() . '/assets/img/blog/blog-01.jpg') . '" alt="' . esc_attr(get_the_title()) . '">';
+                                                    }
+                                                    ?>
                                                 </a>
                                             </div>
                                             <div class="footer-news-text">

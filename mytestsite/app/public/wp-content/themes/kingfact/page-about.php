@@ -5,23 +5,38 @@ Description: Custom About page template with Profile, Vision, Mission and Why Us
 */
 get_header();
 
-// Get featured image or fallback to default
-$breadcrumb_bg = get_the_post_thumbnail_url(get_the_ID(), 'full');
-if (!$breadcrumb_bg) {
-    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+// Get banner image from ACF or fallback
+$about_banner_image = get_field('about_banner_image');
+if (!$about_banner_image) {
+    // Fallback to featured image
+    $about_banner_image = get_the_post_thumbnail_url(get_the_ID(), 'full');
+    if (!$about_banner_image) {
+        // Final fallback to default
+        $about_banner_image = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+    }
 }
+
+// Get banner title and breadcrumb texts from ACF
+$banner_title = get_field('about_banner_title');
+$breadcrumb_home = get_field('about_breadcrumb_home');
+$breadcrumb_current = get_field('about_breadcrumb_current');
+
+// Set defaults if empty
+if (!$banner_title) $banner_title = 'About Us';
+if (!$breadcrumb_home) $breadcrumb_home = 'home';
+if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
 ?>
 
 <main>
-    <div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url( $breadcrumb_bg ); ?>)">
+    <div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url( $about_banner_image ); ?>)">
         <div class="container">
             <div class="row">
                 <div class="col-xl-12">
                     <div class="breadcrumb-text text-center">
-                        <h1>About Us</h1>
+                        <h1><?php echo esc_html($banner_title); ?></h1>
                         <ul class="breadcrumb-menu">
-                            <li><a href="<?php echo esc_url( home_url( '/' ) ); ?>">home</a></li>
-                            <li><span>About Us</span></li>
+                            <li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html($breadcrumb_home); ?></a></li>
+                            <li><span><?php echo esc_html($breadcrumb_current); ?></span></li>
                         </ul>
                     </div>
                 </div>
@@ -243,7 +258,67 @@ if (!$breadcrumb_bg) {
     <!-- counter-area-end -->
 
     <!-- features section -->
-    <?php echo do_shortcode('[features_section title="Explore Features" subtitle="what we do" first_paragraph="But I must explain to you how all this mistaken is denouncing pleasure and praising pain was borners will give you a complete account of the system and expound the actual teachings" bg="http://mytestsite.local/wp-content/uploads/2025/11/fea-bg.jpg" img1="http://mytestsite.local/wp-content/uploads/2025/11/building_3.jpeg" img2="http://mytestsite.local/wp-content/uploads/2025/11/building_3.jpeg" btn_text="read more" btn_url="/about" title2="Technology Buildup" paragraph2="Avoids pleasure itself, because it is pleasure because those who do not know how" title3="Awards & Accolades" paragraph3="Avoids pleasure itself, because it is pleasure because those who do not know how"]'); ?>
+    <?php
+    // Get featured section fields from ACF
+    $features_bg = get_field('about_features_bg');
+    $features_subtitle = get_field('about_features_subtitle');
+    $features_title = get_field('about_features_title');
+    $features_paragraph = get_field('about_features_paragraph');
+    $features_item1_image = get_field('about_features_item1_image');
+    $features_item1_title = get_field('about_features_item1_title');
+    $features_item1_text = get_field('about_features_item1_text');
+    $features_item2_image = get_field('about_features_item2_image');
+    $features_item2_title = get_field('about_features_item2_title');
+    $features_item2_text = get_field('about_features_item2_text');
+    
+    // Set defaults
+    if (!$features_bg) $features_bg = get_template_directory_uri() . '/assets/img/features/fea-bg.jpg';
+    if (!$features_subtitle) $features_subtitle = 'who we are';
+    if (!$features_title) $features_title = 'Explore Features';
+    if (!$features_paragraph) $features_paragraph = 'But I must explain to you how all this mistaken is denouncing pleasure and praising pain was borners will give you a complete account of the system and expound the actual teachings';
+    if (!$features_item1_image) $features_item1_image = get_template_directory_uri() . '/assets/img/features/who-01.jpg';
+    if (!$features_item1_title) $features_item1_title = 'Technology Buildup';
+    if (!$features_item1_text) $features_item1_text = 'Avoids pleasure itself, because it is pleasure because those who do not know how';
+    if (!$features_item2_image) $features_item2_image = get_template_directory_uri() . '/assets/img/features/who-02.jpg';
+    if (!$features_item2_title) $features_item2_title = 'Awards & Accolades';
+    if (!$features_item2_text) $features_item2_text = 'Avoids pleasure itself, because it is pleasure because those who do not know how';
+    ?>
+    <div class="features-area pt-120 pb-90" style="background-image:url(<?php echo esc_url($features_bg); ?>)">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-4 col-lg-4 col-md-6">
+                    <div class="section-title mb-30">
+                        <span><?php echo esc_html($features_subtitle); ?></span>
+                        <h1><?php echo esc_html($features_title); ?></h1>
+                        <div class="mb-20"></div>
+                        <p><?php echo wp_kses_post($features_paragraph); ?></p>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-6">
+                    <div class="b-features text-center mb-30">
+                        <div class="b-fea-img">
+                            <img src="<?php echo esc_url($features_item1_image); ?>" alt="<?php echo esc_attr($features_item1_title); ?>">
+                        </div>
+                        <div class="b-fea-content">
+                            <h3><?php echo esc_html($features_item1_title); ?></h3>
+                            <p><?php echo esc_html($features_item1_text); ?></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-6">
+                    <div class="b-features text-center mb-30">
+                        <div class="b-fea-img">
+                            <img src="<?php echo esc_url($features_item2_image); ?>" alt="<?php echo esc_attr($features_item2_title); ?>">
+                        </div>
+                        <div class="b-fea-content">
+                            <h3><?php echo esc_html($features_item2_title); ?></h3>
+                            <p><?php echo esc_html($features_item2_text); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- features section end -->
 
       <!-- testimonial-area -->
@@ -280,9 +355,13 @@ if (!$breadcrumb_bg) {
                         ?>
                         <div class="col-xl-12">
                             <div class="client-wrapper text-center">
-                                <?php if (has_post_thumbnail()) : ?>
+                                <?php 
+                                $testimonial_photo_id = get_post_meta(get_the_ID(), '_testimonial_photo', true);
+                                $testimonial_photo_url = $testimonial_photo_id ? wp_get_attachment_image_url($testimonial_photo_id, 'thumbnail') : '';
+                                if ($testimonial_photo_url) : 
+                                ?>
                                 <div class="client-img pos-rel">
-                                    <?php the_post_thumbnail('thumbnail', array('alt' => esc_attr($client_name))); ?>
+                                    <img src="<?php echo esc_url($testimonial_photo_url); ?>" alt="<?php echo esc_attr($client_name); ?>" />
                                 </div>
                                 <?php endif; ?>
                                 <div class="client-content">

@@ -5,10 +5,23 @@ Template Name: Products Page
 
 get_header();
 
-// Get featured image or fallback to default
-$breadcrumb_bg = get_the_post_thumbnail_url(get_the_ID(), 'full');
+// Get banner image - priority: ACF custom image > Default (skip featured image)
+$breadcrumb_bg = get_field('products_page_banner_image');
 if (!$breadcrumb_bg) {
     $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+}
+
+// Get banner title - use ACF field or fallback to page title
+$banner_title = get_field('products_page_banner_title');
+if (empty($banner_title)) {
+    $banner_title = get_the_title();
+}
+
+// Get breadcrumb texts
+$breadcrumb_home = get_field('products_page_breadcrumb_home') ?: 'home';
+$breadcrumb_current = get_field('products_page_breadcrumb_current');
+if (empty($breadcrumb_current)) {
+    $breadcrumb_current = get_the_title();
 }
 ?>
 
@@ -18,10 +31,10 @@ if (!$breadcrumb_bg) {
         <div class="row">
             <div class="col-xl-12">
                 <div class="breadcrumb-text text-center">
-                    <h1><?php the_title(); ?></h1>
+                    <h1><?php echo esc_html($banner_title); ?></h1>
                     <ul class="breadcrumb-menu">
-                        <li><a href="<?php echo home_url(); ?>">home</a></li>
-                        <li><span><?php the_title(); ?></span></li>
+                        <li><a href="<?php echo home_url(); ?>"><?php echo esc_html($breadcrumb_home); ?></a></li>
+                        <li><span><?php echo esc_html($breadcrumb_current); ?></span></li>
                     </ul>
                 </div>
             </div>
