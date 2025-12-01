@@ -345,3 +345,20 @@ Stack trace:
 [30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item2_title in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 56
 [30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item2_title in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 59
 [30-Nov-2025 11:44:39 UTC] PHP Warning:  Undefined variable $features_item2_text in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\page-home.php on line 60
+[01-Dec-2025 12:52:35 UTC] PHP Warning:  Undefined array key "contact_phone" in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 590
+[01-Dec-2025 12:52:35 UTC] PHP Warning:  Undefined array key "contact_subject" in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 591
+[01-Dec-2025 13:34:10 UTC] PHP Warning:  Attempt to read property "title" on null in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-customize-widgets.php on line 926
+[01-Dec-2025 13:42:11 UTC] PHP Warning:  Attempt to read property "title" on null in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-customize-widgets.php on line 926
+[01-Dec-2025 14:50:49 UTC] PHP Fatal error:  Uncaught Error: Object of class WP_Post could not be converted to string in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\single-product.php:5
+Stack trace:
+#0 C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\template-loader.php(106): include()
+#1 C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-blog-header.php(19): require_once('C:\\Users\\mpmin\\...')
+#2 C:\Users\mpmin\Local Sites\mytestsite\app\public\index.php(17): require('C:\\Users\\mpmin\\...')
+#3 {main}
+  thrown in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\single-product.php on line 5
+[01-Dec-2025 16:08:02 UTC] PHP Parse error:  Unmatched '}' in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 5210
+[01-Dec-2025 16:08:02 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-recovery-mode-email-service.php on line 367
+[01-Dec-2025 16:08:02 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-includes\class-wp-recovery-mode-email-service.php on line 368
+[01-Dec-2025 16:08:04 UTC] PHP Parse error:  Unmatched '}' in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 5210
+[01-Dec-2025 16:08:04 UTC] PHP Parse error:  Unmatched '}' in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 5210
+[01-Dec-2025 16:08:04 UTC] PHP Parse error:  Unmatched '}' in C:\Users\mpmin\Local Sites\mytestsite\app\public\wp-content\themes\kingfact\functions.php on line 5210

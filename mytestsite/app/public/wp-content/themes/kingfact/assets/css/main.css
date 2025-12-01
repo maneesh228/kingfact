@@ -5470,6 +5470,130 @@ button.b-btn {
 .contact-map {
   min-height: 700px; }
 
+/* Ensure Google Maps iframes display properly */
+.contact-map iframe {
+  width: 100%;
+  height: 700px;
+  border: 0;
+  display: block; }
+
+/* Contact Form 7 Styling */
+.wpcf7 {
+  width: 100%; }
+
+.wpcf7 .row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px; }
+
+.wpcf7 .col-md-4,
+.wpcf7 .col-md-12 {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px; }
+
+.wpcf7 .col-md-4 {
+  flex: 0 0 33.333333%;
+  max-width: 33.333333%; }
+
+.wpcf7 .col-md-12 {
+  flex: 0 0 100%;
+  max-width: 100%; }
+
+.wpcf7 input[type="text"],
+.wpcf7 input[type="email"],
+.wpcf7 input[type="url"],
+.wpcf7 textarea {
+  width: 100%;
+  height: 50px;
+  border: 2px solid #eaeaea;
+  padding: 0 20px;
+  font-size: 14px;
+  color: #666;
+  background: transparent;
+  transition: .3s;
+  -webkit-transition: .3s;
+  -moz-transition: .3s;
+  -ms-transition: .3s;
+  -o-transition: .3s;
+  margin-bottom: 30px; }
+
+.wpcf7 textarea {
+  height: 150px;
+  padding: 20px;
+  resize: vertical; }
+
+.wpcf7 input[type="text"]:focus,
+.wpcf7 input[type="email"]:focus,
+.wpcf7 input[type="url"]:focus,
+.wpcf7 textarea:focus {
+  outline: none;
+  border-color: #febc35; }
+
+.wpcf7 input[type="submit"] {
+  background: #1b1b1b;
+  color: #fff;
+  border: 2px solid #1b1b1b;
+  padding: 15px 40px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: .3s;
+  -webkit-transition: .3s;
+  -moz-transition: .3s;
+  -ms-transition: .3s;
+  -o-transition: .3s; }
+
+.wpcf7 input[type="submit"]:hover {
+  background: #febc35;
+  border-color: #febc35;
+  color: #1b1b1b; }
+
+.wpcf7 .contacts-us-form-button {
+  text-align: center; }
+
+.wpcf7-response-output {
+  margin: 20px 0 0 0 !important;
+  padding: 15px !important;
+  border-radius: 4px;
+  text-align: center; }
+
+.wpcf7-mail-sent-ok {
+  border: 2px solid #398f14 !important;
+  background: #d4edda;
+  color: #155724; }
+
+.wpcf7-validation-errors,
+.wpcf7-acceptance-missing {
+  border: 2px solid #f5c6cb !important;
+  background: #f8d7da;
+  color: #721c24; }
+
+.wpcf7-spam-blocked {
+  border: 2px solid #ffc107 !important;
+  background: #fff3cd;
+  color: #856404; }
+
+.wpcf7-not-valid-tip {
+  color: #dc3545;
+  font-size: 12px;
+  display: block;
+  margin-top: -25px;
+  margin-bottom: 15px; }
+
+.wpcf7 .ajax-loader {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: middle; }
+
+@media only screen and (max-width: 767px) {
+  .wpcf7 .col-md-4 {
+    flex: 0 0 100%;
+    max-width: 100%; } }
+
 .contact-box {
   border: 2px dashed #eaeaea;
   padding: 40px 10px;

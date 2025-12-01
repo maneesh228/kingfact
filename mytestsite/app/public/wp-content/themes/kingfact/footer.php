@@ -35,6 +35,9 @@ if ( function_exists( 'get_field' ) ) {
     $footer_socials = ! empty( $opts['header_social_links'] ) ? $opts['header_social_links'] : array();
     $footer_copyright = ! empty( $opts['footer_copyright'] ) ? $opts['footer_copyright'] : 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.';
 }
+
+// Normalize quick_links to ensure fallback works properly
+$quick_links = $quick_links ?: ( ! empty( $opts['footer_quick_links'] ) ? $opts['footer_quick_links'] : array() );
 ?>
 
 <!-- footer-area-start -->
@@ -60,7 +63,15 @@ if ( function_exists( 'get_field' ) ) {
                                 <h3 class="footer-title">Quick Links</h3>
                                 <div class="footer-link">
                                     <?php
-                                    if ( has_nav_menu( 'footer' ) ) {
+                                    // Priority: ACF/Theme Settings Quick Links > WordPress Menu > Hardcoded fallback
+                                    if ( ! empty( $quick_links ) ) {
+                                        // Use quick links from ACF or Theme Settings
+                                        echo '<ul>';
+                                        foreach ( $quick_links as $qlink ) {
+                                            echo '<li><a href="' . esc_url( $qlink['url'] ) . '">' . esc_html( $qlink['text'] ) . '</a></li>';
+                                        }
+                                        echo '</ul>';
+                                    } elseif ( has_nav_menu( 'footer' ) ) {
                                         wp_nav_menu( array(
                                             'theme_location' => 'footer',
                                             'container'      => false,
@@ -69,7 +80,7 @@ if ( function_exists( 'get_field' ) ) {
                                             'depth'          => 1,
                                         ) );
                                     } else {
-                                        // Fallback menu if no menu is assigned
+                                        // Fallback menu if no menu is assigned and no quick links set
                                         echo '<ul>';
                                         echo '<li><a href="#">About Company</a></li>';
                                         echo '<li><a href="#">Latest Projects</a></li>';

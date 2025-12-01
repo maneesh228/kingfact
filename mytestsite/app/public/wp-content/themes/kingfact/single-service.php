@@ -14,7 +14,19 @@ if ( have_posts() ) {
     rewind_posts();
 }
 
-echo do_shortcode('[kingfact_breadcrumb title="' . esc_attr( $service_title ) . '" current="' . esc_attr( $service_title ) . '"]');
+// Get banner image from Services parent page
+$services_page = get_page_by_path('services');
+$breadcrumb_bg = '';
+$services_url = home_url('/services/');
+if ($services_page) {
+    $breadcrumb_bg = get_field('services_page_banner_image', $services_page->ID);
+    $services_url = get_permalink($services_page->ID);
+}
+if (!$breadcrumb_bg) {
+    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+}
+
+echo do_shortcode('[kingfact_breadcrumb title="' . esc_attr( $service_title ) . '" current="' . esc_attr( $service_title ) . '" parent_label="Services" parent_url="' . esc_url($services_url) . '" bg="' . esc_url($breadcrumb_bg) . '"]');
 ?>
 
 <style>

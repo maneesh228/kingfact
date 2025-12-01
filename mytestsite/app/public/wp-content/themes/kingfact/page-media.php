@@ -6,23 +6,31 @@
 
 get_header();
 
-// Get featured image or fallback to default
-$breadcrumb_bg = get_the_post_thumbnail_url(get_the_ID(), 'full');
-if (!$breadcrumb_bg) {
-    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bdrc-bg.jpg';
+// Get ACF banner image or fallback to featured image or default
+$banner_image = get_field('media_banner_image');
+if (!$banner_image) {
+    $banner_image = get_the_post_thumbnail_url(get_the_ID(), 'full');
 }
+if (!$banner_image) {
+    $banner_image = get_template_directory_uri() . '/assets/img/bg/bdrc-bg.jpg';
+}
+
+// Get ACF breadcrumb text or use defaults
+$banner_title = get_field('media_banner_title') ?: 'Media';
+$breadcrumb_home = get_field('media_breadcrumb_home') ?: 'home';
+$breadcrumb_current = get_field('media_breadcrumb_current') ?: 'media';
 ?>
 
 <!-- breadcrumb-area-start -->
-<section class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url($breadcrumb_bg); ?>)">
+<section class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url($banner_image); ?>)">
     <div class="container">
         <div class="row">
             <div class="col-xl-12">
                 <div class="breadcrumb-text text-center">
-                    <h1><?php the_title(); ?></h1>
+                    <h1><?php echo esc_html($banner_title); ?></h1>
                     <ul class="breadcrumb-menu">
-                        <li><a href="<?php echo home_url(); ?>">home</a></li>
-                        <li><span><?php the_title(); ?></span></li>
+                        <li><a href="<?php echo esc_url(home_url('/')); ?>"><?php echo esc_html($breadcrumb_home); ?></a></li>
+                        <li><span><?php echo esc_html($breadcrumb_current); ?></span></li>
                     </ul>
                 </div>
             </div>
@@ -46,68 +54,107 @@ if (!$breadcrumb_bg) {
             </div>
         </div>
 
+        <!-- Instructions Section (if available) -->
+        <?php 
+        $instructions = get_field('media_instructions');
+        if ($instructions) : ?>
+            <div class="row mb-40">
+                <div class="col-xl-12">
+                    <div class="media-instructions">
+                        <?php echo wp_kses_post($instructions); ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Media Grid -->
         <div class="row media-grid">
             <?php
-            // Query media items attached to this page
-            $media_args = array(
-                'post_type' => 'attachment',
-                'post_status' => 'inherit',
-                'posts_per_page' => -1,
-                'post_mime_type' => array('image', 'video'),
-                'post_parent' => get_the_ID(), // Only get media attached to this page
-                'orderby' => 'date',
-                'order' => 'DESC',
-            );
+            // Get custom media galleries
+            $image_gallery = get_post_meta(get_the_ID(), '_media_image_gallery', true);
+            $video_gallery = get_post_meta(get_the_ID(), '_media_video_gallery', true);
             
-            $media_query = new WP_Query($media_args);
+            $has_media = false;
             
-            if ($media_query->have_posts()) :
-                while ($media_query->have_posts()) : $media_query->the_post();
+            // Display Images
+            if (!empty($image_gallery) && is_array($image_gallery)) :
+                foreach ($image_gallery as $image_id) :
+                    if (!$image_id) continue;
+                    $has_media = true;
                     
-                    $attachment_id = get_the_ID();
-                    $mime_type = get_post_mime_type($attachment_id);
-                    $is_image = strpos($mime_type, 'image') !== false;
-                    $is_video = strpos($mime_type, 'video') !== false;
+                    $image_url = wp_get_attachment_image_url($image_id, 'full');
+                    $thumbnail = wp_get_attachment_image_url($image_id, 'medium_large');
+                    $image_title = get_the_title($image_id);
+                    $image_caption = wp_get_attachment_caption($image_id);
                     
-                    // Determine media type class
-                    $media_type_class = '';
-                    if ($is_image) {
-                        $media_type_class = 'media-item-image';
-                    } elseif ($is_video) {
-                        $media_type_class = 'media-item-video';
+                    if (!$image_url) continue;
+                    ?>
+                    
+                    <div class="col-xl-4 col-lg-4 col-md-6 mb-30 media-item media-item-image">
+                        <div class="media-box">
+                            <div class="media-img">
+                                <a href="<?php echo esc_url($image_url); ?>" data-lightbox="media-gallery" data-title="<?php echo esc_attr($image_title ? $image_title : $image_caption); ?>">
+                                    <img src="<?php echo esc_url($thumbnail ? $thumbnail : $image_url); ?>" alt="<?php echo esc_attr($image_title ? $image_title : $image_caption); ?>">
+                                    <div class="media-overlay">
+                                        <i class="far fa-search-plus"></i>
+                                    </div>
+                                </a>
+                            </div>
+                            <?php if ($image_title || $image_caption) : ?>
+                                <div class="media-caption">
+                                    <h4><?php echo esc_html($image_title ? $image_title : $image_caption); ?></h4>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                <?php
+                endforeach;
+            endif;
+            
+            // Display Videos
+            if (!empty($video_gallery) && is_array($video_gallery)) :
+                foreach ($video_gallery as $video_url) :
+                    if (!$video_url) continue;
+                    $has_media = true;
+                    
+                    // Detect video type (YouTube, Vimeo, or direct)
+                    $is_youtube = (strpos($video_url, 'youtube.com') !== false || strpos($video_url, 'youtu.be') !== false);
+                    $is_vimeo = (strpos($video_url, 'vimeo.com') !== false);
+                    
+                    // Get video thumbnail
+                    $video_thumbnail = '';
+                    if ($is_youtube) {
+                        // Extract YouTube ID
+                        preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/', $video_url, $matches);
+                        if (isset($matches[1])) {
+                            $youtube_id = $matches[1];
+                            $video_thumbnail = 'https://img.youtube.com/vi/' . $youtube_id . '/maxresdefault.jpg';
+                        }
+                    } elseif ($is_vimeo) {
+                        // For Vimeo, we'll use a placeholder or you can implement Vimeo API
+                        $video_thumbnail = get_template_directory_uri() . '/assets/img/bg/video-placeholder.jpg';
                     }
                     
-                    // Get media URL
-                    $media_url = wp_get_attachment_url($attachment_id);
-                    $media_title = get_the_title();
-                    
-                    // Get thumbnail for display
-                    if ($is_image) {
-                        $thumbnail = wp_get_attachment_image_url($attachment_id, 'medium');
-                    } else {
-                        // For videos, try to get a thumbnail or use a placeholder
-                        $thumbnail = wp_get_attachment_image_url($attachment_id, 'medium');
-                        if (!$thumbnail) {
-                            $thumbnail = get_template_directory_uri() . '/assets/img/bg/video-placeholder.jpg';
-                        }
+                    if (!$video_thumbnail) {
+                        $video_thumbnail = get_template_directory_uri() . '/assets/img/bg/video-placeholder.jpg';
                     }
                     ?>
                     
-                    <div class="col-xl-4 col-lg-4 col-md-6 mb-30 media-item <?php echo esc_attr($media_type_class); ?>">
+                    <div class="col-xl-4 col-lg-4 col-md-6 mb-30 media-item media-item-video">
                         <div class="media-box">
                             <div class="media-img">
-                                <?php if ($is_image) : ?>
-                                    <a href="<?php echo esc_url($media_url); ?>" data-lightbox="media-gallery" data-title="<?php echo esc_attr($media_title); ?>">
-                                        <img src="<?php echo esc_url($thumbnail); ?>" alt="<?php echo esc_attr($media_title); ?>">
+                                <?php if ($is_youtube || $is_vimeo) : ?>
+                                    <a href="<?php echo esc_url($video_url); ?>" class="video-popup">
+                                        <img src="<?php echo esc_url($video_thumbnail); ?>" alt="Video">
                                         <div class="media-overlay">
-                                            <i class="far fa-search-plus"></i>
+                                            <i class="far fa-play-circle"></i>
                                         </div>
                                     </a>
-                                <?php elseif ($is_video) : ?>
+                                <?php else : ?>
                                     <div class="video-container">
                                         <video controls preload="metadata">
-                                            <source src="<?php echo esc_url($media_url); ?>" type="<?php echo esc_attr($mime_type); ?>">
+                                            <source src="<?php echo esc_url($video_url); ?>" type="video/mp4">
                                             Your browser does not support the video tag.
                                         </video>
                                         <div class="video-play-overlay">
@@ -116,24 +163,21 @@ if (!$breadcrumb_bg) {
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            <?php if ($media_title) : ?>
-                                <div class="media-caption">
-                                    <h4><?php echo esc_html($media_title); ?></h4>
-                                </div>
-                            <?php endif; ?>
                         </div>
                     </div>
                     
                 <?php
-                endwhile;
-                wp_reset_postdata();
-            else :
+                endforeach;
+            endif;
+            
+            // Show message if no media
+            if (!$has_media) :
                 ?>
                 <div class="col-xl-12">
                     <div class="no-media-found text-center">
-                        <p>No media files found. Please upload images or videos from the WordPress Media Library.</p>
-                        <?php if (current_user_can('upload_files')) : ?>
-                            <a href="<?php echo admin_url('upload.php'); ?>" class="b-btn btn-black mt-20"><span>Go to Media Library</span></a>
+                        <p>No media files found. Please add images or videos from the Media Galleries section in the page editor.</p>
+                        <?php if (current_user_can('edit_pages')) : ?>
+                            <a href="<?php echo get_edit_post_link(); ?>" class="b-btn btn-black mt-20"><span>Edit Page</span></a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -146,6 +190,23 @@ if (!$breadcrumb_bg) {
 
 <style>
 /* Media Gallery Styles */
+.media-instructions {
+    background: #f8f8f8;
+    padding: 30px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+    border-left: 4px solid #febc35;
+}
+
+.media-instructions p {
+    margin: 0 0 15px;
+    line-height: 1.8;
+}
+
+.media-instructions p:last-child {
+    margin-bottom: 0;
+}
+
 .media-filter {
     margin-bottom: 30px;
 }
@@ -164,7 +225,7 @@ if (!$breadcrumb_bg) {
 
 .filter-btn:hover,
 .filter-btn.active {
-    background: #ff6b35;
+    background: #febc35;
     color: #fff;
 }
 
@@ -242,7 +303,7 @@ if (!$breadcrumb_bg) {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 107, 53, 0.9);
+    background: #febc35;
     display: flex;
     align-items: center;
     justify-content: center;

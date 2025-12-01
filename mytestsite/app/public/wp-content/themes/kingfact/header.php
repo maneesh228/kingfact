@@ -32,11 +32,17 @@ if ( function_exists( 'get_field' ) ) {
     
     // Logo: prefer ACF, then Theme Settings, then false
     $logo = $acf_logo ? $acf_logo : ( ! empty( $opts['header_logo'] ) ? $opts['header_logo'] : false );
+    
+    // Hours: prefer ACF, then Theme Settings, then default
+    $hours = $hours ? $hours : ( ! empty( $opts['header_hours'] ) ? $opts['header_hours'] : 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends' );
+    
+    // Links: prefer ACF, then Theme Settings
+    $links = $links ? $links : ( ! empty( $opts['header_links'] ) ? $opts['header_links'] : false );
 } else {
-    // ACF not available — provide safe defaults
+    // ACF not available — provide safe defaults from theme options
     $show_top  = true;
-    $hours     = 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends';
-    $links     = false; // no top links
+    $hours     = ! empty( $opts['header_hours'] ) ? $opts['header_hours'] : 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends';
+    $links     = ! empty( $opts['header_links'] ) ? $opts['header_links'] : false;
     $logo      = ! empty( $opts['header_logo'] ) ? $opts['header_logo'] : false;
     $quote_txt = 'get a quote';
     $quote_url = home_url( '/contact/' );
@@ -44,7 +50,7 @@ if ( function_exists( 'get_field' ) ) {
 
 // Normalize values (avoid null)
 $show_top  = ( $show_top === false ) ? false : true;
-$hours     = $hours ? $hours : 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends';
+$hours     = $hours ?: ( ! empty( $opts['header_hours'] ) ? $opts['header_hours'] : 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends' );
 $quote_txt = $quote_txt ? $quote_txt : 'get a quote';
 $quote_url = $quote_url ? $quote_url : home_url( '/contact/' );
 

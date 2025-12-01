@@ -86,10 +86,16 @@ function theme_enqueue_home_assets() {
             wp_enqueue_script( 'rev-ext-' . md5($ext), $base . 'rs/js/' . $ext, array('rev'), null, true );
         }
 
-        // Google Maps API (for contact page)
+        // Google Maps API (for contact page - only if custom iframe not set)
         if ( is_page_template( 'page-contact.php' ) ) {
-            $google_maps_api_key = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with your actual API key
-            wp_enqueue_script( 'google-maps', 'https://maps.googleapis.com/maps/api/js?key=' . $google_maps_api_key, array(), null, true );
+            // Check if custom map iframe is set
+            $map_iframe = get_field('contact_map_iframe');
+            
+            // Only load Google Maps API if no custom iframe is configured
+            if ( empty( $map_iframe ) ) {
+                $google_maps_api_key = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with your actual API key
+                wp_enqueue_script( 'google-maps', 'https://maps.googleapis.com/maps/api/js?key=' . $google_maps_api_key, array(), null, true );
+            }
         }
     }
 }
@@ -162,6 +168,40 @@ add_action( 'after_setup_theme', function() {
         'flex-width'  => true,
     ));
 });
+
+// Fix navigation menu active classes for custom post types
+add_filter('nav_menu_css_class', 'kingfact_fix_menu_active_class', 10, 4);
+function kingfact_fix_menu_active_class($classes, $item, $args, $depth) {
+    // Only apply to primary menu
+    if ($args->theme_location !== 'primary') {
+        return $classes;
+    }
+    
+    // Remove current-menu-item and current_page_item from all items on single service/product pages
+    if (is_singular('service') || is_singular('product')) {
+        $classes = array_diff($classes, array('current-menu-item', 'current_page_item', 'current_page_parent'));
+        
+        // Add current-menu-item to Services menu item when viewing single service
+        if (is_singular('service')) {
+            $services_page = get_page_by_path('services');
+            if ($services_page && $item->object_id == $services_page->ID) {
+                $classes[] = 'current-menu-item';
+                $classes[] = 'current_page_parent';
+            }
+        }
+        
+        // Add current-menu-item to Products menu item when viewing single product
+        if (is_singular('product')) {
+            $products_page = get_page_by_path('products');
+            if ($products_page && $item->object_id == $products_page->ID) {
+                $classes[] = 'current-menu-item';
+                $classes[] = 'current_page_parent';
+            }
+        }
+    }
+    
+    return $classes;
+}
 
 
 // 1) Register 'slide' CPT
@@ -810,6 +850,7 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
             $save['header_logo'] = esc_url_raw( wp_unslash( $_POST['header_logo'] ?? '' ) );
             $save['footer_logo'] = esc_url_raw( wp_unslash( $_POST['footer_logo'] ?? '' ) );
             // Header
+            $save['header_hours'] = sanitize_text_field( wp_unslash( $_POST['header_hours'] ?? '' ) );
             $save['header_contact_address'] = sanitize_text_field( wp_unslash( $_POST['header_contact_address'] ?? '' ) );
             $save['header_contact_email']   = sanitize_email( wp_unslash( $_POST['header_contact_email'] ?? '' ) );
             $save['header_contact_phone']   = sanitize_text_field( wp_unslash( $_POST['header_contact_phone'] ?? '' ) );
@@ -826,6 +867,19 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                 }
             }
             $save['header_social_links'] = $header_socials;
+
+            // Header top bar links
+            $link_texts = isset( $_POST['header_link_text'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['header_link_text'] ) ) : array();
+            $link_urls  = isset( $_POST['header_link_url'] ) ? array_map( 'esc_url_raw', wp_unslash( (array) $_POST['header_link_url'] ) ) : array();
+            $header_links = array();
+            for ( $i = 0; $i < max( count( $link_texts ), count( $link_urls ) ); $i++ ) {
+                $txt = trim( $link_texts[ $i ] ?? '' );
+                $url = trim( $link_urls[ $i ] ?? '' );
+                if ( $txt || $url ) {
+                    $header_links[] = array( 'text' => $txt, 'url' => $url );
+                }
+            }
+            $save['header_links'] = $header_links;
 
             // Footer
             $save['footer_text'] = wp_kses_post( wp_unslash( $_POST['footer_text'] ?? '' ) );
@@ -847,15 +901,30 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
             }
             $save['footer_social_links'] = $footer_socials;
 
+            // Footer quick links
+            $qlink_texts = isset( $_POST['footer_quick_link_text'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['footer_quick_link_text'] ) ) : array();
+            $qlink_urls  = isset( $_POST['footer_quick_link_url'] ) ? array_map( 'esc_url_raw', wp_unslash( (array) $_POST['footer_quick_link_url'] ) ) : array();
+            $footer_quick_links = array();
+            for ( $i = 0; $i < max( count( $qlink_texts ), count( $qlink_urls ) ); $i++ ) {
+                $txt = trim( $qlink_texts[ $i ] ?? '' );
+                $url = trim( $qlink_urls[ $i ] ?? '' );
+                if ( $txt || $url ) {
+                    $footer_quick_links[] = array( 'text' => $txt, 'url' => $url );
+                }
+            }
+            $save['footer_quick_links'] = $footer_quick_links;
+
             kingfact_update_options( $save );
             echo '<div class="updated"><p>Settings saved.</p></div>';
         }
 
         // Load current values
         $header_logo = kingfact_get_option( 'header_logo', '' );
+        $header_hours = kingfact_get_option( 'header_hours', 'Mon - Fri: 9:00 - 19:00 / Closed on Weekends' );
         $header_address = kingfact_get_option( 'header_contact_address', 'Flat 20, Reynolds USA' );
         $header_email = kingfact_get_option( 'header_contact_email', 'support@rmail.com' );
         $header_phone = kingfact_get_option( 'header_contact_phone', '+812 (345) 6789' );
+        $header_links = kingfact_get_option( 'header_links', array() );
         $header_socials = kingfact_get_option( 'header_social_links', array() );
 
         $footer_logo = kingfact_get_option( 'footer_logo', '' );
@@ -864,6 +933,7 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
         $footer_contact_email = kingfact_get_option( 'footer_contact_email', 'support@gmail.com' );
         $footer_contact_phone = kingfact_get_option( 'footer_contact_phone', '+000 (123) 44 558' );
         $footer_copyright = kingfact_get_option( 'footer_copyright', 'Copyright © ' . date('Y') . ' kingfact. All rights reserved.' );
+        $footer_quick_links = kingfact_get_option( 'footer_quick_links', array() );
         $footer_socials = kingfact_get_option( 'footer_social_links', array() );
 
         ?>
@@ -872,7 +942,8 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
             <form method="post">
                 <?php wp_nonce_field( 'kingfact_save_theme_settings', 'kingfact_theme_settings_nonce' ); ?>
 
-                <h2>Header Logo</h2>
+                <h2>Header Settings</h2>
+
                 <table class="form-table">
                     <tr>
                         <th><label for="header_logo">Header Logo</label></th>
@@ -891,9 +962,15 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                         </td>
                     </tr>
                 </table>
-
-                <h2>Header Contact</h2>
+                
                 <table class="form-table">
+                    <tr>
+                        <th><label for="header_hours">Opening Hours Text</label></th>
+                        <td>
+                            <input name="header_hours" id="header_hours" class="large-text" value="<?php echo esc_attr( $header_hours ); ?>">
+                            <p class="description">Text displayed in the header top bar showing your opening hours.</p>
+                        </td>
+                    </tr>
                     <tr>
                         <th><label for="header_contact_address">Contact Address</label></th>
                         <td><input name="header_contact_address" id="header_contact_address" class="regular-text" value="<?php echo esc_attr( $header_address ); ?>"></td>
@@ -907,6 +984,23 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                         <td><input name="header_contact_phone" id="header_contact_phone" class="regular-text" value="<?php echo esc_attr( $header_phone ); ?>"></td>
                     </tr>
                 </table>
+
+                <h3>Header Top Bar Links</h3>
+                <div id="header-top-links">
+                    <table class="form-table" id="header-links-table">
+                        <?php if ( $header_links ) : foreach ( $header_links as $link ) : ?>
+                            <tr>
+                                <th>Link Text</th>
+                                <td><input name="header_link_text[]" class="regular-text" value="<?php echo esc_attr( $link['text'] ); ?>"> URL: <input name="header_link_url[]" class="regular-text" value="<?php echo esc_attr( $link['url'] ); ?>"></td>
+                            </tr>
+                        <?php endforeach; endif; ?>
+                        <tr class="template-row" style="display:none;">
+                            <th>Link Text</th>
+                            <td><input name="header_link_text[]" class="regular-text"> URL: <input name="header_link_url[]" class="regular-text"></td>
+                        </tr>
+                    </table>
+                    <p><button type="button" class="button" id="add-header-link">Add Top Link</button></p>
+                </div>
 
                 <h3>Header Social Links</h3>
                 <div id="header-socials">
@@ -952,6 +1046,24 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
                         <td><input name="footer_copyright" id="footer_copyright" class="regular-text" value="<?php echo esc_attr( $footer_copyright ); ?>"></td>
                     </tr>
                 </table>
+
+                <h3>Footer Quick Links</h3>
+                <div id="footer-quick-links">
+                    <table class="form-table" id="footer-quick-links-table">
+                        <?php if ( $footer_quick_links ) : foreach ( $footer_quick_links as $qlink ) : ?>
+                            <tr>
+                                <th>Link Text</th>
+                                <td><input name="footer_quick_link_text[]" class="regular-text" value="<?php echo esc_attr( $qlink['text'] ); ?>"> URL: <input name="footer_quick_link_url[]" class="regular-text" value="<?php echo esc_attr( $qlink['url'] ); ?>"></td>
+                            </tr>
+                        <?php endforeach; endif; ?>
+                        <tr class="template-row" style="display:none;">
+                            <th>Link Text</th>
+                            <td><input name="footer_quick_link_text[]" class="regular-text"> URL: <input name="footer_quick_link_url[]" class="regular-text"></td>
+                        </tr>
+                    </table>
+                    <p><button type="button" class="button" id="add-footer-quick-link">Add Quick Link</button></p>
+                </div>
+                <p><em>Note: Quick Links appear in the footer navigation section.</em></p>
                 <p><em>Note: Contact information (address, email, phone) and social links are managed in the "Header Contact" and "Header Social Links" sections above and are shared across the site including footer.</em></p>
 
                 <p class="submit"><button type="submit" class="button button-primary">Save Settings</button></p>
@@ -960,6 +1072,38 @@ if ( ! function_exists( 'acf_add_options_page' ) ) {
 
         <script>
         (function(){
+            // Footer quick link addition
+            var addFooterQuickLink = document.getElementById('add-footer-quick-link');
+            if (addFooterQuickLink) {
+                addFooterQuickLink.addEventListener('click', function(){
+                    var table = document.getElementById('footer-quick-links-table');
+                    var tbody = table.querySelector('tbody') || table;
+                    var tpl = tbody.querySelector('.template-row');
+                    if (tpl) {
+                        var newRow = tpl.cloneNode(true);
+                        newRow.style.display = '';
+                        newRow.classList.remove('template-row');
+                        tbody.insertBefore(newRow, tpl);
+                    }
+                });
+            }
+
+            // Header top link addition
+            var addHeaderLink = document.getElementById('add-header-link');
+            if (addHeaderLink) {
+                addHeaderLink.addEventListener('click', function(){
+                    var table = document.getElementById('header-links-table');
+                    var tbody = table.querySelector('tbody') || table;
+                    var tpl = tbody.querySelector('.template-row');
+                    if (tpl) {
+                        var newRow = tpl.cloneNode(true);
+                        newRow.style.display = '';
+                        newRow.classList.remove('template-row');
+                        tbody.insertBefore(newRow, tpl);
+                    }
+                });
+            }
+
             // Social link addition
             var addHeader = document.getElementById('add-header-social');
             if (addHeader) {
@@ -1157,17 +1301,26 @@ function kingfact_breadcrumb_shortcode( $atts ) {
     $base = get_template_directory_uri() . '/assets/';
 
     $a = shortcode_atts( array(
-        'title'      => 'Our Services',
-        'home_label' => 'home',
-        'home_url'   => home_url('/'),
-        'current'    => 'Services',
-        'bg'         => 'img/bg/bg-9.jpg',
-        'class'      => '',
+        'title'        => 'Our Services',
+        'home_label'   => 'home',
+        'home_url'     => home_url('/'),
+        'parent_label' => '',
+        'parent_url'   => '',
+        'current'      => 'Services',
+        'bg'           => 'img/bg/bg-9.jpg',
+        'class'        => '',
     ), $atts, 'kingfact_breadcrumb' );
+
+    // Check if bg is a full URL (starts with http:// or https://) or a relative path
+    if ( preg_match('/^https?:\/\//', $a['bg']) ) {
+        $bg_url = $a['bg']; // Use full URL as-is
+    } else {
+        $bg_url = $base . ltrim( $a['bg'], '/' ); // Prepend base path for relative URLs
+    }
 
     ob_start();
     ?>
-    <div class="breadcrumb-area pt-245 pb-255 <?php echo esc_attr( $a['class'] ); ?>" style="background-image:url(<?php echo esc_url( $base . ltrim( $a['bg'], '/' ) ); ?>)">
+    <div class="breadcrumb-area pt-245 pb-255 <?php echo esc_attr( $a['class'] ); ?>" style="background-image:url(<?php echo esc_url( $bg_url ); ?>)">
         <div class="container">
             <div class="row">
                 <div class="col-xl-12">
@@ -1175,6 +1328,9 @@ function kingfact_breadcrumb_shortcode( $atts ) {
                         <h1><?php echo esc_html( $a['title'] ); ?></h1>
                         <ul class="breadcrumb-menu">
                             <li><a href="<?php echo esc_url( $a['home_url'] ); ?>"><?php echo esc_html( $a['home_label'] ); ?></a></li>
+                            <?php if ( ! empty( $a['parent_label'] ) && ! empty( $a['parent_url'] ) ) : ?>
+                                <li><a href="<?php echo esc_url( $a['parent_url'] ); ?>"><?php echo esc_html( $a['parent_label'] ); ?></a></li>
+                            <?php endif; ?>
                             <li><span><?php echo esc_html( $a['current'] ); ?></span></li>
                         </ul>
                     </div>
@@ -4604,5 +4760,454 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
         'instruction_placement' => 'label',
     ));
 }
+
+// Register ACF fields for Contact Page
+if ( function_exists( 'acf_add_local_field_group' ) ) {
+    acf_add_local_field_group( array(
+        'key' => 'group_contact_page',
+        'title' => 'Contact Page Settings',
+        'fields' => array(
+            // Banner & Breadcrumb Tab
+            array(
+                'key' => 'field_contact_banner_tab',
+                'label' => 'Banner & Breadcrumb',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_contact_banner_image',
+                'label' => 'Banner Background Image',
+                'name' => 'contact_banner_image',
+                'type' => 'image',
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'library' => 'all',
+                'instructions' => 'Upload a banner background image for the Contact page. Recommended size: 1920x600px',
+            ),
+            array(
+                'key' => 'field_contact_banner_title',
+                'label' => 'Banner Title',
+                'name' => 'contact_banner_title',
+                'type' => 'text',
+                'default_value' => 'contact',
+                'placeholder' => 'contact',
+                'instructions' => 'Main title displayed in the banner center',
+            ),
+            array(
+                'key' => 'field_contact_breadcrumb_home',
+                'label' => 'Breadcrumb - Home Text',
+                'name' => 'contact_breadcrumb_home',
+                'type' => 'text',
+                'default_value' => 'home',
+                'placeholder' => 'home',
+                'instructions' => 'Text for the home breadcrumb link',
+            ),
+            array(
+                'key' => 'field_contact_breadcrumb_current',
+                'label' => 'Breadcrumb - Current Page Text',
+                'name' => 'contact_breadcrumb_current',
+                'type' => 'text',
+                'default_value' => 'contact',
+                'placeholder' => 'contact',
+                'instructions' => 'Text for the current page in breadcrumb',
+            ),
+            // Google Map Tab
+            array(
+                'key' => 'field_contact_map_tab',
+                'label' => 'Google Map',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_contact_map_message',
+                'label' => '',
+                'name' => '',
+                'type' => 'message',
+                'message' => '<strong>How to add Google Maps:</strong><br>
+                    1. Go to <a href="https://www.google.com/maps" target="_blank">Google Maps</a><br>
+                    2. Search for your business location<br>
+                    3. Click the <strong>"Share"</strong> button<br>
+                    4. Click <strong>"Embed a map"</strong> tab<br>
+                    5. Select map size (Small/Medium/Large/Custom size)<br>
+                    6. Copy the <strong>entire iframe code</strong><br>
+                    7. Paste it in the field below',
+                'new_lines' => '',
+                'esc_html' => 0,
+            ),
+            array(
+                'key' => 'field_contact_map_iframe',
+                'label' => 'Google Map Iframe Code',
+                'name' => 'contact_map_iframe',
+                'type' => 'textarea',
+                'rows' => 8,
+                'new_lines' => '',
+                'maxlength' => '',
+                'placeholder' => '<iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
+                'instructions' => 'Paste the complete iframe embed code from Google Maps here.',
+            ),
+            array(
+                'key' => 'field_contact_map_preview',
+                'label' => 'Map Preview',
+                'name' => '',
+                'type' => 'message',
+                'message' => 'Save/Update the page to see your map displayed on the contact page.',
+                'new_lines' => '',
+                'esc_html' => 0,
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'page_template',
+                    'operator' => '==',
+                    'value' => 'page-contact.php',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+    ));
+}
+
+// Include Contact Form 7 setup
+require_once get_template_directory() . '/inc/setup-contact-form.php';
+
+// Register ACF fields for Media Page
+if ( function_exists( 'acf_add_local_field_group' ) ) {
+    acf_add_local_field_group( array(
+        'key' => 'group_media_page',
+        'title' => 'Media Page Settings',
+        'fields' => array(
+            // Tab: Banner & Breadcrumb
+            array(
+                'key' => 'field_media_tab_banner',
+                'label' => 'Banner & Breadcrumb',
+                'name' => '',
+                'type' => 'tab',
+                'instructions' => '',
+                'required' => 0,
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_media_banner_image',
+                'label' => 'Banner Image',
+                'name' => 'media_banner_image',
+                'type' => 'image',
+                'instructions' => 'Upload the banner image for the media page. Recommended size: 1920x400px',
+                'required' => 0,
+                'return_format' => 'url',
+                'preview_size' => 'medium',
+                'library' => 'all',
+            ),
+            array(
+                'key' => 'field_media_banner_title',
+                'label' => 'Banner Title',
+                'name' => 'media_banner_title',
+                'type' => 'text',
+                'instructions' => 'Main title displayed on the banner',
+                'required' => 0,
+                'default_value' => 'Media',
+                'placeholder' => 'Media',
+            ),
+            array(
+                'key' => 'field_media_breadcrumb_home',
+                'label' => 'Breadcrumb - Home Text',
+                'name' => 'media_breadcrumb_home',
+                'type' => 'text',
+                'instructions' => 'Text for the home breadcrumb link',
+                'required' => 0,
+                'default_value' => 'home',
+                'placeholder' => 'home',
+            ),
+            array(
+                'key' => 'field_media_breadcrumb_current',
+                'label' => 'Breadcrumb - Current Page Text',
+                'name' => 'media_breadcrumb_current',
+                'type' => 'text',
+                'instructions' => 'Text for the current page in breadcrumb',
+                'required' => 0,
+                'default_value' => 'media',
+                'placeholder' => 'media',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'page_template',
+                    'operator' => '==',
+                    'value' => 'page-media.php',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+    ));
+}
+
+// Custom Media Gallery Meta Box with dynamic add/remove
+add_action('add_meta_boxes', 'kingfact_add_media_gallery_meta_box');
+function kingfact_add_media_gallery_meta_box() {
+    add_meta_box(
+        'kingfact_media_gallery',
+        'Media Galleries',
+        'kingfact_media_gallery_meta_box_callback',
+        'page',
+        'normal',
+        'high'
+    );
+}
+
+function kingfact_media_gallery_meta_box_callback($post) {
+    // Only show on media page template
+    $template = get_post_meta($post->ID, '_wp_page_template', true);
+    if ($template !== 'page-media.php') {
+        return;
+    }
+    
+    wp_nonce_field('kingfact_save_media_gallery', 'kingfact_media_gallery_nonce');
+    
+    $image_gallery = get_post_meta($post->ID, '_media_image_gallery', true);
+    $video_gallery = get_post_meta($post->ID, '_media_video_gallery', true);
+    
+    if (!is_array($image_gallery)) $image_gallery = array();
+    if (!is_array($video_gallery)) $video_gallery = array();
+    ?>
+    
+    <style>
+    .media-gallery-tabs {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+    }
+    .media-gallery-tabs button {
+        background: #f1f1f1;
+        border: 1px solid #ccc;
+        border-bottom: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    .media-gallery-tabs button.active {
+        background: #fff;
+        font-weight: bold;
+    }
+    .gallery-tab-content {
+        display: none;
+        padding: 20px 0;
+    }
+    .gallery-tab-content.active {
+        display: block;
+    }
+    .gallery-item {
+        background: #f9f9f9;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        position: relative;
+    }
+    .gallery-item img {
+        max-width: 150px;
+        height: auto;
+        display: block;
+        margin: 10px 0;
+    }
+    .gallery-item .remove-item {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+    .gallery-item .remove-item:hover {
+        background: #c82333;
+    }
+    .add-gallery-item {
+        background: #0073aa;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 3px;
+        margin-top: 10px;
+    }
+    .add-gallery-item:hover {
+        background: #005177;
+    }
+    .upload-image-btn {
+        background: #0073aa;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        cursor: pointer;
+        border-radius: 3px;
+        margin-top: 5px;
+    }
+    .upload-image-btn:hover {
+        background: #005177;
+    }
+    </style>
+    
+    <div class="media-gallery-tabs">
+        <button type="button" class="gallery-tab-btn active" data-tab="images">Image Gallery</button>
+        <button type="button" class="gallery-tab-btn" data-tab="videos">Video Gallery</button>
+    </div>
+    
+    <!-- Image Gallery Tab -->
+    <div class="gallery-tab-content active" id="images-tab">
+        <div id="image-gallery-items">
+            <?php if (!empty($image_gallery)) : foreach ($image_gallery as $index => $image_id) : 
+                $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
+            ?>
+            <div class="gallery-item">
+                <button type="button" class="remove-item" onclick="removeGalleryItem(this)">Remove</button>
+                <input type="hidden" name="media_image_gallery[]" value="<?php echo esc_attr($image_id); ?>">
+                <?php if ($image_url) : ?>
+                    <img src="<?php echo esc_url($image_url); ?>" alt="Gallery Image">
+                <?php endif; ?>
+            </div>
+            <?php endforeach; endif; ?>
+        </div>
+        <button type="button" class="add-gallery-item" onclick="addImageGalleryItem()">Add Image</button>
+    </div>
+    
+    <!-- Video Gallery Tab -->
+    <div class="gallery-tab-content" id="videos-tab">
+        <div id="video-gallery-items">
+            <?php if (!empty($video_gallery)) : foreach ($video_gallery as $index => $video_url) : ?>
+            <div class="gallery-item">
+                <button type="button" class="remove-item" onclick="removeGalleryItem(this)">Remove</button>
+                <label>Video URL:</label>
+                <input type="url" name="media_video_gallery[]" value="<?php echo esc_attr($video_url); ?>" 
+                       placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." 
+                       style="width: 100%; padding: 8px; margin-top: 5px;">
+            </div>
+            <?php endforeach; endif; ?>
+        </div>
+        <button type="button" class="add-gallery-item" onclick="addVideoGalleryItem()">Add Video</button>
+    </div>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        // Tab switching
+        $('.gallery-tab-btn').on('click', function() {
+            $('.gallery-tab-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            $('.gallery-tab-content').removeClass('active');
+            $('#' + $(this).data('tab') + '-tab').addClass('active');
+        });
+    });
+    
+    function addImageGalleryItem() {
+        var container = document.getElementById('image-gallery-items');
+        var item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = '<button type="button" class="remove-item" onclick="removeGalleryItem(this)">Remove</button>' +
+                        '<input type="hidden" name="media_image_gallery[]" value="" class="image-id-input">' +
+                        '<button type="button" class="upload-image-btn" onclick="openMediaUploader(this)">Select Image</button>' +
+                        '<div class="image-preview"></div>';
+        container.appendChild(item);
+    }
+    
+    function addVideoGalleryItem() {
+        var container = document.getElementById('video-gallery-items');
+        var item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = '<button type="button" class="remove-item" onclick="removeGalleryItem(this)">Remove</button>' +
+                        '<label>Video URL:</label>' +
+                        '<input type="url" name="media_video_gallery[]" value="" ' +
+                        'placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." ' +
+                        'style="width: 100%; padding: 8px; margin-top: 5px;">';
+        container.appendChild(item);
+    }
+    
+    function removeGalleryItem(button) {
+        if (confirm('Are you sure you want to remove this item?')) {
+            button.parentElement.remove();
+        }
+    }
+    
+    function openMediaUploader(button) {
+        var galleryItem = button.closest('.gallery-item');
+        var imageInput = galleryItem.querySelector('.image-id-input');
+        var imagePreview = galleryItem.querySelector('.image-preview');
+        
+        if (window.mediaUploader) {
+            window.mediaUploader.open();
+            window.currentImageInput = imageInput;
+            window.currentImagePreview = imagePreview;
+            return;
+        }
+        
+        window.mediaUploader = wp.media({
+            title: 'Select Image',
+            button: { text: 'Use this image' },
+            multiple: false
+        });
+        
+        window.mediaUploader.on('select', function() {
+            var attachment = window.mediaUploader.state().get('selection').first().toJSON();
+            window.currentImageInput.value = attachment.id;
+            window.currentImagePreview.innerHTML = '<img src="' + attachment.sizes.thumbnail.url + '" alt="Gallery Image">';
+        });
+        
+        window.currentImageInput = imageInput;
+        window.currentImagePreview = imagePreview;
+        window.mediaUploader.open();
+    }
+    </script>
+    <?php
+}
+
+// Save media gallery data
+add_action('save_post', 'kingfact_save_media_gallery_meta_box');
+function kingfact_save_media_gallery_meta_box($post_id) {
+    // Security checks
+    if (!isset($_POST['kingfact_media_gallery_nonce']) || 
+        !wp_verify_nonce($_POST['kingfact_media_gallery_nonce'], 'kingfact_save_media_gallery')) {
+        return;
+    }
+    
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+    
+    // Save image gallery
+    if (isset($_POST['media_image_gallery'])) {
+        $image_gallery = array_filter($_POST['media_image_gallery'], function($val) {
+            return !empty($val);
+        });
+        update_post_meta($post_id, '_media_image_gallery', array_values($image_gallery));
+    } else {
+        delete_post_meta($post_id, '_media_image_gallery');
+    }
+    
+    // Save video gallery
+    if (isset($_POST['media_video_gallery'])) {
+        $video_gallery = array_map('esc_url_raw', $_POST['media_video_gallery']);
+        $video_gallery = array_filter($video_gallery, function($val) {
+            return !empty($val);
+        });
+        update_post_meta($post_id, '_media_video_gallery', array_values($video_gallery));
+    } else {
+        delete_post_meta($post_id, '_media_video_gallery');
+    }
+}
+
+
 
 

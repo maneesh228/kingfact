@@ -1,6 +1,20 @@
 <?php get_header(); ?>
 
-<?php echo do_shortcode('[kingfact_breadcrumb title="' . get_the_title() . '" current="Products" home_label="Home" home_url="' . home_url('/') . '"]'); ?>
+<?php
+// Get banner image from Products parent page
+$products_page = get_page_by_path('products');
+$breadcrumb_bg = '';
+$products_url = home_url('/products/');
+if ($products_page) {
+    $breadcrumb_bg = get_field('products_page_banner_image', $products_page->ID);
+    $products_url = get_permalink($products_page->ID);
+}
+if (!$breadcrumb_bg) {
+    $breadcrumb_bg = get_template_directory_uri() . '/assets/img/bg/bg-9.jpg';
+}
+
+echo do_shortcode('[kingfact_breadcrumb title="' . get_the_title() . '" current="' . get_the_title() . '" parent_label="Products" parent_url="' . esc_url($products_url) . '" home_label="Home" home_url="' . home_url('/') . '" bg="' . esc_url($breadcrumb_bg) . '"]');
+?>
 
 <!-- Product detail area -->
 <section class="product-detail-area pt-120 pb-90">
