@@ -119,7 +119,6 @@ if ( empty( $contact_address ) || empty( $contact_email ) || empty( $contact_pho
         
         // Get Google Map iframe from ACF
         $map_iframe = get_field('contact_map_iframe');
-        echo $map_iframe.'hhhh';
         if ( $map_iframe ) {
             // Output the iframe code (already includes <iframe> tags)
             echo wp_kses_post( $map_iframe );
