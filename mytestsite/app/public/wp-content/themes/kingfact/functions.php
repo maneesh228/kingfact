@@ -3281,6 +3281,25 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'type' => 'tab',
                 'placement' => 'top',
             ),
+            array(
+                'key' => 'field_slides_instructions',
+                'label' => 'Manage Home Page Slides',
+                'name' => '',
+                'type' => 'message',
+                'message' => '<p style="font-size: 14px; line-height: 1.6;">Home page slides are managed through the <strong>Slides</strong> custom post type.</p>
+                <p style="font-size: 14px; line-height: 1.6;">To add or edit slides:</p>
+                <ol style="font-size: 14px; line-height: 1.8;">
+                    <li>Go to <strong>Slides → All Slides</strong> in the admin menu</li>
+                    <li>Click <strong>Add New</strong> to create a new slide</li>
+                    <li>Upload a background image, add title, subtitle, and button text</li>
+                    <li>Use drag & drop in the All Slides page to reorder slides</li>
+                    <li>Publish the slide to make it appear on the homepage</li>
+                </ol>
+                <p style="margin-top: 15px;"><a href="' . admin_url('post-new.php?post_type=slide') . '" class="button button-primary" style="margin-right: 10px;"><span class="dashicons dashicons-plus-alt" style="vertical-align: middle; margin-top: 3px;"></span> Add New Slide</a>
+                <a href="' . admin_url('edit.php?post_type=slide') . '" class="button"><span class="dashicons dashicons-images-alt2" style="vertical-align: middle; margin-top: 3px;"></span> Manage All Slides</a></p>',
+                'new_lines' => '',
+                'esc_html' => 0,
+            ),
             
             // Features Section Tab
             array(
@@ -4971,6 +4990,16 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
 // Custom Media Gallery Meta Box with dynamic add/remove
 add_action('add_meta_boxes', 'kingfact_add_media_gallery_meta_box');
 function kingfact_add_media_gallery_meta_box() {
+    global $post;
+    
+    // Only add meta box if it's the media page template
+    if (!$post) return;
+    
+    $template = get_post_meta($post->ID, '_wp_page_template', true);
+    if ($template !== 'page-media.php') {
+        return;
+    }
+    
     add_meta_box(
         'kingfact_media_gallery',
         'Media Galleries',
@@ -4982,12 +5011,6 @@ function kingfact_add_media_gallery_meta_box() {
 }
 
 function kingfact_media_gallery_meta_box_callback($post) {
-    // Only show on media page template
-    $template = get_post_meta($post->ID, '_wp_page_template', true);
-    if ($template !== 'page-media.php') {
-        return;
-    }
-    
     wp_nonce_field('kingfact_save_media_gallery', 'kingfact_media_gallery_nonce');
     
     $image_gallery = get_post_meta($post->ID, '_media_image_gallery', true);
