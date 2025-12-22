@@ -108,7 +108,7 @@ if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
                         <div class="b-work-content-2">
                             <div class="inner-work-2">
                                 <h2><a href="<?php echo esc_url($vision_link); ?>"><?php echo esc_html($vision_title); ?></a></h2>
-                                <p><?php echo esc_html($vision_content); ?></p>
+                                <div><?php echo wp_kses_post($vision_content); ?></div>
                                 <div class="b-work-link">
                                     <a href="<?php echo esc_url($vision_link); ?>"><i class="far fa-long-arrow-right"></i></a>
                                 </div>
@@ -137,7 +137,7 @@ if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
                         <div class="b-work-content-2">
                             <div class="inner-work-2">
                                 <h2><a href="<?php echo esc_url($mission_link); ?>"><?php echo esc_html($mission_title); ?></a></h2>
-                                <p><?php echo esc_html($mission_content); ?></p>
+                                <div><?php echo wp_kses_post($mission_content); ?></div>
                                 <div class="b-work-link">
                                     <a href="<?php echo esc_url($mission_link); ?>"><i class="far fa-long-arrow-right"></i></a>
                                 </div>
@@ -166,7 +166,7 @@ if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
                         <div class="b-work-content-2">
                             <div class="inner-work-2">
                                 <h2><a href="<?php echo esc_url($goals_link); ?>"><?php echo esc_html($goals_title); ?></a></h2>
-                                <p><?php echo esc_html($goals_content); ?></p>
+                                <div><?php echo wp_kses_post($goals_content); ?></div>
                                 <div class="b-work-link">
                                     <a href="<?php echo esc_url($goals_link); ?>"><i class="far fa-long-arrow-right"></i></a>
                                 </div>
@@ -301,7 +301,7 @@ if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
                         </div>
                         <div class="b-fea-content">
                             <h3><?php echo esc_html($features_item1_title); ?></h3>
-                            <p><?php echo esc_html($features_item1_text); ?></p>
+                            <div><?php echo wp_kses_post($features_item1_text); ?></div>
                         </div>
                     </div>
                 </div>
@@ -312,7 +312,7 @@ if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
                         </div>
                         <div class="b-fea-content">
                             <h3><?php echo esc_html($features_item2_title); ?></h3>
-                            <p><?php echo esc_html($features_item2_text); ?></p>
+                            <div><?php echo wp_kses_post($features_item2_text); ?></div>
                         </div>
                     </div>
                 </div>

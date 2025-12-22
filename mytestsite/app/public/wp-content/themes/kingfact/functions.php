@@ -1910,6 +1910,11 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
                         $description = wp_trim_words( get_the_content(), 20, '...' );
                     }
                     
+                    // Limit description to 150 characters
+                    if ( strlen( $description ) > 150 ) {
+                        $description = substr( $description, 0, 150 ) . '...';
+                    }
+                    
                     // Add class to hide services after the 6th one
                     $hide_class = $service_count > 6 ? 'service-hidden' : '';
                 ?>
@@ -2852,6 +2857,11 @@ function kingfact_products_display_shortcode( $atts, $content = null ) {
                     $description = get_the_excerpt();
                     if ( empty( $description ) ) {
                         $description = wp_trim_words( get_the_content(), 20, '...' );
+                    }
+                    
+                    // Limit description to 150 characters
+                    if ( strlen( $description ) > 150 ) {
+                        $description = substr( $description, 0, 150 ) . '...';
                     }
                     
                     // Add class to hide products after the 6th one
@@ -4926,6 +4936,49 @@ if ( function_exists( 'acf_add_local_field_group' ) ) {
                 'message' => 'Save/Update the page to see your map displayed on the contact page.',
                 'new_lines' => '',
                 'esc_html' => 0,
+            ),
+            // Contact Information Tab
+            array(
+                'key' => 'field_contact_info_tab',
+                'label' => 'Contact Information',
+                'type' => 'tab',
+                'placement' => 'top',
+            ),
+            array(
+                'key' => 'field_contact_address',
+                'label' => 'Address',
+                'name' => 'contact_address',
+                'type' => 'wysiwyg',
+                'tabs' => 'all',
+                'toolbar' => 'basic',
+                'media_upload' => 0,
+                'placeholder' => 'Enter your full address here...',
+                'instructions' => 'Enter your business/office address. You can use formatting options.',
+                'default_value' => '123 Main Street, Suite 100<br>City, State 12345<br>Country',
+            ),
+            array(
+                'key' => 'field_contact_email',
+                'label' => 'Email Address',
+                'name' => 'contact_email',
+                'type' => 'wysiwyg',
+                'tabs' => 'all',
+                'toolbar' => 'basic',
+                'media_upload' => 0,
+                'placeholder' => 'Enter email addresses...',
+                'instructions' => 'Enter one or more email addresses',
+                'default_value' => 'info@example.com<br>support@example.com',
+            ),
+            array(
+                'key' => 'field_contact_phone',
+                'label' => 'Phone Number',
+                'name' => 'contact_phone',
+                'type' => 'wysiwyg',
+                'tabs' => 'all',
+                'toolbar' => 'basic',
+                'media_upload' => 0,
+                'placeholder' => 'Enter phone numbers...',
+                'instructions' => 'Enter one or more phone numbers',
+                'default_value' => '+1 (555) 123-4567<br>+1 (555) 987-6543',
             ),
         ),
         'location' => array(

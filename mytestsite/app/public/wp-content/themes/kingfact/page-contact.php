@@ -26,23 +26,26 @@ if (!$banner_title) $banner_title = 'contact';
 if (!$breadcrumb_home) $breadcrumb_home = 'home';
 if (!$breadcrumb_current) $breadcrumb_current = 'contact';
 
-// Get contact info from header settings (ACF Options)
-$contact_address = '';
-$contact_email = '';
-$contact_phone = '';
+// Get contact info from contact page ACF fields
+$contact_address = get_field('contact_address');
+$contact_email = get_field('contact_email');
+$contact_phone = get_field('contact_phone');
 
-if ( function_exists( 'get_field' ) ) {
-    $contact_address = get_field( 'header_contact_address', 'option' );
-    $contact_email = get_field( 'header_contact_email', 'option' );
-    $contact_phone = get_field( 'header_contact_phone', 'option' );
+// Fallback to header settings (ACF Options) if contact page fields are empty
+if (empty($contact_address) || empty($contact_email) || empty($contact_phone)) {
+    if (function_exists('get_field')) {
+        if (empty($contact_address)) $contact_address = get_field('header_contact_address', 'option');
+        if (empty($contact_email)) $contact_email = get_field('header_contact_email', 'option');
+        if (empty($contact_phone)) $contact_phone = get_field('header_contact_phone', 'option');
+    }
 }
 
-// Fallback to theme options if ACF not available
+// Final fallback to theme options if ACF not available
 if ( empty( $contact_address ) || empty( $contact_email ) || empty( $contact_phone ) ) {
     $opts = get_option( 'kingfact_theme_options', array() );
-    $contact_address = ! empty( $opts['header_contact_address'] ) ? $opts['header_contact_address'] : 'Flat 20, Reynolds USA';
-    $contact_email = ! empty( $opts['header_contact_email'] ) ? $opts['header_contact_email'] : 'support@rmail.com';
-    $contact_phone = ! empty( $opts['header_contact_phone'] ) ? $opts['header_contact_phone'] : '+812 (345) 6789';
+    if (empty($contact_address)) $contact_address = ! empty( $opts['header_contact_address'] ) ? $opts['header_contact_address'] : 'Flat 20, Reynolds USA';
+    if (empty($contact_email)) $contact_email = ! empty( $opts['header_contact_email'] ) ? $opts['header_contact_email'] : 'support@rmail.com';
+    if (empty($contact_phone)) $contact_phone = ! empty( $opts['header_contact_phone'] ) ? $opts['header_contact_phone'] : '+812 (345) 6789';
 }
 ?>
 
@@ -81,21 +84,36 @@ if ( empty( $contact_address ) || empty( $contact_email ) || empty( $contact_pho
                     <div class="contact-box text-center mb-30">
                         <i class="fas fa-envelope"></i>
                         <h3>Mail Here</h3>
-                        <p><a href="mailto:<?php echo esc_attr( $contact_email ); ?>"><?php echo esc_html( $contact_email ); ?></a></p>
+                        <?php 
+                        // Display email(s) - output WYSIWYG content
+                        if ($contact_email) {
+                            echo '<div>' . wp_kses_post($contact_email) . '</div>';
+                        }
+                        ?>
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-4 col-md-4">
                     <div class="contact-box text-center mb-30">
                         <i class="fas fa-map-marker-alt"></i>
                         <h3>Visit Here</h3>
-                        <p><?php echo esc_html( $contact_address ); ?></p>
+                        <?php 
+                        // Display address - output WYSIWYG content
+                        if ($contact_address) {
+                            echo '<div>' . wp_kses_post($contact_address) . '</div>';
+                        }
+                        ?>
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-4 col-md-4">
                     <div class="contact-box text-center mb-30">
                         <i class="fas fa-phone"></i>
                         <h3>Call Here</h3>
-                        <p><a href="tel:<?php echo esc_attr( str_replace( array( ' ', '(', ')', '-' ), '', $contact_phone ) ); ?>"><?php echo esc_html( $contact_phone ); ?></a></p>
+                        <?php 
+                        // Display phone(s) - output WYSIWYG content
+                        if ($contact_phone) {
+                            echo '<div>' . wp_kses_post($contact_phone) . '</div>';
+                        }
+                        ?>
                     </div>
                 </div>
             </div>

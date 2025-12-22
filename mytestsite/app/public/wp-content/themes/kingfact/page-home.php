@@ -291,7 +291,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                 <span><?php echo esc_html($features_subtitle); ?></span>
                                 <h1><?php echo esc_html($features_title); ?></h1>
                                 <div class="mb-20"></div>
-                                <p><?php echo esc_html($features_paragraph); ?></p>
+                                <div><?php echo wp_kses_post($features_paragraph); ?></div>
                                 <div class="fea-btn mt-30">
                                     <a class="b-btn btn-black" href="<?php echo esc_url($features_btn_url); ?>">
                                         <span><?php echo esc_html($features_btn_text); ?></span>
@@ -306,7 +306,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                 </div>
                                 <div class="b-fea-content">
                                     <h3><?php echo esc_html($features_item1_title); ?></h3>
-                                    <p><?php echo esc_html($features_item1_text); ?></p>
+                                    <div><?php echo wp_kses_post($features_item1_text); ?></div>
                                 </div>
                             </div>
                         </div>
@@ -317,7 +317,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                 </div>
                                 <div class="b-fea-content">
                                     <h3><?php echo esc_html($features_item2_title); ?></h3>
-                                    <p><?php echo esc_html($features_item2_text); ?></p>
+                                    <div><?php echo wp_kses_post($features_item2_text); ?></div>
                                 </div>
                             </div>
                         </div>
@@ -416,7 +416,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                 <div class="b-play mb-40">
                                     <a href="<?php echo esc_url($video_url); ?>"><i class="fal fa-play"></i></a>
                                 </div>
-                                <h2><?php echo esc_html($video_title); ?></h2>
+                                <div class="video-title"><?php echo wp_kses_post($video_title); ?></div>
                                 <div class="b-main-btn">
                                     <a class="b-btn" href="<?php echo esc_url($video_btn_url); ?>">
                                         <span><?php echo esc_html($video_btn_text); ?></span>
@@ -534,7 +534,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                 <span><?php echo esc_html($counter_subtitle); ?></span>
                                 <h1><?php echo esc_html($counter_title); ?></h1>
                                 <div class="mb-20"></div>
-                                <p><?php echo esc_html($counter_description); ?></p>
+                                <div><?php echo wp_kses_post($counter_description); ?></div>
                                 <div class="fact-btn mt-20">
                                     <a class="text-btn" href="<?php echo esc_url($counter_btn_url); ?>">
                                         <?php echo esc_html($counter_btn_text); ?>
@@ -699,7 +699,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                             </div>
                                             <div class="choose-text">
                                                 <h4><?php echo esc_html($goal1_title); ?></h4>
-                                                <p><?php echo esc_html($goal1_description); ?></p>
+                                                <div><?php echo wp_kses_post($goal1_description); ?></div>
                                             </div>
                                         </li>
                                         <li>
@@ -708,7 +708,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                             </div>
                                             <div class="choose-text">
                                                 <h4><?php echo esc_html($goal2_title); ?></h4>
-                                                <p><?php echo esc_html($goal2_description); ?></p>
+                                                <div><?php echo wp_kses_post($goal2_description); ?></div>
                                             </div>
                                         </li>
                                         <li>
@@ -717,7 +717,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                             </div>
                                             <div class="choose-text">
                                                 <h4><?php echo esc_html($goal3_title); ?></h4>
-                                                <p><?php echo esc_html($goal3_description); ?></p>
+                                                <div><?php echo wp_kses_post($goal3_description); ?></div>
                                             </div>
                                         </li>
                                     </ul>
