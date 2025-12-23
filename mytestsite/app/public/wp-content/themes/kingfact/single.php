@@ -23,7 +23,7 @@ if ( ! $breadcrumb_bg ) {
     <?php while ( have_posts() ) : the_post(); ?>
         
         <!-- breadcrumb-area-start -->
-        <div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url( $breadcrumb_bg ); ?>)">
+        <div class="breadcrumb-area" style="background-image:url(<?php echo esc_url( $breadcrumb_bg ); ?>); min-height: 350px; display: flex; align-items: center;">
             <div class="container">
                 <div class="row">
                     <div class="col-xl-12">

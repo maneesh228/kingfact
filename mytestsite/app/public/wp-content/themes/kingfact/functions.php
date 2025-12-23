@@ -1339,7 +1339,7 @@ function kingfact_breadcrumb_shortcode( $atts ) {
 
     ob_start();
     ?>
-    <div class="breadcrumb-area pt-245 pb-255 <?php echo esc_attr( $a['class'] ); ?>" style="background-image:url(<?php echo esc_url( $bg_url ); ?>)">
+    <div class="breadcrumb-area <?php echo esc_attr( $a['class'] ); ?>" style="background-image:url(<?php echo esc_url( $bg_url ); ?>); min-height: 350px; display: flex; align-items: center;">
         <div class="container">
             <div class="row">
                 <div class="col-xl-12">
@@ -1982,6 +1982,29 @@ function kingfact_services_display_shortcode( $atts, $content = null ) {
     </div>
 
     <style>
+    /* Service block fixed height styling */
+    .b-services.b-services-02.mb-80 {
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+    }
+    .b-services.b-services-02.mb-80 .b-services-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .b-services.b-services-02.mb-80 .b-services-content h3 {
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+    }
+    .b-services.b-services-02.mb-80 .b-services-content p {
+        flex: 1;
+    }
+    .b-services.b-services-02.mb-80 .sv-link {
+        margin-top: auto;
+    }
+    
     /* Service image full width styling */
     .b-services .b-services-img {
         overflow: hidden;
@@ -2937,8 +2960,31 @@ function kingfact_products_display_shortcode( $atts, $content = null ) {
         </div>
     </div>
 
-    <?php if ( $total_products > 6 ) : ?>
     <style>
+    /* Product block fixed height styling */
+    .b-products.mb-30 {
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+    }
+    .b-products.mb-30 .b-products-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .b-products.mb-30 .b-products-content h3 {
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+    }
+    .b-products.mb-30 .b-products-content p {
+        flex: 1;
+    }
+    .b-products.mb-30 .pv-link {
+        margin-top: auto;
+    }
+    
+    /* Show more functionality styles */
     .product-hidden {
         display: none;
     }
@@ -2956,6 +3002,7 @@ function kingfact_products_display_shortcode( $atts, $content = null ) {
     }
     </style>
 
+    <?php if ( $total_products > 6 ) : ?>
     <script>
     function toggleProducts() {
         const hiddenProducts = document.querySelectorAll('.product-hidden');

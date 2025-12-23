@@ -22,7 +22,7 @@ $breadcrumb_current = get_field('media_breadcrumb_current') ?: 'media';
 ?>
 
 <!-- breadcrumb-area-start -->
-<section class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url($banner_image); ?>)">
+<section class="breadcrumb-area" style="background-image:url(<?php echo esc_url($banner_image); ?>); min-height: 350px; display: flex; align-items: center;">
     <div class="container">
         <div class="row">
             <div class="col-xl-12">

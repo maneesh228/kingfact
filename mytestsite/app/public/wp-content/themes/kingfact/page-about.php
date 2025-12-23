@@ -28,7 +28,7 @@ if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
 ?>
 
 <main>
-    <div class="breadcrumb-area pt-245 pb-255" style="background-image:url(<?php echo esc_url( $about_banner_image ); ?>)">
+    <div class="breadcrumb-area" style="background-image:url(<?php echo esc_url( $about_banner_image ); ?>); min-height: 350px; display: flex; align-items: center;">
         <div class="container">
             <div class="row">
                 <div class="col-xl-12">
@@ -390,7 +390,38 @@ if (!$breadcrumb_current) $breadcrumb_current = 'About Us';
                 </div>
             </div>
             <!-- testimonial-area end -->
-     
+    
+    <style>
+    /* Testimonial content height fix */
+    .client-wrapper {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 30px 20px;
+    }
+    .client-wrapper .client-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .client-wrapper .client-content p {
+        margin-bottom: 20px;
+    }
+    .client-wrapper .client-img {
+        margin-bottom: 20px;
+    }
+    
+    /* Disable hover effects for vision, mission, why us sections */
+    .b-work .b-work-content-2 {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    .b-work:hover .b-work-img img {
+        transform: none !important;
+    }
+    </style>
 
 </main>
 

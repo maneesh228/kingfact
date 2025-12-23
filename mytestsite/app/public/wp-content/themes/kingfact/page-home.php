@@ -367,7 +367,7 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                                 }
                         ?>
                         <div class="col-xl-4">
-                            <div class="b-services mb-30">
+                            <div class="b-services b-services-02 mb-80">
                                 <?php 
                                 $service_banner_id = get_post_meta(get_the_ID(), '_service_banner', true);
                                 $service_banner_url = $service_banner_id ? wp_get_attachment_image_url($service_banner_id, 'medium') : '';
@@ -399,6 +399,65 @@ $features_item2_text = get_field('features_item2_text') ?: 'Avoids pleasure itse
                 </div>
             </div>
             <!-- services-area end  -->
+
+            <style>
+            /* Service block fixed height styling */
+            .b-services.b-services-02.mb-80 {
+                min-height: 500px;
+                display: flex;
+                flex-direction: column;
+            }
+            .b-services.b-services-02.mb-80 .b-services-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            .b-services.b-services-02.mb-80 .b-services-content h3 {
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+            }
+            .b-services.b-services-02.mb-80 .b-services-content p {
+                flex: 1;
+            }
+            .b-services.b-services-02.mb-80 .sv-link {
+                margin-top: auto;
+            }
+            
+            /* Service image full width styling */
+            .b-services .b-services-img {
+                overflow: hidden;
+                width: 100%;
+            }
+            .b-services .b-services-img img {
+                width: 100% !important;
+                height: auto !important;
+                max-width: 100% !important;
+                display: block;
+                object-fit: cover;
+            }
+            
+            /* Testimonial content height fix */
+            .client-wrapper {
+                min-height: 300px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 30px 20px;
+            }
+            .client-wrapper .client-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            .client-wrapper .client-content p {
+                margin-bottom: 20px;
+            }
+            .client-wrapper .client-img {
+                margin-bottom: 20px;
+            }
+            </style>
 
              <!-- video-bg-area start  -->
               <?php
